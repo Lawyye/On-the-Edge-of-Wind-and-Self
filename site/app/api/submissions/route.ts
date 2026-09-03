@@ -38,9 +38,11 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, status: 'pending' });
   }
 
-  // 2. Submitted implausibly fast.
+  // 2. Submitted implausibly fast. The stamp is required: leaving it out used to
+  // skip this check entirely, which is the first thing a scripted post would do.
+  // The real form always sends it, so demanding it costs a genuine teacher nothing.
   const startedAt = Number(text('started_at'));
-  if (Number.isFinite(startedAt) && startedAt > 0 && Date.now() - startedAt < MIN_FILL_MS) {
+  if (!Number.isFinite(startedAt) || startedAt <= 0 || Date.now() - startedAt < MIN_FILL_MS) {
     return fail('Форма тым жылдам жіберілді / Форма отправлена слишком быстро.');
   }
 

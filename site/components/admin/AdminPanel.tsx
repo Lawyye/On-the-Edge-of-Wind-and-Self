@@ -343,9 +343,14 @@ function SubmissionsTab({
           <span>Документы</span>
           <h2>Материалы участников</h2>
         </div>
-        <button type="button" className="portal-button portal-button-secondary" onClick={onRefresh}>
-          Обновить
-        </button>
+        <div className="admin-heading-actions">
+          <a className="portal-button portal-button-secondary" href="/api/admin/export">
+            Выгрузить в таблицу
+          </a>
+          <button type="button" className="portal-button portal-button-secondary" onClick={onRefresh}>
+            Обновить
+          </button>
+        </div>
       </div>
 
       <div className="admin-filter-row">

@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import './site.css';
 import './portal.css';
+// Refinement layer, applied on top of the verbatim copy. Removing this one
+// import returns the site to the original Google Sites layout exactly.
+import './refine.css';
 
 export const metadata: Metadata = {
   title: '"ORLEU" Mangistau KDI',

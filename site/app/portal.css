@@ -658,3 +658,11 @@
 .storage-bar span.is-tight { background: #d45d52; }
 
 .storage-meter p { margin: 9px 0 0; color: #7d9196; font-size: 11px; line-height: 1.5; }
+
+/* Two actions side by side in a section heading, stacked on a phone. */
+.admin-heading-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+@media (max-width: 420px) {
+  .admin-heading-actions { width: 100%; }
+  .admin-heading-actions .portal-button { flex: 1 1 100%; }
+}

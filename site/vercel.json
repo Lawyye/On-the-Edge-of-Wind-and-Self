@@ -4,5 +4,10 @@
       "path": "/api/cron/keepalive",
       "schedule": "0 6 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "claude/report-site-admin-panel-vcfz6q": false
+    }
+  }
 }

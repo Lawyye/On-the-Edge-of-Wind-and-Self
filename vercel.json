@@ -1,0 +1,22 @@
+{
+  "_comment": [
+    "This file exists for the OLD Vercel project `orleu-mangistau-kdi`, which has",
+    "no Root Directory set and therefore reads the repository root.",
+    "",
+    "That project is a leftover Vite build whose only remaining job is to host the",
+    "original site's photographs, which the new site still links to. It became",
+    "connected to this repository by accident; every push started a build there",
+    "that fails, because the Vite app it expects is not in this repository.",
+    "",
+    "Two reasons to switch its automatic deployments off. The failures send the",
+    "owner an alarming email on every push, and far worse, a build that somehow",
+    "succeeded would replace the deployment currently serving those photographs",
+    "and they would disappear from the live site.",
+    "",
+    "The new site is unaffected: its Root Directory is `site`, so it reads",
+    "site/vercel.json and never sees this file."
+  ],
+  "github": {
+    "enabled": false
+  }
+}

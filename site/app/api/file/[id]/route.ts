@@ -80,7 +80,9 @@ export async function GET(
           'content-type': data.mime || 'application/octet-stream',
           // inline so a PDF or photo opens in the browser instead of downloading
           'content-disposition': `inline; filename*=UTF-8''${encodeURIComponent(fileName)}`,
-          'content-length': String(size),
+          // Deliberately no content-length: it would come from the size recorded
+          // at upload, and a stale or mismatched value stalls the browser mid
+          // download. Chunked transfer costs nothing here.
           'cache-control': 'private, max-age=300',
         },
       });

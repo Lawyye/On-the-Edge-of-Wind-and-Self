@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import ImageControl from './ImageControl';
 import {
   CheckIcon, EditIcon, GridIcon, InboxIcon, InfoIcon, LogoutIcon,
-  SettingsIcon, ToggleOff, ToggleOn, UserIcon,
+  SettingsIcon, ToggleOff, ToggleOn, UploadIcon, UserIcon,
 } from '../Icons';
 import type { PortalSettings, SiteContent, Submission, SubmissionStatus } from '@/lib/types';
 
@@ -782,6 +782,29 @@ function SettingsTab({
   const [password, setPassword] = useState('');
   const [repeat, setRepeat] = useState('');
   const [busy, setBusy] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+
+  async function migrateImages() {
+    if (!window.confirm(
+      'Скопировать все фотографии со старого сайта в ваше хранилище? Это можно делать повторно.',
+    )) return;
+
+    setMigrating(true);
+    try {
+      const response = await fetch('/api/admin/migrate-images', { method: 'POST' });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        onError(result.error ?? 'Не удалось перенести фотографии.');
+        return;
+      }
+      if (result.ok) onFlash(result.message);
+      else onError(result.message ?? 'Часть файлов перенести не удалось.');
+    } catch {
+      onError('Не удалось перенести фотографии — нет связи с сервером.');
+    } finally {
+      setMigrating(false);
+    }
+  }
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -861,6 +884,28 @@ function SettingsTab({
             aria-label="Автоматическая публикация"
           >
             {settings.auto_publish ? <ToggleOn /> : <ToggleOff />}
+          </button>
+        </div>
+
+        <div className="portal-card setting-card">
+          <div>
+            <UploadIcon />
+            <div>
+              <h3>Перенести фотографии в своё хранилище</h3>
+              <p>
+                Фотографии оригинального сайта до сих пор лежат на старом проекте, который никто
+                не поддерживает. Эта кнопка копирует их к вам и переключает сайт на новые адреса —
+                после этого старый проект можно удалить. Нажимать можно повторно.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="portal-button portal-button-secondary"
+            onClick={migrateImages}
+            disabled={migrating}
+          >
+            {migrating ? 'Переношу…' : 'Перенести'}
           </button>
         </div>
 

@@ -1,10 +1,10 @@
 {
   "site": {
     "title": "\"ORLEU\" Mangistau KDI",
-    "logo": "/assets/source/asset-029.png",
+    "logo": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-029.png",
     "homeRoute": "/негізгі-бет",
-    "heroImage": "/assets/source/asset-046.jpg",
-    "eventHeroImage": "/assets/source/asset-028.jpg",
+    "heroImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-046.jpg",
+    "eventHeroImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-028.jpg",
     "colors": {
       "teal": "#043843",
       "orange": "#ed7d31",
@@ -21,7 +21,7 @@
     "mission": "Педагогтердің кәсібилігін арттыру – олардың өмір бойы білім алуға деген ұмтылысына қолдау көрсете отырып, сапалы контент әзірлеу, кәсіби білім беру қауымдастығында инновациялық білім мен тәжірибені тарату.",
     "goalTitle": "ЖОБАНЫҢ МАҚСАТЫ:",
     "goal": "Педагогтердің кәсіби құзыреттілігін арттыру, педагогикалық тәжірибесін жүйелеу және дамыту, кәсіби белсенділігін қолдау арқылы педагог мәртебесін нығайтуға және кәсіби қызметін нәтижелі жүзеге асыруына жағдай жасау.",
-    "goalImage": "/assets/source/asset-030.png",
+    "goalImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-030.png",
     "tasksTitle": "Жобаның міндеттері",
     "tasks": [
       "педагогтердің әдістемелік, жобалық және зерттеушілік дағдыларын дамытуға ықпал ету;",
@@ -31,7 +31,7 @@
       "сараптамалық қызметті дамыту мақсатында педагогтердің қазылар алқасының мүшесі ретінде қатысуына жағдай жасау;",
       "педагогтердің кәсіби жетістіктерін рәсімдеу және кәсіби қызмет нәтижелерін растайтын дәлелдемелік құжаттармен қамтамасыз ету."
     ],
-    "tasksImage": "/assets/source/asset-006.gif",
+    "tasksImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-006.gif",
     "resultsTitle": "Күтілетін нәтиже: (Жобаны іске асыру нәтижесінде)",
     "results": [
       "педагогтердің кәсіби құзыреттілігі артып, заманауи педагогикалық тәсілдерді (функционалдық сауаттылық, зерттеушілік және цифрлық дағдылар) оқу үдерісінде тиімді қолдану мүмкіндігі кеңейеді;",
@@ -41,7 +41,7 @@
       "педагогтер арасында кәсіби қауымдастық нығаяды;",
       "педагогтердің кәсіби қызметін растайтын құжаттар (сертификаттар, анықтамалар, дипломдар) жүйеленіп, кәсіби портфолио қалыптасады."
     ],
-    "resultsImage": "/assets/source/asset-034.jpg",
+    "resultsImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-034.jpg",
     "footerLines": [
       "Жобаға қатысушылар: бастауыш сынып мұғалімдері (аттестатталушы педагогтер)",
       "Жобаның іске асырылу кезеңі: 2025-2026 оқу жылы (II жартыжылдық).",
@@ -55,29 +55,29 @@
       {
         "name": "Сахарбаева Марал Әділкеркейқызы",
         "description": "«Өрлеу» БАҰО АҚ Маңғыстау облысы бойынша Кәсіби даму институты филиалының аға оқытушысы.",
-        "image": "/assets/source/asset-050.png",
-        "barImage": "/assets/source/asset-014.png",
+        "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-050.png",
+        "barImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-014.png",
         "accent": "#ed7d31"
       },
       {
         "name": "Қиянова Шолпан Орынбасаровна",
         "description": "Білім берудің оқу-әдістемелік орталығының жаратылыстану және бастауыш білім беру бөлімінің жетекшісі.",
-        "image": "/assets/source/asset-056.png",
-        "barImage": "/assets/source/asset-005.png",
+        "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-056.png",
+        "barImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-005.png",
         "accent": "#a0ceff"
       },
       {
         "name": "Тоғысова Жәмила Айтуарқызы",
         "description": "жаратылыстану және бастауыш білім беру бөлімінің әдіскері.",
-        "image": "/assets/source/asset-052.png",
-        "barImage": "/assets/source/asset-042.png",
+        "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-052.png",
+        "barImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-042.png",
         "accent": "#377f8d"
       }
     ],
     "footerTitle": "ПЕДАГОГ МӘРТЕБЕСІ: КӘСІБИ ӨСУ ЖӘНЕ ҚҰЗЫРЕТТІЛІК ОНЛАЙН КӘСІБИ ҚОЛДАУ ЖОБАСЫ",
-    "footerImage": "/assets/source/asset-043.jpg",
+    "footerImage": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-043.jpg",
     "documentTitle": "Бастауыш_ЖОБА жоспары",
-    "documentUrl": "/assets/source/project-plan.pdf"
+    "documentUrl": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/project-plan.pdf"
   },
   "events": [
     {
@@ -90,7 +90,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ, әдіскерлер",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-037.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-037.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -133,7 +133,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ, әдіскерлер",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-059.png",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-059.png",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -176,7 +176,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ, әдіскерлер",
       "completion": "Электронды жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-009.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-009.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -219,7 +219,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ мамандары",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-020.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-020.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -262,7 +262,7 @@
       "responsible": "Шақырылған тренерлер",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-017.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-017.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -305,7 +305,7 @@
       "responsible": "Әдістемелік жұмыстардың авторлары",
       "completion": "Электронды жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-019.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-019.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -348,7 +348,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ мамандары",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-003.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-003.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -391,7 +391,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ мамандары",
       "completion": "Анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-002.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-002.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -434,7 +434,7 @@
       "responsible": "Қазылар алқасының мүшелері",
       "completion": "Электронды жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-015.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-015.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -477,7 +477,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ мамандары",
       "completion": "Сертификат",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-054.png",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-054.png",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -520,7 +520,7 @@
       "responsible": "«Өрлеу» БАҰО АҚ мамандары",
       "completion": "Электронды жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-045.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-045.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -563,7 +563,7 @@
       "responsible": "Тәжірибелі мұғалімдер, тренерлер",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-036.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-036.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -606,7 +606,7 @@
       "responsible": "Аудан/қала әдіскерлері",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-033.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-033.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -649,7 +649,7 @@
       "responsible": "",
       "completion": "Электронды жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-024.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-024.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -692,7 +692,7 @@
       "responsible": "Жоба авторлары, қазылар алқасы",
       "completion": "Диплом, жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-047.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-047.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -735,7 +735,7 @@
       "responsible": "Жоба жетекшілері",
       "completion": "Куәлік, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-038.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-038.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -778,7 +778,7 @@
       "responsible": "Сахарбаева М., Әуелбаева А. және т.б.",
       "completion": "Жинақ, анықтама",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-021.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-021.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -821,7 +821,7 @@
       "responsible": "",
       "completion": "Электронды жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-049.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-049.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",
@@ -864,7 +864,7 @@
       "responsible": "Шақырылған тренерлер, спикерлер",
       "completion": "Алғыс хат, жинақ",
       "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың материалдары — қала және аудан бойынша",
-      "image": "/assets/source/asset-040.jpg",
+      "image": "https://zdgnutjfmpcqjeuvcbuk.supabase.co/storage/v1/object/public/images/original/asset-040.jpg",
       "links": [
         {
           "label": "АҚТАУ ҚАЛАСЫ",

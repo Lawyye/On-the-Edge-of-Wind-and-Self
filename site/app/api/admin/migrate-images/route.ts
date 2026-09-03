@@ -86,6 +86,16 @@ export async function POST() {
     return Response.json({ error: 'База данных не подключена.' }, { status: 503 });
   }
 
+  if (!LEGACY_ORIGIN) {
+    return Response.json(
+      {
+        error:
+          'Перенос уже выполнен. Чтобы запустить его снова, задайте переменную LEGACY_ASSET_ORIGIN.',
+      },
+      { status: 409 },
+    );
+  }
+
   const content = await getContent();
   const paths = collectPaths(content);
 

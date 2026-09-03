@@ -1,6 +1,7 @@
 import 'server-only';
 import { createHash } from 'node:crypto';
 import { getSupabase } from './supabase';
+import { getSecret } from './secrets';
 
 /**
  * Anti-flood for the anonymous upload form. Moderation is the real barrier —
@@ -14,8 +15,8 @@ export const MAX_PER_HOUR = 5;
  * Raw IPs are never stored. The salt makes the hash useless as a lookup table,
  * which matters because we do not yet know whether submissions carry personal data.
  */
-export function hashIp(ip: string): string {
-  const salt = process.env.IP_HASH_SALT ?? '';
+export async function hashIp(ip: string): Promise<string> {
+  const salt = await getSecret('ip_hash_salt');
   return createHash('sha256').update(`${salt}:${ip}`).digest('hex');
 }
 

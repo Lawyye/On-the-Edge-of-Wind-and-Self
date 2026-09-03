@@ -31,16 +31,21 @@ npm run dev
 
 ### 2. Переменные в Vercel
 
-**Settings → Environment Variables**:
+Если проект на Vercel подключён к Supabase через официальную интеграцию,
+`SUPABASE_URL` и `SUPABASE_SERVICE_ROLE_KEY` подставляются автоматически —
+руками ничего вводить не нужно.
 
-| Переменная | Что это |
+Остальное необязательно:
+
+| Переменная | Когда нужна |
 |---|---|
-| `SUPABASE_URL` | из Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | из Supabase, секрет |
-| `ADMIN_BOOTSTRAP_PASSWORD` | первый пароль куратора; он же способ восстановить доступ |
-| `AUTH_SECRET` | `openssl rand -hex 32` |
-| `IP_HASH_SALT` | `openssl rand -hex 32` |
-| `CRON_SECRET` | Vercel подставляет сам для крон-задач |
+| `ADMIN_BOOTSTRAP_PASSWORD` | запасной вход, если пароль куратора забыт |
+| `AUTH_SECRET`, `IP_HASH_SALT` | только чтобы зафиксировать или сменить их вручную |
+| `CRON_SECRET` | Vercel подставляет сам |
+
+Пароль куратора хранится хешем в таблице `settings` и меняется во вкладке
+«Настройки». Ключ подписи сессий и соль для хеша IP приложение генерирует само
+при первом запуске и кладёт туда же — см. `lib/secrets.ts`.
 
 ### 3. Root Directory
 

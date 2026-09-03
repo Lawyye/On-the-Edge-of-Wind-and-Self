@@ -4,6 +4,7 @@ import { promisify } from 'node:util';
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 import { getSupabase } from './supabase';
+import { getSecret } from './secrets';
 
 const scrypt = promisify(scryptCb) as (
   password: string,
@@ -19,10 +20,8 @@ const PASSWORD_SETTING_KEY = 'admin_password_hash';
 /** Minimum the curator's password must satisfy, matching the admin UI copy. */
 export const MIN_PASSWORD_LENGTH = 10;
 
-function secret(): Uint8Array {
-  const value = process.env.AUTH_SECRET;
-  if (!value) throw new Error('AUTH_SECRET is not set');
-  return new TextEncoder().encode(value);
+async function secret(): Promise<Uint8Array> {
+  return new TextEncoder().encode(await getSecret('auth_secret'));
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -92,7 +91,7 @@ export async function createSession(): Promise<void> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DAYS}d`)
-    .sign(secret());
+    .sign(await secret());
 
   const jar = await cookies();
   jar.set(SESSION_COOKIE, token, {
@@ -114,7 +113,7 @@ export async function isAuthenticated(): Promise<boolean> {
   const token = jar.get(SESSION_COOKIE)?.value;
   if (!token) return false;
   try {
-    await jwtVerify(token, secret());
+    await jwtVerify(token, await secret());
     return true;
   } catch {
     return false;

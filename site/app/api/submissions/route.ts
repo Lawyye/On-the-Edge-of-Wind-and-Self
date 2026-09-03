@@ -60,7 +60,7 @@ export async function POST(request: Request) {
   }
 
   // 3. Flood protection, counted against a salted hash rather than the address.
-  const ipHash = hashIp(clientIp(request));
+  const ipHash = await hashIp(clientIp(request));
   if (await isRateLimited(ipHash)) {
     return fail(
       'Сағатына 5 материалдан артық жіберуге болмайды / Не более 5 материалов в час.',

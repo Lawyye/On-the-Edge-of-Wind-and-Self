@@ -1,0 +1,901 @@
+{
+  "site": {
+    "title": "\"ORLEU\" Mangistau KDI",
+    "logo": "/assets/source/asset-029.png",
+    "homeRoute": "/негізгі-бет",
+    "heroImage": "/assets/source/asset-046.jpg",
+    "eventHeroImage": "/assets/source/asset-028.jpg",
+    "colors": {
+      "teal": "#043843",
+      "orange": "#ed7d31",
+      "yellow": "#ffc000",
+      "sky": "#a0ceff",
+      "slate": "#377f8d"
+    }
+  },
+  "home": {
+    "route": "/негізгі-бет",
+    "billboardTitle": "«ПЕДАГОГ МӘРТЕБЕСІ: КӘСІБИ ӨСУ ЖӘНЕ ҚҰЗІРЕТТІЛІК»",
+    "billboardSubtitle": "онлайн кәсіби қолдау жобасы",
+    "intro": "Маңғыстау облысы бойынша бастауыш сыныптарға  ғылыми-әдістемелік қолдау көрсетудің біртұтас ақпараттық кеңістігі",
+    "mission": "Педагогтердің кәсібилігін арттыру – олардың өмір бойы білім алуға деген ұмтылысына қолдау көрсете отырып, сапалы контент әзірлеу, кәсіби білім беру қауымдастығында инновациялық білім мен тәжірибені тарату.",
+    "goalTitle": "ЖОБАНЫҢ МАҚСАТЫ:",
+    "goal": "Педагогтердің кәсіби құзыреттілігін арттыру, педагогикалық тәжірибесін жүйелеу және дамыту, кәсіби белсенділігін қолдау арқылы педагог мәртебесін нығайтуға және кәсіби қызметін нәтижелі жүзеге асыруына жағдай жасау.",
+    "goalImage": "/assets/source/asset-030.png",
+    "tasksTitle": "Жобаның міндеттері",
+    "tasks": [
+      "педагогтердің әдістемелік, жобалық және зерттеушілік дағдыларын дамытуға ықпал ету;",
+      "функционалдық сауаттылықты дамытуға бағытталған тиімді педагогикалық тәжірибелерді тарату;",
+      "педагогтердің әдістемелік өнімдерін (әдістемелік құрал, бағдарлама, нұсқаулық, жинақ және т.б.) әзірлеу, жүйелеу және таратуға жағдай жасау;",
+      "пәндік және жобалық бағыттағы онлайн сайыстар мен байқаулар арқылы педагогтердің кәсіби шеберлігін көрсетуге мүмкіндік беру;",
+      "сараптамалық қызметті дамыту мақсатында педагогтердің қазылар алқасының мүшесі ретінде қатысуына жағдай жасау;",
+      "педагогтердің кәсіби жетістіктерін рәсімдеу және кәсіби қызмет нәтижелерін растайтын дәлелдемелік құжаттармен қамтамасыз ету."
+    ],
+    "tasksImage": "/assets/source/asset-006.gif",
+    "resultsTitle": "Күтілетін нәтиже: (Жобаны іске асыру нәтижесінде)",
+    "results": [
+      "педагогтердің кәсіби құзыреттілігі артып, заманауи педагогикалық тәсілдерді (функционалдық сауаттылық, зерттеушілік және цифрлық дағдылар) оқу үдерісінде тиімді қолдану мүмкіндігі кеңейеді;",
+      "педагогтер функционалдық сауаттылықты дамытуға бағытталған тапсырмаларды құрастыру және қолдану дағдыларын жетілдіреді;",
+      "педагогтердің педагогикалық тәжірибесі жүйеленіп, әдістемелік өнім (әдістемелік құрал, бағдарлама, нұсқаулық, жинақ және т.б.) түрінде ұсынылады;",
+      "педагогтердің кәсіби белсенділігі артады;",
+      "педагогтер арасында кәсіби қауымдастық нығаяды;",
+      "педагогтердің кәсіби қызметін растайтын құжаттар (сертификаттар, анықтамалар, дипломдар) жүйеленіп, кәсіби портфолио қалыптасады."
+    ],
+    "resultsImage": "/assets/source/asset-034.jpg",
+    "footerLines": [
+      "Жобаға қатысушылар: бастауыш сынып мұғалімдері (аттестатталушы педагогтер)",
+      "Жобаның іске асырылу кезеңі: 2025-2026 оқу жылы (II жартыжылдық).",
+      "Өткізілу форматы: Онлайн (Zoom / Google Meet)"
+    ]
+  },
+  "curatorsPage": {
+    "route": "/негізгі-бет/жоба-кураторлары",
+    "title": "Жоба кураторлары",
+    "curators": [
+      {
+        "name": "Сахарбаева Марал Әділкеркейқызы",
+        "description": "«Өрлеу» БАҰО АҚ Маңғыстау облысы бойынша Кәсіби даму институты филиалының аға оқытушысы.",
+        "image": "/assets/source/asset-050.png",
+        "barImage": "/assets/source/asset-014.png",
+        "accent": "#ed7d31"
+      },
+      {
+        "name": "Қиянова Шолпан Орынбасаровна",
+        "description": "Білім берудің оқу-әдістемелік орталығының жаратылыстану және бастауыш білім беру бөлімінің жетекшісі.",
+        "image": "/assets/source/asset-056.png",
+        "barImage": "/assets/source/asset-005.png",
+        "accent": "#a0ceff"
+      },
+      {
+        "name": "Тоғысова Жәмила Айтуарқызы",
+        "description": "жаратылыстану және бастауыш білім беру бөлімінің әдіскері.",
+        "image": "/assets/source/asset-052.png",
+        "barImage": "/assets/source/asset-042.png",
+        "accent": "#377f8d"
+      }
+    ],
+    "footerTitle": "ПЕДАГОГ МӘРТЕБЕСІ: КӘСІБИ ӨСУ ЖӘНЕ ҚҰЗЫРЕТТІЛІК ОНЛАЙН КӘСІБИ ҚОЛДАУ ЖОБАСЫ",
+    "footerImage": "/assets/source/asset-043.jpg",
+    "documentTitle": "Бастауыш_ЖОБА жоспары",
+    "documentUrl": "/assets/source/project-plan.pdf"
+  },
+  "events": [
+    {
+      "route": "/ақпан/функционалдық-сауаттылық-тапсырмаларды-құрастыру-және-талдау",
+      "month": "ақпан",
+      "monthLabel": "Ақпан",
+      "title": "Функционалдық сауаттылық: тапсырмаларды құрастыру және талдау",
+      "date": "16-20 ақпан",
+      "format": "Онлайн семинар",
+      "responsible": "«Өрлеу» БАҰО АҚ, әдіскерлер",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-037.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDN1UrBjvo3TqRpASITu3ktAVqunhDriOu0UY8r9imSSJg?e=ePecyH"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDowbQJqDNATYauLJdjq9qWASJ_8__O103fgeBOgSwkBpc?e=dfF5nz"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgD1M-nOtqiUSpNkh41NrLOoAXxzLFcCwaEKpfYq93PfcOo?e=aXDSyN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgAYb5RsN5Q0RK9Sd-F_EjgrAUyUKRk4u-sglUTdnDFYp9k?e=ueknrq"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDyK40q_GZYTLTLrJcos38GAWzfID_qQpPDZj9WWmf296M?e=1tKGH8"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBD8dGmwExfQ5dQaDpIipETAUvjEeQVHXbKDsJWyMW8wzQ?e=7AK9l4"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDqWxA1pmNUQJ3lE6rTtLYfAUFb1xseP80FbHLCpNw_Epw?e=uZZMiL"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%B0%D2%9B%D0%BF%D0%B0%D0%BD/%D1%84%D1%83%D0%BD%D0%BA%D1%86%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D0%B4%D1%8B%D2%9B-%D1%81%D0%B0%D1%83%D0%B0%D1%82%D1%82%D1%8B%D0%BB%D1%8B%D2%9B-%D1%82%D0%B0%D0%BF%D1%81%D1%8B%D1%80%D0%BC%D0%B0%D0%BB%D0%B0%D1%80%D0%B4%D1%8B-%D2%9B%D2%B1%D1%80%D0%B0%D1%81%D1%82%D1%8B%D1%80%D1%83-%D0%B6%D3%99%D0%BD%D0%B5-%D1%82%D0%B0%D0%BB%D0%B4%D0%B0%D1%83"
+    },
+    {
+      "route": "/ақпан/бастауыш-сынып-пәндеріндегі-күрделі-тақырыптарды-анықтау",
+      "month": "ақпан",
+      "monthLabel": "Ақпан",
+      "title": "Бастауыш сынып пәндеріндегі күрделі тақырыптарды анықтау",
+      "date": "23-27 ақпан",
+      "format": "Онлайн семинар",
+      "responsible": "«Өрлеу» БАҰО АҚ, әдіскерлер",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-059.png",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDN1UrBjvo3TqRpASITu3ktAVqunhDriOu0UY8r9imSSJg?e=ePecyH"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDowbQJqDNATYauLJdjq9qWASJ_8__O103fgeBOgSwkBpc?e=dfF5nz"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgD1M-nOtqiUSpNkh41NrLOoAXxzLFcCwaEKpfYq93PfcOo?e=aXDSyN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgAYb5RsN5Q0RK9Sd-F_EjgrAUyUKRk4u-sglUTdnDFYp9k?e=ueknrq"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDyK40q_GZYTLTLrJcos38GAWzfID_qQpPDZj9WWmf296M?e=1tKGH8"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBD8dGmwExfQ5dQaDpIipETAUvjEeQVHXbKDsJWyMW8wzQ?e=7AK9l4"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDqWxA1pmNUQJ3lE6rTtLYfAUFb1xseP80FbHLCpNw_Epw?e=uZZMiL"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%B0%D2%9B%D0%BF%D0%B0%D0%BD/%D0%B1%D0%B0%D1%81%D1%82%D0%B0%D1%83%D1%8B%D1%88-%D1%81%D1%8B%D0%BD%D1%8B%D0%BF-%D0%BF%D3%99%D0%BD%D0%B4%D0%B5%D1%80%D1%96%D0%BD%D0%B4%D0%B5%D0%B3%D1%96-%D0%BA%D2%AF%D1%80%D0%B4%D0%B5%D0%BB%D1%96-%D1%82%D0%B0%D2%9B%D1%8B%D1%80%D1%8B%D0%BF%D1%82%D0%B0%D1%80%D0%B4%D1%8B-%D0%B0%D0%BD%D1%8B%D2%9B%D1%82%D0%B0%D1%83"
+    },
+    {
+      "route": "/ақпан/мұғалімнің-зерттеу-тәжірибелерін-жүйелеу-және-тарату",
+      "month": "ақпан",
+      "monthLabel": "Ақпан",
+      "title": "Мұғалімнің зерттеу тәжірибелерін жүйелеу және тарату",
+      "date": "Келісімді уақытта",
+      "format": "Онлайн семинар",
+      "responsible": "«Өрлеу» БАҰО АҚ, әдіскерлер",
+      "completion": "Электронды жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-009.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDN1UrBjvo3TqRpASITu3ktAVqunhDriOu0UY8r9imSSJg?e=ePecyH"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDowbQJqDNATYauLJdjq9qWASJ_8__O103fgeBOgSwkBpc?e=dfF5nz"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgD1M-nOtqiUSpNkh41NrLOoAXxzLFcCwaEKpfYq93PfcOo?e=aXDSyN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgAYb5RsN5Q0RK9Sd-F_EjgrAUyUKRk4u-sglUTdnDFYp9k?e=ueknrq"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDyK40q_GZYTLTLrJcos38GAWzfID_qQpPDZj9WWmf296M?e=1tKGH8"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBD8dGmwExfQ5dQaDpIipETAUvjEeQVHXbKDsJWyMW8wzQ?e=7AK9l4"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDqWxA1pmNUQJ3lE6rTtLYfAUFb1xseP80FbHLCpNw_Epw?e=uZZMiL"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%B0%D2%9B%D0%BF%D0%B0%D0%BD/%D0%BC%D2%B1%D2%93%D0%B0%D0%BB%D1%96%D0%BC%D0%BD%D1%96%D2%A3-%D0%B7%D0%B5%D1%80%D1%82%D1%82%D0%B5%D1%83-%D1%82%D3%99%D0%B6%D1%96%D1%80%D0%B8%D0%B1%D0%B5%D0%BB%D0%B5%D1%80%D1%96%D0%BD-%D0%B6%D2%AF%D0%B9%D0%B5%D0%BB%D0%B5%D1%83-%D0%B6%D3%99%D0%BD%D0%B5-%D1%82%D0%B0%D1%80%D0%B0%D1%82%D1%83"
+    },
+    {
+      "route": "/наурыз/pirls-форматындағы-мәтінмен-жұмыс-сұрақ-пен-дескриптор",
+      "month": "наурыз",
+      "monthLabel": "Наурыз",
+      "title": "PIRLS форматындағы мәтінмен жұмыс: сұрақ пен дескриптор",
+      "date": "16-20 наурыз",
+      "format": "Практикалық семинар",
+      "responsible": "«Өрлеу» БАҰО АҚ мамандары",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-020.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BD%D0%B0%D1%83%D1%80%D1%8B%D0%B7/pirls-%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%82%D1%8B%D0%BD%D0%B4%D0%B0%D2%93%D1%8B-%D0%BC%D3%99%D1%82%D1%96%D0%BD%D0%BC%D0%B5%D0%BD-%D0%B6%D2%B1%D0%BC%D1%8B%D1%81-%D1%81%D2%B1%D1%80%D0%B0%D2%9B-%D0%BF%D0%B5%D0%BD-%D0%B4%D0%B5%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82%D0%BE%D1%80"
+    },
+    {
+      "route": "/наурыз/бастауыш-математикадан-логикалық-және-timss-типтес-есептер",
+      "month": "наурыз",
+      "monthLabel": "Наурыз",
+      "title": "Бастауыш математикадан логикалық және TIMSS типтес есептер",
+      "date": "23-27 наурыз",
+      "format": "Онлайн воркшоп",
+      "responsible": "Шақырылған тренерлер",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-017.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BD%D0%B0%D1%83%D1%80%D1%8B%D0%B7/%D0%B1%D0%B0%D1%81%D1%82%D0%B0%D1%83%D1%8B%D1%88-%D0%BC%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0%D0%B4%D0%B0%D0%BD-%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D2%9B-%D0%B6%D3%99%D0%BD%D0%B5-timss-%D1%82%D0%B8%D0%BF%D1%82%D0%B5%D1%81-%D0%B5%D1%81%D0%B5%D0%BF%D1%82%D0%B5%D1%80"
+    },
+    {
+      "route": "/наурыз/мұғалімнің-зерттеу-тәжірибелерін-жүйелеу-әдістемелік-жұмыс-тарату",
+      "month": "наурыз",
+      "monthLabel": "Наурыз",
+      "title": "Мұғалімнің зерттеу тәжірибелерін жүйелеу (Әдістемелік жұмыс тарату)",
+      "date": "Келісімді уақытта",
+      "format": "Тәжірибе алаңы",
+      "responsible": "Әдістемелік жұмыстардың авторлары",
+      "completion": "Электронды жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-019.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BD%D0%B0%D1%83%D1%80%D1%8B%D0%B7/%D0%BC%D2%B1%D2%93%D0%B0%D0%BB%D1%96%D0%BC%D0%BD%D1%96%D2%A3-%D0%B7%D0%B5%D1%80%D1%82%D1%82%D0%B5%D1%83-%D1%82%D3%99%D0%B6%D1%96%D1%80%D0%B8%D0%B1%D0%B5%D0%BB%D0%B5%D1%80%D1%96%D0%BD-%D0%B6%D2%AF%D0%B9%D0%B5%D0%BB%D0%B5%D1%83-%D3%99%D0%B4%D1%96%D1%81%D1%82%D0%B5%D0%BC%D0%B5%D0%BB%D1%96%D0%BA-%D0%B6%D2%B1%D0%BC%D1%8B%D1%81-%D1%82%D0%B0%D1%80%D0%B0%D1%82%D1%83"
+    },
+    {
+      "route": "/сәуір/сабақтағы-дәлел-оқу-мақсаты-тапсырма-бағалау-сәйкестігі",
+      "month": "сәуір",
+      "monthLabel": "Сәуір",
+      "title": "Сабақтағы дәлел: оқу мақсаты – тапсырма – бағалау сәйкестігі",
+      "date": "06-10 сәуір",
+      "format": "Онлайн семинар",
+      "responsible": "«Өрлеу» БАҰО АҚ мамандары",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-003.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D1%81%D3%99%D1%83%D1%96%D1%80/%D1%81%D0%B0%D0%B1%D0%B0%D2%9B%D1%82%D0%B0%D2%93%D1%8B-%D0%B4%D3%99%D0%BB%D0%B5%D0%BB-%D0%BE%D2%9B%D1%83-%D0%BC%D0%B0%D2%9B%D1%81%D0%B0%D1%82%D1%8B-%D1%82%D0%B0%D0%BF%D1%81%D1%8B%D1%80%D0%BC%D0%B0-%D0%B1%D0%B0%D2%93%D0%B0%D0%BB%D0%B0%D1%83-%D1%81%D3%99%D0%B9%D0%BA%D0%B5%D1%81%D1%82%D1%96%D0%B3%D1%96"
+    },
+    {
+      "route": "/сәуір/мәтінмен-жұмыс-оқу-сауаттылығын-дамытудың-негізгі-құралы",
+      "month": "сәуір",
+      "monthLabel": "Сәуір",
+      "title": "Мәтінмен жұмыс – оқу сауаттылығын дамытудың негізгі құралы",
+      "date": "13-17 сәуір",
+      "format": "Онлайн семинар",
+      "responsible": "«Өрлеу» БАҰО АҚ мамандары",
+      "completion": "Анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-002.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D1%81%D3%99%D1%83%D1%96%D1%80/%D0%BC%D3%99%D1%82%D1%96%D0%BD%D0%BC%D0%B5%D0%BD-%D0%B6%D2%B1%D0%BC%D1%8B%D1%81-%D0%BE%D2%9B%D1%83-%D1%81%D0%B0%D1%83%D0%B0%D1%82%D1%82%D1%8B%D0%BB%D1%8B%D2%93%D1%8B%D0%BD-%D0%B4%D0%B0%D0%BC%D1%8B%D1%82%D1%83%D0%B4%D1%8B%D2%A3-%D0%BD%D0%B5%D0%B3%D1%96%D0%B7%D0%B3%D1%96-%D2%9B%D2%B1%D1%80%D0%B0%D0%BB%D1%8B"
+    },
+    {
+      "route": "/сәуір/логикалық-және-қолданбалы-есептер-математикалық-сауаттылық-негізі",
+      "month": "сәуір",
+      "monthLabel": "Сәуір",
+      "title": "Логикалық және қолданбалы есептер – математикалық сауаттылық негізі",
+      "date": "20-24 сәуір",
+      "format": "Онлайн сайыс",
+      "responsible": "Қазылар алқасының мүшелері",
+      "completion": "Электронды жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-015.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D1%81%D3%99%D1%83%D1%96%D1%80/%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D2%9B-%D0%B6%D3%99%D0%BD%D0%B5-%D2%9B%D0%BE%D0%BB%D0%B4%D0%B0%D0%BD%D0%B1%D0%B0%D0%BB%D1%8B-%D0%B5%D1%81%D0%B5%D0%BF%D1%82%D0%B5%D1%80-%D0%BC%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D2%9B-%D1%81%D0%B0%D1%83%D0%B0%D1%82%D1%82%D1%8B%D0%BB%D1%8B%D2%9B-%D0%BD%D0%B5%D0%B3%D1%96%D0%B7%D1%96"
+    },
+    {
+      "route": "/сәуір/бастауыш-білім-берудегі-заманауи-тәсілдер-конференция",
+      "month": "сәуір",
+      "monthLabel": "Сәуір",
+      "title": "Бастауыш білім берудегі заманауи тәсілдер (конференция)",
+      "date": "20-24 сәуір",
+      "format": "Республикалық ғылыми-тәжірибелік конференция",
+      "responsible": "«Өрлеу» БАҰО АҚ мамандары",
+      "completion": "Сертификат",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-054.png",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D1%81%D3%99%D1%83%D1%96%D1%80/%D0%B1%D0%B0%D1%81%D1%82%D0%B0%D1%83%D1%8B%D1%88-%D0%B1%D1%96%D0%BB%D1%96%D0%BC-%D0%B1%D0%B5%D1%80%D1%83%D0%B4%D0%B5%D0%B3%D1%96-%D0%B7%D0%B0%D0%BC%D0%B0%D0%BD%D0%B0%D1%83%D0%B8-%D1%82%D3%99%D1%81%D1%96%D0%BB%D0%B4%D0%B5%D1%80-%D0%BA%D0%BE%D0%BD%D1%84%D0%B5%D1%80%D0%B5%D0%BD%D1%86%D0%B8%D1%8F"
+    },
+    {
+      "route": "/сәуір/мұғалімнің-зерттеу-тәжірибелерін-жүйелеу-және-тарату",
+      "month": "сәуір",
+      "monthLabel": "Сәуір",
+      "title": "Мұғалімнің зерттеу тәжірибелерін жүйелеу және тарату",
+      "date": "Келісімді уақытта",
+      "format": "Тәжірибе алаңы",
+      "responsible": "«Өрлеу» БАҰО АҚ мамандары",
+      "completion": "Электронды жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-045.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC96uN4L12dToSrNDyv_OOdAQhmu4KQPAxjCdiDmCgEYmg?e=7DExER"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgB-UCnz03jJQqe61w0rP7mAARpqEWDOSYzDKdT70vpH7JI?e=WbSdjU"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCNjvS2nPHTQZYTwhCkRHpiAfQTvcLeZM8BuvaNWOROtgo?e=JcMbKN"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDeYhbF508bQYSktIfZQc1tAbA4fY79hOmTXQlRFvKaH0s?e=ViAi8G"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgALWA-9aeGMQrFamR1_proeAUzpQGZ31DjydydEAL1_3Ps?e=vOVieV"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgA9GPfriIiiSLGg3gXJ1gWPAVgjs4j7qpQ0oxWgTh0wCuQ?e=ZgawDJ"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCfesqpEMXVQZddfbhj1R30AfC-y9k8YLTUMwfQHcf4oNA?e=8ebfED"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D1%81%D3%99%D1%83%D1%96%D1%80/%D0%BC%D2%B1%D2%93%D0%B0%D0%BB%D1%96%D0%BC%D0%BD%D1%96%D2%A3-%D0%B7%D0%B5%D1%80%D1%82%D1%82%D0%B5%D1%83-%D1%82%D3%99%D0%B6%D1%96%D1%80%D0%B8%D0%B1%D0%B5%D0%BB%D0%B5%D1%80%D1%96%D0%BD-%D0%B6%D2%AF%D0%B9%D0%B5%D0%BB%D0%B5%D1%83-%D0%B6%D3%99%D0%BD%D0%B5-%D1%82%D0%B0%D1%80%D0%B0%D1%82%D1%83"
+    },
+    {
+      "route": "/мамыр/оқу-сауаттылығын-қалыптастыру-сұрақ-қою-дәлелдеу-және-қорытынды-жасау",
+      "month": "мамыр",
+      "monthLabel": "Мамыр",
+      "title": "Оқу сауаттылығын қалыптастыру: сұрақ қою, дәлелдеу және қорытынды жасау",
+      "date": "11-15 мамыр",
+      "format": "Шеберлік сағаты",
+      "responsible": "Тәжірибелі мұғалімдер, тренерлер",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-036.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCgAo4ig4weSKMprljFV4bdAfgc45HOhtrEP9P3Q9ex0JY?e=jbZYpG"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCavpwMTkFpT7unqgXHUQN6AX-w3edYILuxkQeEdPn-8GM?e=9dwnRG"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDFi9TRL9AcRKtgIaDiZVFJASxJeKshHwLtzHiTeWjgHBI?e=eOYook"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgAeGjARih1HQpiXBOztBovXATUtNqvhbQvza513JMbE-fg?e=MkACZ4"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC2uWRHMH31SYL-yKwK9lMSAUDRiMpr3373CxyBvr-HH8o?e=DgLeNM"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBhvK4_jX2qSrfR7T8D6fgBAeXVdgJVDBgqSNJQPKOApWI?e=sRiO8n"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDCAL9Qmd6fSYOpTnt4KDQKAYdlgS3aVEtMcnHNS1rQZNo?e=egMDQn"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D0%BC%D1%8B%D1%80/%D0%BE%D2%9B%D1%83-%D1%81%D0%B0%D1%83%D0%B0%D1%82%D1%82%D1%8B%D0%BB%D1%8B%D2%93%D1%8B%D0%BD-%D2%9B%D0%B0%D0%BB%D1%8B%D0%BF%D1%82%D0%B0%D1%81%D1%82%D1%8B%D1%80%D1%83-%D1%81%D2%B1%D1%80%D0%B0%D2%9B-%D2%9B%D0%BE%D1%8E-%D0%B4%D3%99%D0%BB%D0%B5%D0%BB%D0%B4%D0%B5%D1%83-%D0%B6%D3%99%D0%BD%D0%B5-%D2%9B%D0%BE%D1%80%D1%8B%D1%82%D1%8B%D0%BD%D0%B4%D1%8B-%D0%B6%D0%B0%D1%81%D0%B0%D1%83"
+    },
+    {
+      "route": "/мамыр/бастауышта-оқу-сауаттылығын-диагностикалау",
+      "month": "мамыр",
+      "monthLabel": "Мамыр",
+      "title": "Бастауышта оқу сауаттылығын диагностикалау",
+      "date": "18-22 мамыр",
+      "format": "Практикалық семинар",
+      "responsible": "Аудан/қала әдіскерлері",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-033.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCgAo4ig4weSKMprljFV4bdAfgc45HOhtrEP9P3Q9ex0JY?e=jbZYpG"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCavpwMTkFpT7unqgXHUQN6AX-w3edYILuxkQeEdPn-8GM?e=9dwnRG"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDFi9TRL9AcRKtgIaDiZVFJASxJeKshHwLtzHiTeWjgHBI?e=eOYook"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgAeGjARih1HQpiXBOztBovXATUtNqvhbQvza513JMbE-fg?e=MkACZ4"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC2uWRHMH31SYL-yKwK9lMSAUDRiMpr3373CxyBvr-HH8o?e=DgLeNM"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBhvK4_jX2qSrfR7T8D6fgBAeXVdgJVDBgqSNJQPKOApWI?e=sRiO8n"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDCAL9Qmd6fSYOpTnt4KDQKAYdlgS3aVEtMcnHNS1rQZNo?e=egMDQn"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D0%BC%D1%8B%D1%80/%D0%B1%D0%B0%D1%81%D1%82%D0%B0%D1%83%D1%8B%D1%88%D1%82%D0%B0-%D0%BE%D2%9B%D1%83-%D1%81%D0%B0%D1%83%D0%B0%D1%82%D1%82%D1%8B%D0%BB%D1%8B%D2%93%D1%8B%D0%BD-%D0%B4%D0%B8%D0%B0%D0%B3%D0%BD%D0%BE%D1%81%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D0%B0%D1%83"
+    },
+    {
+      "route": "/мамыр/мұғалімнің-зерттеу-тәжірибелерін-жүйелеу-және-тарату",
+      "month": "мамыр",
+      "monthLabel": "Мамыр",
+      "title": "Мұғалімнің зерттеу тәжірибелерін жүйелеу және тарату",
+      "date": "Келісімді уақытта",
+      "format": "Тәжірибе алаңы",
+      "responsible": "",
+      "completion": "Электронды жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-024.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCgAo4ig4weSKMprljFV4bdAfgc45HOhtrEP9P3Q9ex0JY?e=jbZYpG"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCavpwMTkFpT7unqgXHUQN6AX-w3edYILuxkQeEdPn-8GM?e=9dwnRG"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDFi9TRL9AcRKtgIaDiZVFJASxJeKshHwLtzHiTeWjgHBI?e=eOYook"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgAeGjARih1HQpiXBOztBovXATUtNqvhbQvza513JMbE-fg?e=MkACZ4"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC2uWRHMH31SYL-yKwK9lMSAUDRiMpr3373CxyBvr-HH8o?e=DgLeNM"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBhvK4_jX2qSrfR7T8D6fgBAeXVdgJVDBgqSNJQPKOApWI?e=sRiO8n"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDCAL9Qmd6fSYOpTnt4KDQKAYdlgS3aVEtMcnHNS1rQZNo?e=egMDQn"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D0%BC%D1%8B%D1%80/%D0%BC%D2%B1%D2%93%D0%B0%D0%BB%D1%96%D0%BC%D0%BD%D1%96%D2%A3-%D0%B7%D0%B5%D1%80%D1%82%D1%82%D0%B5%D1%83-%D1%82%D3%99%D0%B6%D1%96%D1%80%D0%B8%D0%B1%D0%B5%D0%BB%D0%B5%D1%80%D1%96%D0%BD-%D0%B6%D2%AF%D0%B9%D0%B5%D0%BB%D0%B5%D1%83-%D0%B6%D3%99%D0%BD%D0%B5-%D1%82%D0%B0%D1%80%D0%B0%D1%82%D1%83"
+    },
+    {
+      "route": "/мамыр/бастауыштағы-шағын-педагогикалық-жоба-байқауы",
+      "month": "мамыр",
+      "monthLabel": "Мамыр",
+      "title": "«Бастауыштағы шағын педагогикалық жоба» байқауы",
+      "date": "Келісімді уақытта",
+      "format": "Онлайн сайыс",
+      "responsible": "Жоба авторлары, қазылар алқасы",
+      "completion": "Диплом, жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-047.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCgAo4ig4weSKMprljFV4bdAfgc45HOhtrEP9P3Q9ex0JY?e=jbZYpG"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCavpwMTkFpT7unqgXHUQN6AX-w3edYILuxkQeEdPn-8GM?e=9dwnRG"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDFi9TRL9AcRKtgIaDiZVFJASxJeKshHwLtzHiTeWjgHBI?e=eOYook"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgAeGjARih1HQpiXBOztBovXATUtNqvhbQvza513JMbE-fg?e=MkACZ4"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgC2uWRHMH31SYL-yKwK9lMSAUDRiMpr3373CxyBvr-HH8o?e=DgLeNM"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBhvK4_jX2qSrfR7T8D6fgBAeXVdgJVDBgqSNJQPKOApWI?e=sRiO8n"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDCAL9Qmd6fSYOpTnt4KDQKAYdlgS3aVEtMcnHNS1rQZNo?e=egMDQn"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D0%BC%D1%8B%D1%80/%D0%B1%D0%B0%D1%81%D1%82%D0%B0%D1%83%D1%8B%D1%88%D1%82%D0%B0%D2%93%D1%8B-%D1%88%D0%B0%D2%93%D1%8B%D0%BD-%D0%BF%D0%B5%D0%B4%D0%B0%D0%B3%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D2%9B-%D0%B6%D0%BE%D0%B1%D0%B0-%D0%B1%D0%B0%D0%B9%D2%9B%D0%B0%D1%83%D1%8B"
+    },
+    {
+      "route": "/маусым/математикалық-сауаттылық-өмірмен-байланысты-есептер-арқылы-ойлауды-дамыту",
+      "month": "маусым",
+      "monthLabel": "Маусым",
+      "title": "Математикалық сауаттылық: өмірмен байланысты есептер арқылы ойлауды дамыту",
+      "date": "8-12 маусым",
+      "format": "Онлайн семинар",
+      "responsible": "Жоба жетекшілері",
+      "completion": "Куәлік, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-038.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBMWa1Ba6RJQZxgikxBSWwrAeSTwX8iskdOs1mHqtQTKO0?e=aoZlAC"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBpmbHLA2blQ6d8bUjjelqnARtlavmAtiyqp6NkX2ddBpA?e=dBaBIp"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDdJc7VsidFS4doR3_miaW1AXsLLXj_lT_1ALpSPFP4VYk?e=LcPONf"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCUIUlSzaO0S7K9xNXkKFQ1AUS17wD2RVP8IoeG9BO4fX8?e=Ht6rWA"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBnKCTglCj_RIvqKOwFxHENAf3sLIuGm1zXfWF1qSKrKCY?e=PxUlj4"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBbwAak8Qw0RJfrvoQEKs9lARlmctvs1-mTLWSmq_-f08U?e=GXIDy5"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgD6aPpuLLR-TZKdfRgezp6lAQXNo9n2PBeLaRGl7nqJ-M8?e=aD7Ae9"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D1%83%D1%81%D1%8B%D0%BC/%D0%BC%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D2%9B-%D1%81%D0%B0%D1%83%D0%B0%D1%82%D1%82%D1%8B%D0%BB%D1%8B%D2%9B-%D3%A9%D0%BC%D1%96%D1%80%D0%BC%D0%B5%D0%BD-%D0%B1%D0%B0%D0%B9%D0%BB%D0%B0%D0%BD%D1%8B%D1%81%D1%82%D1%8B-%D0%B5%D1%81%D0%B5%D0%BF%D1%82%D0%B5%D1%80-%D0%B0%D1%80%D2%9B%D1%8B%D0%BB%D1%8B-%D0%BE%D0%B9%D0%BB%D0%B0%D1%83%D0%B4%D1%8B-%D0%B4%D0%B0%D0%BC%D1%8B%D1%82%D1%83"
+    },
+    {
+      "route": "/маусым/бастауыш-сыныптар-бойынша-пәндерден-фс-қа-арналған-тапсырмалар-жинағы",
+      "month": "маусым",
+      "monthLabel": "Маусым",
+      "title": "Бастауыш сыныптар бойынша пәндерден функционалдық сауаттылыққа арналған тапсырмалар жинағы",
+      "date": "Маусым (ай бойы)",
+      "format": "Жинақ",
+      "responsible": "Сахарбаева М., Әуелбаева А. және т.б.",
+      "completion": "Жинақ, анықтама",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-021.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBMWa1Ba6RJQZxgikxBSWwrAeSTwX8iskdOs1mHqtQTKO0?e=aoZlAC"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBpmbHLA2blQ6d8bUjjelqnARtlavmAtiyqp6NkX2ddBpA?e=dBaBIp"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDdJc7VsidFS4doR3_miaW1AXsLLXj_lT_1ALpSPFP4VYk?e=LcPONf"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCUIUlSzaO0S7K9xNXkKFQ1AUS17wD2RVP8IoeG9BO4fX8?e=Ht6rWA"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBnKCTglCj_RIvqKOwFxHENAf3sLIuGm1zXfWF1qSKrKCY?e=PxUlj4"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBbwAak8Qw0RJfrvoQEKs9lARlmctvs1-mTLWSmq_-f08U?e=GXIDy5"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgD6aPpuLLR-TZKdfRgezp6lAQXNo9n2PBeLaRGl7nqJ-M8?e=aD7Ae9"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D1%83%D1%81%D1%8B%D0%BC/%D0%B1%D0%B0%D1%81%D1%82%D0%B0%D1%83%D1%8B%D1%88-%D1%81%D1%8B%D0%BD%D1%8B%D0%BF%D1%82%D0%B0%D1%80-%D0%B1%D0%BE%D0%B9%D1%8B%D0%BD%D1%88%D0%B0-%D0%BF%D3%99%D0%BD%D0%B4%D0%B5%D1%80%D0%B4%D0%B5%D0%BD-%D1%84%D1%81-%D2%9B%D0%B0-%D0%B0%D1%80%D0%BD%D0%B0%D0%BB%D2%93%D0%B0%D0%BD-%D1%82%D0%B0%D0%BF%D1%81%D1%8B%D1%80%D0%BC%D0%B0%D0%BB%D0%B0%D1%80-%D0%B6%D0%B8%D0%BD%D0%B0%D2%93%D1%8B"
+    },
+    {
+      "route": "/маусым/мұғалімнің-зерттеу-тәжірибелерін-жүйелеу-және-тарату",
+      "month": "маусым",
+      "monthLabel": "Маусым",
+      "title": "Мұғалімнің зерттеу тәжірибелерін жүйелеу және тарату",
+      "date": "Келісімді уақытта",
+      "format": "Тәжірибе алаңы",
+      "responsible": "",
+      "completion": "Электронды жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-049.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBMWa1Ba6RJQZxgikxBSWwrAeSTwX8iskdOs1mHqtQTKO0?e=aoZlAC"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBpmbHLA2blQ6d8bUjjelqnARtlavmAtiyqp6NkX2ddBpA?e=dBaBIp"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDdJc7VsidFS4doR3_miaW1AXsLLXj_lT_1ALpSPFP4VYk?e=LcPONf"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCUIUlSzaO0S7K9xNXkKFQ1AUS17wD2RVP8IoeG9BO4fX8?e=Ht6rWA"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBnKCTglCj_RIvqKOwFxHENAf3sLIuGm1zXfWF1qSKrKCY?e=PxUlj4"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBbwAak8Qw0RJfrvoQEKs9lARlmctvs1-mTLWSmq_-f08U?e=GXIDy5"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgD6aPpuLLR-TZKdfRgezp6lAQXNo9n2PBeLaRGl7nqJ-M8?e=aD7Ae9"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D1%83%D1%81%D1%8B%D0%BC/%D0%BC%D2%B1%D2%93%D0%B0%D0%BB%D1%96%D0%BC%D0%BD%D1%96%D2%A3-%D0%B7%D0%B5%D1%80%D1%82%D1%82%D0%B5%D1%83-%D1%82%D3%99%D0%B6%D1%96%D1%80%D0%B8%D0%B1%D0%B5%D0%BB%D0%B5%D1%80%D1%96%D0%BD-%D0%B6%D2%AF%D0%B9%D0%B5%D0%BB%D0%B5%D1%83-%D0%B6%D3%99%D0%BD%D0%B5-%D1%82%D0%B0%D1%80%D0%B0%D1%82%D1%83"
+    },
+    {
+      "route": "/маусым/кәсіби-даму-нәтижелері-рефлексия-және-қорытынды",
+      "month": "маусым",
+      "monthLabel": "Маусым",
+      "title": "Кәсіби даму нәтижелері: рефлексия және қорытынды",
+      "date": "15-19 маусым",
+      "format": "Онлайн конференция",
+      "responsible": "Шақырылған тренерлер, спикерлер",
+      "completion": "Алғыс хат, жинақ",
+      "materialsHeading": "Тақырып бойынша өткізілген іс-шаралардың  материалдарын жүктеу қапшықтары",
+      "image": "/assets/source/asset-040.jpg",
+      "links": [
+        {
+          "label": "АҚТАУ ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBMWa1Ba6RJQZxgikxBSWwrAeSTwX8iskdOs1mHqtQTKO0?e=aoZlAC"
+        },
+        {
+          "label": "ЖАҢАӨЗЕН ҚАЛАСЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBpmbHLA2blQ6d8bUjjelqnARtlavmAtiyqp6NkX2ddBpA?e=dBaBIp"
+        },
+        {
+          "label": "БЕЙНЕУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgDdJc7VsidFS4doR3_miaW1AXsLLXj_lT_1ALpSPFP4VYk?e=LcPONf"
+        },
+        {
+          "label": "МАҢҒЫСТАУ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgCUIUlSzaO0S7K9xNXkKFQ1AUS17wD2RVP8IoeG9BO4fX8?e=Ht6rWA"
+        },
+        {
+          "label": "МҰНАЙЛЫ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBnKCTglCj_RIvqKOwFxHENAf3sLIuGm1zXfWF1qSKrKCY?e=PxUlj4"
+        },
+        {
+          "label": "ТҮПҚАРАҒАН АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgBbwAak8Qw0RJfrvoQEKs9lARlmctvs1-mTLWSmq_-f08U?e=GXIDy5"
+        },
+        {
+          "label": "ҚАРАҚИЯ АУДАНЫ",
+          "url": "https://orleuedu-my.sharepoint.com/:f:/g/personal/tazhibayev_b_orleu_edu_kz/IgD6aPpuLLR-TZKdfRgezp6lAQXNo9n2PBeLaRGl7nqJ-M8?e=aD7Ae9"
+        }
+      ],
+      "originalUrl": "https://sites.google.com/view/orleumangistaukdi/%D0%BC%D0%B0%D1%83%D1%81%D1%8B%D0%BC/%D0%BA%D3%99%D1%81%D1%96%D0%B1%D0%B8-%D0%B4%D0%B0%D0%BC%D1%83-%D0%BD%D3%99%D1%82%D0%B8%D0%B6%D0%B5%D0%BB%D0%B5%D1%80%D1%96-%D1%80%D0%B5%D1%84%D0%BB%D0%B5%D0%BA%D1%81%D0%B8%D1%8F-%D0%B6%D3%99%D0%BD%D0%B5-%D2%9B%D0%BE%D1%80%D1%8B%D1%82%D1%8B%D0%BD%D0%B4%D1%8B"
+    }
+  ]
+}

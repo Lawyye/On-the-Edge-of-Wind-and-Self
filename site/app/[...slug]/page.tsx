@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { getContent, findEvent } from '@/lib/content';
@@ -121,11 +122,27 @@ function EventView({ event, site }: { event: SiteEvent; site: SiteContent['site'
             <h2 className="content-width">{event.materialsHeading}</h2>
           </div>
           <div className="materials-links content-width">
-            {event.links.map((link) => (
-              <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer">
-                {link.label}
-              </a>
-            ))}
+            {event.links.map((link) =>
+              // A district button now opens this site's own archive, filtered to
+              // that district and this event. External addresses still work, so
+              // the curator can point a button anywhere from the editor.
+              link.url.startsWith('/') ? (
+                <Link key={link.label} href={link.url}>
+                  {link.label}
+                </Link>
+              ) : (
+                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer">
+                  {link.label}
+                </a>
+              ),
+            )}
+          </div>
+
+          <div className="event-submit content-width">
+            <p>Осы іс-шара бойынша материалыңызды жіберіңіз. Тіркелу қажет емес.</p>
+            <Link href="/submit" className="portal-button portal-button-primary">
+              Материал жіберу
+            </Link>
           </div>
         </>
       )}

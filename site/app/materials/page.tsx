@@ -20,8 +20,27 @@ async function publishedMaterials(): Promise<PublishedMaterial[]> {
   return data as PublishedMaterial[];
 }
 
-export default async function MaterialsPage() {
-  const [content, materials] = await Promise.all([getContent(), publishedMaterials()]);
+function first(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? '';
+  return value ?? '';
+}
+
+export default async function MaterialsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [content, materials, params] = await Promise.all([
+    getContent(),
+    publishedMaterials(),
+    searchParams,
+  ]);
+
+  // Filters are read on the server and handed down as initial state, so the
+  // district buttons on an event page open an already-filtered archive without
+  // the page needing a Suspense boundary for useSearchParams.
+  const region = first(params.region);
+  const eventRoute = first(params.event);
 
   return (
     <Shell content={content}>
@@ -36,6 +55,8 @@ export default async function MaterialsPage() {
             materials={materials}
             events={content.events}
             regions={regionOptions(content.events)}
+            initialRegion={region}
+            initialEvent={eventRoute}
           />
         </div>
       </div>

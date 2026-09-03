@@ -610,3 +610,29 @@
   .admin-submission-actions .portal-button { flex-basis: 100%; }
   .image-control > div { align-items: flex-start; flex-direction: column; }
 }
+
+/*
+ * Call to action under an event's district buttons. Those buttons now lead to
+ * the archive, so the page still needs an obvious way to contribute.
+ */
+.event-submit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 4px;
+  padding-bottom: 34px;
+}
+
+.event-submit p {
+  margin: 0;
+  color: #4d6268;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .event-submit { align-items: stretch; flex-direction: column; padding-bottom: 26px; }
+  .event-submit .portal-button { width: 100%; }
+}

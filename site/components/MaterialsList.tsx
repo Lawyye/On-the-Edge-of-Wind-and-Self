@@ -21,14 +21,22 @@ export default function MaterialsList({
   materials,
   events,
   regions,
+  initialRegion = '',
+  initialEvent = '',
 }: {
   materials: PublishedMaterial[];
   events: SiteEvent[];
   regions: string[];
+  /**
+   * Preselected filters. The district buttons on an event page link straight
+   * here with both set, which is what replaced the old external folders.
+   */
+  initialRegion?: string;
+  initialEvent?: string;
 }) {
   const [query, setQuery] = useState('');
-  const [region, setRegion] = useState('');
-  const [eventRoute, setEventRoute] = useState('');
+  const [region, setRegion] = useState(initialRegion);
+  const [eventRoute, setEventRoute] = useState(initialEvent);
 
   const eventTitles = useMemo(
     () => new Map(events.map((event) => [event.route, event.title])),

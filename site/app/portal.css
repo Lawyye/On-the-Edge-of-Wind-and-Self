@@ -636,3 +636,25 @@
   .event-submit { align-items: stretch; flex-direction: column; padding-bottom: 26px; }
   .event-submit .portal-button { width: 100%; }
 }
+
+/* How full the free file-storage allowance is, shown before it runs out. */
+.storage-meter { margin-top: 18px; padding-top: 16px; border-top: 1px solid #edf2f3; }
+
+.storage-meter-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: #6f8388;
+  font-size: 11px;
+}
+
+.storage-meter-top strong { color: #173e46; font-size: 13px; }
+.storage-meter-top strong.is-tight { color: #b0453a; }
+
+.storage-bar { height: 7px; overflow: hidden; border-radius: 4px; background: #e6eff0; }
+.storage-bar span { display: block; height: 100%; border-radius: 4px; background: #377f8d; }
+.storage-bar span.is-tight { background: #d45d52; }
+
+.storage-meter p { margin: 9px 0 0; color: #7d9196; font-size: 11px; line-height: 1.5; }

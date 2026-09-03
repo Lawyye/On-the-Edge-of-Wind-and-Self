@@ -54,6 +54,8 @@ export default function AdminPanel({
 
   const pending = submissions.filter((item) => item.status === 'pending').length;
   const published = submissions.filter((item) => item.status === 'published').length;
+  // Every row already carries its file size, so this costs no extra request.
+  const usedBytes = submissions.reduce((sum, item) => sum + (item.file_size ?? 0), 0);
 
   function flash(message: string) {
     setNotice(message);
@@ -184,6 +186,7 @@ export default function AdminPanel({
             pending={pending}
             published={published}
             events={content.events.length}
+            usedBytes={usedBytes}
             onGo={setTab}
           />
         )}
@@ -216,11 +219,27 @@ export default function AdminPanel({
 
 /* ------------------------------------------------------------------ overview */
 
+/**
+ * The free Supabase plan allows 1 GB of uploaded files. Nothing warns you as it
+ * fills — uploads simply start failing — so the panel shows how full it is.
+ */
+const STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
+
+function formatSize(bytes: number): string {
+  if (bytes >= 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} ГБ`;
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
+  return `${Math.round(bytes / 1024)} КБ`;
+}
+
 function Overview({
-  total, pending, published, events, onGo,
+  total, pending, published, events, usedBytes, onGo,
 }: {
-  total: number; pending: number; published: number; events: number; onGo: (tab: Tab) => void;
+  total: number; pending: number; published: number; events: number;
+  usedBytes: number; onGo: (tab: Tab) => void;
 }) {
+  const percent = Math.min(100, Math.round((usedBytes / STORAGE_LIMIT_BYTES) * 100));
+  const tight = percent >= 80;
+
   return (
     <>
       <div className="admin-section-heading">
@@ -267,6 +286,26 @@ function Overview({
           <p>
             Опубликованные документы видны всем на странице «Материалы». Остальные видите только вы.
           </p>
+
+          <div className="storage-meter">
+            <div className="storage-meter-top">
+              <span>Занято места</span>
+              <strong className={tight ? 'is-tight' : undefined}>
+                {formatSize(usedBytes)} из 1 ГБ
+              </strong>
+            </div>
+            <div className="storage-bar">
+              <span
+                className={tight ? 'is-tight' : undefined}
+                style={{ width: `${Math.max(percent, 1)}%` }}
+              />
+            </div>
+            <p>
+              {tight
+                ? 'Место почти закончилось. Новые файлы скоро перестанут загружаться — удалите ненужные или перейдите на платный тариф Supabase.'
+                : 'Бесплатный тариф Supabase даёт 1 ГБ под файлы участников.'}
+            </p>
+          </div>
         </div>
       </div>
     </>

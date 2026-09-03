@@ -86,6 +86,9 @@ export async function POST(request: Request) {
     upsert: false,
   });
   if (upload.error) {
+    // Surfaced in the Vercel logs so a real cause — a full storage quota, most
+    // likely — is diagnosable instead of guessed at from a generic message.
+    console.error('storage upload failed', { path, reason: upload.error.message });
     return fail('Файл жүктелмеді / Не удалось загрузить файл.', 502);
   }
 

@@ -1,3 +1,8 @@
+// Importing this from a client component is a build error rather than a silent
+// mistake. Next.js would not inline a non-public env var into the browser bundle
+// anyway, so the key could not actually leak — but the failure would be a
+// confusing "undefined key" at runtime instead of a clear one at compile time.
+import 'server-only';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 /**

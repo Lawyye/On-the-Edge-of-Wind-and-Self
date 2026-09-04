@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Golos+Text:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; color: #20322D; -webkit-font-smoothing: antialiased; }
+    a { color: #587568; text-decoration: none; }
+    a:hover { color: #46604F; }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F4F6F1; display: flex; flex-direction: column;">
+
+  <div style="flex: 1; overflow: hidden; padding: 64px 20px 0;">
+
+    <h1 style="margin: 0; font-family: Literata, Georgia, serif; font-size: 30px; line-height: 1.14; font-weight: 500; letter-spacing: -0.4px;">Профиль</h1>
+
+    <div style="display: flex; align-items: center; gap: 15px; margin-top: 22px;">
+      <div style="position: relative; flex-shrink: 0;">
+        <div style="width: 68px; height: 68px; border-radius: 50%; background: #E5ECE6; display: flex; align-items: center; justify-content: center;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.5" stroke-linecap="round">
+            <path d="M12 21c0-5.5 2.6-9.4 6.5-11"></path>
+            <path d="M12 21c0-5.5-2.6-9.4-6.5-11"></path>
+            <path d="M12 21V9"></path>
+          </svg>
+        </div>
+        <div style="position: absolute; right: -2px; bottom: -2px; width: 26px; height: 26px; border-radius: 50%; background: #20322D; border: 2.5px solid #F4F6F1; display: flex; align-items: center; justify-content: center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F4F6F1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 20h4l10-10-4-4L4 16z"></path>
+          </svg>
+        </div>
+      </div>
+      <div style="flex-grow: 1;">
+        <div style="font-family: Literata, Georgia, serif; font-size: 19px; font-weight: 600;">Анонимный профиль</div>
+        <p style="margin: 5px 0 0; font-size: 13px; line-height: 1.45; color: #78867F;">Аватар виден только тебе. Записи остаются без имени.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 9px; margin-top: 22px;">
+      <div style="flex: 1; background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 18px; padding: 14px 12px;">
+        <div style="font-family: Literata, Georgia, serif; font-size: 24px; font-weight: 600; line-height: 1;">4</div>
+        <div style="margin-top: 6px; font-size: 12px; color: #78867F;">истории</div>
+      </div>
+      <div style="flex: 1; background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 18px; padding: 14px 12px;">
+        <div style="font-family: Literata, Georgia, serif; font-size: 24px; font-weight: 600; line-height: 1;">12</div>
+        <div style="margin-top: 6px; font-size: 12px; color: #78867F;">откликов</div>
+      </div>
+      <div style="flex: 1; background: #F0E2D4; border: 1px solid #E4D0BC; border-radius: 18px; padding: 14px 12px;">
+        <div style="font-family: Literata, Georgia, serif; font-size: 24px; font-weight: 600; line-height: 1; color: #74543D;">7</div>
+        <div style="margin-top: 6px; font-size: 12px; color: #8A6849;">дней здесь</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 22px; overflow: hidden;">
+
+      <div style="height: 54px; display: flex; align-items: center; gap: 13px; padding: 0 18px; border-bottom: 1px solid #EDF1EC;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 4.5A1.5 1.5 0 016.5 3h11A1.5 1.5 0 0119 4.5v15l-7-3.5L5 19.5z"></path>
+        </svg>
+        <span style="flex-grow: 1; font-size: 15px;">Мои истории</span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B4C0B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+      </div>
+
+      <div style="height: 54px; display: flex; align-items: center; gap: 13px; padding: 0 18px; border-bottom: 1px solid #EDF1EC;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 21l-6-4.2L6 21V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5z"></path>
+        </svg>
+        <span style="flex-grow: 1; font-size: 15px;">Сохранённое</span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B4C0B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+      </div>
+
+      <div style="height: 54px; display: flex; align-items: center; gap: 13px; padding: 0 18px; border-bottom: 1px solid #EDF1EC;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l7 4v5c0 4.4-3 8.3-7 9-4-0.7-7-4.6-7-9V7z"></path>
+        </svg>
+        <span style="flex-grow: 1; font-size: 15px;">Приватность</span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B4C0B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+      </div>
+
+      <div style="height: 54px; display: flex; align-items: center; gap: 13px; padding: 0 18px;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 11v5M12 8.2v.2"></path>
+        </svg>
+        <span style="flex-grow: 1; font-size: 15px;">Об этом месте</span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B4C0B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+      </div>
+
+    </div>
+
+    <div style="margin-top: 16px; background: #FFF6F5; border: 1px solid #EFDAD7; border-radius: 20px; padding: 16px 18px; display: flex; gap: 12px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B46B64" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;">
+        <path d="M12 3l9 16H3z"></path>
+        <path d="M12 10v4M12 16.8v.2"></path>
+      </svg>
+      <div>
+        <div style="font-size: 14.5px; font-weight: 600; color: #8F4F49;">Если сейчас тяжело по-настоящему</div>
+        <p style="margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; color: #8A625E;">Здесь тебе ответят такие же люди, не врачи. Если есть угроза жизни — позвони в экстренную службу.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 84px; height: 40px; background: linear-gradient(180deg, rgba(244,246,241,0) 0%, #F4F6F1 100%); pointer-events: none;"></div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: #FFFFFF; border-top: 1px solid #E0E6E1; display: flex; align-items: flex-start; padding-top: 11px;">
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6h16M4 12h16M4 18h10"></path>
+      </svg>
+      <span style="font-size: 11px; font-weight: 500; color: #9AA79F;">Лента</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 21l-6-4.2L6 21V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5z"></path>
+      </svg>
+      <span style="font-size: 11px; font-weight: 500; color: #9AA79F;">Сохранено</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 11.5a8.4 8.4 0 01-9 8.4 9 9 0 01-3.9-.9L3 20.5l1.6-4.6A8.4 8.4 0 0112 3.1a8.4 8.4 0 019 8.4z"></path>
+      </svg>
+      <span style="font-size: 11px; font-weight: 500; color: #9AA79F;">Отклики</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#20322D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8.5" r="3.6"></circle>
+        <path d="M5 20c0-3.4 3.1-5.6 7-5.6s7 2.2 7 5.6"></path>
+      </svg>
+      <span style="font-size: 11px; font-weight: 600; color: #20322D;">Профиль</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

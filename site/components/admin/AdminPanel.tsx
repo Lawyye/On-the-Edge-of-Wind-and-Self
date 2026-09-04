@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageControl from './ImageControl';
 import {
-  CheckIcon, EditIcon, GridIcon, InboxIcon, InfoIcon, LogoutIcon,
+  CheckIcon, EditIcon, GridIcon, HomeIcon, InboxIcon, InfoIcon, LogoutIcon,
   SettingsIcon, ToggleOff, ToggleOn, UploadIcon, UserIcon,
 } from '../Icons';
 import type { PortalSettings, SiteContent, Submission, SubmissionStatus } from '@/lib/types';
@@ -135,6 +135,13 @@ export default function AdminPanel({
           <h1>Управление сайтом</h1>
         </div>
         <div className="admin-account">
+          {/* A plain link, not next/link: after saving, a full load guarantees the
+              curator sees the site exactly as a visitor does rather than anything
+              the client router still holds. */}
+          <a className="admin-home-link" href="/" title="Открыть сайт" aria-label="На сайт">
+            <HomeIcon />
+            <span>На сайт</span>
+          </a>
           <UserIcon />
           <span>Куратор</span>
           <button type="button" onClick={logout} title="Выйти" aria-label="Выйти">

@@ -330,6 +330,16 @@
 .admin-login-card form { display: grid; gap: 17px; }
 .admin-login-button { width: 100%; margin-top: 4px; }
 
+.admin-login-back {
+  display: block;
+  margin-top: 18px;
+  color: #697d82;
+  font-size: 13px;
+  text-align: center;
+}
+
+.admin-login-back:hover { color: #0a5664; text-decoration: underline; }
+
 .admin-loading { display: grid; min-height: 100vh; place-items: center; color: #4b676d; background: #f2f7f8; font-family: Montserrat, Arial, sans-serif; }
 
 .admin-header {
@@ -347,6 +357,25 @@
 .admin-header h1 { margin: 4px 0 0; color: #123c44; font-size: 21px; }
 
 .admin-account { display: flex; align-items: center; gap: 9px; color: #60767b; font-size: 12px; }
+
+.admin-home-link {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+  padding-inline: 14px;
+  border-radius: 9px;
+  color: #0a5664;
+  background: #edf3f4;
+  font-size: 12px;
+  font-weight: 600;
+  transition: color .15s, background .15s;
+}
+
+.admin-home-link:hover { color: #fff; background: #0a5664; }
+.admin-home-link svg { width: 17px; height: 17px; }
+
 .admin-account > svg { width: 21px; height: 21px; }
 .admin-account button {
   display: grid;
@@ -583,6 +612,7 @@
   .admin-header { min-height: 72px; padding: 12px 16px; }
   .admin-header h1 { font-size: 17px; }
   .admin-account span { display: none; }
+  .admin-home-link { min-width: 38px; gap: 0; margin-right: 0; padding-inline: 0; justify-content: center; }
   .admin-tabs { top: 64px; }
   .admin-tabs button { min-height: 62px; flex-direction: column; gap: 3px; font-size: 9px; }
   .admin-tabs button.is-active:after { inset-inline: 8%; }

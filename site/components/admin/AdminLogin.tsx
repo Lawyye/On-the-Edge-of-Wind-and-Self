@@ -68,6 +68,10 @@ export default function AdminLogin() {
             {busy ? 'Проверяю доступ…' : 'Войти'}
           </button>
         </form>
+
+        <a className="admin-login-back" href="/">
+          Вернуться на сайт
+        </a>
       </div>
     </div>
   );

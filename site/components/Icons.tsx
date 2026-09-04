@@ -44,6 +44,10 @@ export const LayersIcon = (p: P) => (
   </svg>
 );
 
+export const HomeIcon = (p: P) => (
+  <svg {...base} {...p}><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M9 22V12h6v10" /></svg>
+);
+
 export const UserIcon = (p: P) => (
   <svg {...base} {...p}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
 );

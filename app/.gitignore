@@ -1,0 +1,15 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+pubspec.lock
+
+# Платформенные папки восстанавливаются командой `flutter create .`
+# (см. README.md). Держать их в репозитории не обязательно.
+
+# IDE
+.idea/
+*.iml
+.vscode/

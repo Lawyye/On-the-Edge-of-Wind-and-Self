@@ -10,97 +10,177 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Golos+Text:wght@400;500;600;700&display=swap">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; color: #20322D; -webkit-font-smoothing: antialiased; }
-    a { color: #587568; text-decoration: none; }
-    a:hover { color: #46604F; }
+    body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--moss); text-decoration: none; }
+    a:hover { color: var(--ink); }
+
+    .app {
+      --bg: #F4F6F1; --card: #FFFFFF; --line: #E0E6E1; --lineSoft: #EDF1EC;
+      --ink: #20322D; --body: #34463E; --muted: #78867F; --faint: #9AA79F;
+      --moss: #587568; --pale: #E5ECE6; --sand: #F0E2D4; --sandInk: #74543D;
+      --clay: #B8845D; --ember: #B46B64; --resp: #E9EFE9; --nav: #FFFFFF;
+    }
+    .app.is-dark {
+      --bg: #151E1A; --card: #1D2925; --line: #2C3A34; --lineSoft: #26332E;
+      --ink: #EAF0EA; --body: #C6D2C9; --muted: #8B9A91; --faint: #6E7D74;
+      --moss: #8FB09C; --pale: #26332E; --sand: #3A2F26; --sandInk: #D6B491;
+      --clay: #C99A72; --ember: #D08C84; --resp: #212E28; --nav: #1A2420;
+    }
+
+    .act { flex-grow: 1; height: 48px; border-radius: 16px; background: var(--card); border: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+    .act svg { fill: none; stroke: var(--faint); stroke-width: 1.7; }
+    .act span { font-size: 14.5px; font-weight: 600; color: var(--faint); }
+    .act.heart.is-on { border-color: var(--ember); }
+    .act.heart.is-on svg { fill: var(--ember); stroke: var(--ember); }
+    .act.heart.is-on span { color: var(--ember); }
+    .act.save.is-on { border-color: var(--moss); }
+    .act.save.is-on svg { fill: var(--moss); stroke: var(--moss); }
+    .act.save.is-on span { color: var(--moss); }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F4F6F1; display: flex; flex-direction: column;">
+<div class="app {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); display: flex; flex-direction: column;">
 
-  <div style="padding: 58px 14px 10px; display: flex; align-items: center; justify-content: space-between; background: #F4F6F1;">
-    <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#20322D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 5l-7 7 7 7"></path>
-      </svg>
+  <div style="padding: 56px 14px 8px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+    <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: var(--ink);" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
     </div>
-    <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#20322D" stroke-width="1.9" stroke-linecap="round">
-        <circle cx="12" cy="5.5" r="0.6"></circle>
-        <circle cx="12" cy="12" r="0.6"></circle>
-        <circle cx="12" cy="18.5" r="0.6"></circle>
-      </svg>
+    <div style="display: flex; gap: 4px;">
+      <div onClick="{{toggleTheme}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <sc-if value="{{isDark}}" hint-placeholder-val="{{true}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="stroke: var(--clay);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9L5.3 5.3"></path>
+          </svg>
+        </sc-if>
+        <sc-if value="{{isLight}}" hint-placeholder-val="{{false}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"></path>
+          </svg>
+        </sc-if>
+      </div>
+      <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: var(--ink);" stroke-width="1.9" stroke-linecap="round">
+          <circle cx="12" cy="5.5" r="0.6"></circle><circle cx="12" cy="12" r="0.6"></circle><circle cx="12" cy="18.5" r="0.6"></circle>
+        </svg>
+      </div>
     </div>
   </div>
 
   <div style="flex: 1; overflow: hidden; padding: 0 20px;">
 
     <div style="display: flex; align-items: center; gap: 10px;">
-      <div style="height: 26px; padding: 0 11px; border-radius: 999px; background: #F0E2D4; display: flex; align-items: center;">
-        <span style="font-size: 12px; font-weight: 600; color: #74543D;">Одиночество</span>
+      <div style="width: 36px; height: 36px; border-radius: 13px; background: var(--sand); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.6" stroke-linecap="round">
+          <path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"></path>
+        </svg>
       </div>
-      <span style="font-size: 12.5px; color: #9AA79F;">без имени · 2 ч назад</span>
+      <div style="flex-grow: 1;">
+        <div style="font-size: 14px; font-weight: 600; color: var(--ink);">Полынь</div>
+        <div style="font-size: 12px; color: var(--faint);">2 ч назад</div>
+      </div>
+      <div style="height: 26px; padding: 0 11px; border-radius: 999px; background: var(--sand); display: flex; align-items: center;">
+        <span style="font-size: 12px; font-weight: 600; color: var(--sandInk);">Одиночество</span>
+      </div>
     </div>
 
-    <h1 style="margin: 14px 0 0; font-family: Literata, Georgia, serif; font-size: 26px; line-height: 1.26; font-weight: 600; letter-spacing: -0.3px;">Переехал в новый город и не с кем поговорить</h1>
+    <h1 style="margin: 16px 0 0; font-family: Literata, Georgia, serif; font-size: 26px; line-height: 1.26; font-weight: 600; letter-spacing: -0.3px; color: var(--ink);">Переехал в новый город и не с кем поговорить</h1>
 
-    <p style="margin: 14px 0 0; font-size: 16px; line-height: 1.62; color: #34463E;">Прошло два месяца. На парах все уже с кем-то, а я как будто опоздал на первую неделю и теперь не знаю, как в это войти. Вроде и не грустно, но вечером тихо так, что слышно холодильник.</p>
+    <p style="margin: 13px 0 0; font-size: 16px; line-height: 1.62; color: var(--body);">Прошло два месяца. На парах все уже с кем-то, а я как будто опоздал на первую неделю и теперь не знаю, как в это войти. Вроде и не грустно, но вечером тихо так, что слышно холодильник.</p>
 
     <div style="display: flex; gap: 10px; margin-top: 20px;">
-      <div style="flex-grow: 1; height: 48px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E8D6D4; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="#B46B64" stroke="#B46B64" stroke-width="1.6" stroke-linejoin="round">
+      <div class="act heart {{heartCls}}" onClick="{{toggleHeart}}">
+        <svg width="19" height="19" viewBox="0 0 24 24" stroke-linejoin="round">
           <path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path>
         </svg>
-        <span style="font-size: 14.5px; font-weight: 600; color: #B46B64;">Я рядом · 7</span>
+        <span>Я рядом · {{hearts}}</span>
       </div>
-      <div style="width: 48px; height: 48px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E0E6E1; display: flex; align-items: center; justify-content: center;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <div class="act save {{saveCls}}" onClick="{{toggleSave}}" style="flex-grow: 0; width: 48px;">
+        <svg width="19" height="19" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 21l-6-4.2L6 21V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5z"></path>
         </svg>
       </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 12px; margin: 26px 0 16px;">
-      <span style="font-family: Literata, Georgia, serif; font-size: 17px; font-weight: 600;">Отклики</span>
-      <span style="font-size: 13px; color: #9AA79F;">4</span>
-      <div style="flex-grow: 1; height: 1px; background: #E0E6E1;"></div>
+    <div style="display: flex; align-items: center; gap: 12px; margin: 24px 0 14px;">
+      <span style="font-family: Literata, Georgia, serif; font-size: 17px; font-weight: 600; color: var(--ink);">Отклики</span>
+      <span style="font-size: 13px; color: var(--faint);">4</span>
+      <div style="flex-grow: 1; height: 1px; background: var(--line);"></div>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 10px;">
-
-      <div style="background: #E9EFE9; border-radius: 20px; padding: 16px 18px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <span style="font-size: 12.5px; font-weight: 600; color: #46604F;">Без имени</span>
-          <span style="font-size: 12px; color: #8B998F;">1 ч назад</span>
+      <div style="background: var(--resp); border-radius: 20px; padding: 15px 17px;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div style="width: 26px; height: 26px; border-radius: 9px; background: var(--pale); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round">
+              <path d="M12 21c0-5.5 2.6-9.4 6.5-11"></path><path d="M12 21c0-5.5-2.6-9.4-6.5-11"></path><path d="M12 21V9"></path>
+            </svg>
+          </div>
+          <span style="flex-grow: 1; font-size: 13px; font-weight: 600; color: var(--ink);">Соснарь</span>
+          <span style="font-size: 12px; color: var(--faint);">1 ч назад</span>
         </div>
-        <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: #34463E;">Я переехал год назад и первые месяцы было ровно так же. Помогло не искать сразу друзей, а найти место, куда ходишь регулярно.</p>
+        <p style="margin: 9px 0 0; font-size: 15px; line-height: 1.55; color: var(--body);">Я переехал год назад и первые месяцы было ровно так же. Помогло не искать сразу друзей, а найти место, куда ходишь регулярно.</p>
       </div>
 
-      <div style="background: #E9EFE9; border-radius: 20px; padding: 16px 18px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <span style="font-size: 12.5px; font-weight: 600; color: #46604F;">Без имени</span>
-          <span style="font-size: 12px; color: #8B998F;">40 мин назад</span>
+      <div style="background: var(--resp); border-radius: 20px; padding: 15px 17px;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div style="width: 26px; height: 26px; border-radius: 9px; background: var(--sand); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.7" stroke-linecap="round">
+              <path d="M3 9c2.5-2.4 4.5-2.4 7 0s4.5 2.4 7 0"></path><path d="M3 15c2.5-2.4 4.5-2.4 7 0s4.5 2.4 7 0"></path>
+            </svg>
+          </div>
+          <span style="flex-grow: 1; font-size: 13px; font-weight: 600; color: var(--ink);">Мятный Чай</span>
+          <span style="font-size: 12px; color: var(--faint);">40 мин назад</span>
         </div>
-        <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: #34463E;">Ты не опоздал. Люди на парах тоже часто просто держатся за первого попавшегося.</p>
+        <p style="margin: 9px 0 0; font-size: 15px; line-height: 1.55; color: var(--body);">Ты не опоздал. Люди на парах тоже часто просто держатся за первого попавшегося.</p>
       </div>
-
     </div>
   </div>
 
-  <div style="position: absolute; left: 0; right: 0; bottom: 88px; height: 44px; background: linear-gradient(180deg, rgba(244,246,241,0) 0%, #F4F6F1 100%); pointer-events: none;"></div>
+  <div style="position: absolute; left: 0; right: 0; bottom: 88px; height: 40px; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--bg) 92%); pointer-events: none;"></div>
 
-  <div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-top: 1px solid #E0E6E1; padding: 12px 16px 30px; display: flex; align-items: center; gap: 10px;">
-    <div style="flex-grow: 1; height: 46px; border-radius: 999px; background: #F4F6F1; border: 1px solid #E0E6E1; display: flex; align-items: center; padding: 0 18px;">
-      <span style="font-size: 14.5px; color: #9AA79F;">Написать по-человечески…</span>
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; background: var(--nav); border-top: 1px solid var(--line); padding: 12px 16px 30px; display: flex; align-items: center; gap: 10px;">
+    <div style="flex-grow: 1; height: 46px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; padding: 0 18px;">
+      <span style="font-size: 14.5px; color: var(--faint);">Ответить как Соснарь…</span>
     </div>
-    <div style="width: 46px; height: 46px; border-radius: 50%; background: #587568; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <div style="width: 46px; height: 46px; border-radius: 50%; background: var(--moss); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--bg);" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4.5 12h13M12 5.5l6 6.5-6 6.5"></path>
       </svg>
     </div>
   </div>
 
 </div>
-</x-dc>
+
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { dark: null, heart: false, save: false };
+  }
+
+  isDark() {
+    return this.state.dark === null ? (this.props.dark ?? false) : this.state.dark;
+  }
+
+  renderVals() {
+    const dark = this.isDark();
+    return {
+      themeClass: dark ? 'is-dark' : '',
+      isDark: dark,
+      isLight: !dark,
+      toggleTheme: () => this.setState({ dark: !dark }),
+
+      heartCls: this.state.heart ? 'is-on' : '',
+      hearts: this.state.heart ? 8 : 7,
+      toggleHeart: () => this.setState({ heart: !this.state.heart }),
+
+      saveCls: this.state.save ? 'is-on' : '',
+      toggleSave: () => this.setState({ save: !this.state.save }),
+    };
+  }
+}
+</script>
 </body>
 </html>

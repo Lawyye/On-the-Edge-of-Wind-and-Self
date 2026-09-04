@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Golos+Text:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--moss); text-decoration: none; }
+    a:hover { color: var(--ink); }
+
+    .app {
+      --bg: #F4F6F1; --card: #FFFFFF; --line: #E0E6E1; --lineSoft: #EDF1EC;
+      --ink: #20322D; --body: #34463E; --muted: #78867F; --faint: #9AA79F;
+      --moss: #587568; --pale: #E5ECE6; --sand: #F0E2D4; --sandInk: #74543D;
+      --clay: #B8845D; --ember: #B46B64;
+    }
+    .app.is-dark {
+      --bg: #151E1A; --card: #1D2925; --line: #2C3A34; --lineSoft: #26332E;
+      --ink: #EAF0EA; --body: #C6D2C9; --muted: #8B9A91; --faint: #6E7D74;
+      --moss: #8FB09C; --pale: #26332E; --sand: #3A2F26; --sandInk: #D6B491;
+      --clay: #C99A72; --ember: #D08C84;
+    }
+
+    .medal { width: 52px; height: 52px; border-radius: 17px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--sand); border: 1px solid var(--clay); }
+    .locked .medal { background: var(--pale); border: 1px dashed var(--line); }
+    .locked .aname { color: var(--muted); }
+
+    .arow { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px 16px; display: flex; gap: 14px; cursor: pointer; }
+    .arow.is-open { border-color: var(--clay); }
+
+    .bar { height: 6px; border-radius: 999px; background: var(--pale); overflow: hidden; }
+    .bar > i { display: block; height: 100%; border-radius: 999px; background: var(--moss); }
+  </style>
+</helmet>
+
+<div class="app {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); display: flex; flex-direction: column;">
+
+  <div style="padding: 58px 20px 0; display: flex; align-items: center; justify-content: space-between;">
+    <div style="width: 42px; height: 42px; display: flex; align-items: center; cursor: pointer;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: var(--ink);" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </div>
+    <div onClick="{{toggleTheme}}" style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <sc-if value="{{isDark}}" hint-placeholder-val="{{true}}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="stroke: var(--clay);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4.2"></circle>
+          <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9L5.3 5.3"></path>
+        </svg>
+      </sc-if>
+      <sc-if value="{{isLight}}" hint-placeholder-val="{{false}}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"></path>
+        </svg>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="padding: 6px 20px 0;">
+    <h1 style="margin: 0; font-family: Literata, Georgia, serif; font-size: 30px; line-height: 1.14; font-weight: 500; letter-spacing: -0.4px; color: var(--ink);">Достижения</h1>
+    <div style="display: flex; align-items: center; gap: 12px; margin-top: 14px;">
+      <div class="bar" style="flex-grow: 1;"><i style="width: 33%;"></i></div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--moss); flex-shrink: 0;">4 из 12</span>
+    </div>
+    <p style="margin: 10px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted);">Их дают за то, что ты рядом с другими, — не за то, сколько тебе плохо.</p>
+  </div>
+
+  <div style="flex: 1; overflow: hidden; padding: 20px 20px 0; display: flex; flex-direction: column; gap: 9px;">
+    <sc-for list="{{items}}" as="a" hint-placeholder-count="5">
+      <div class="arow {{a.cls}}" onClick="{{a.toggle}}">
+        <div class="medal">
+          <sc-if value="{{a.isStar}}" hint-placeholder-val="{{true}}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l2.3 4.9 5.2.7-3.8 3.7.9 5.2-4.6-2.5-4.6 2.5.9-5.2L4.5 8.6l5.2-.7z"></path>
+            </svg>
+          </sc-if>
+          <sc-if value="{{a.isHeart}}" hint-placeholder-val="{{false}}">
+            <svg width="24" height="24" viewBox="0 0 24 24" style="fill: var(--ember); stroke: var(--ember);" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path>
+            </svg>
+          </sc-if>
+          <sc-if value="{{a.isCal}}" hint-placeholder-val="{{false}}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="5.5" width="16" height="14.5" rx="3"></rect>
+              <path d="M4 10h16M8.5 3v4M15.5 3v4"></path>
+            </svg>
+          </sc-if>
+          <sc-if value="{{a.isCup}}" hint-placeholder-val="{{false}}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="9" r="5"></circle><path d="M8.6 13.4L7 21l5-2.4 5 2.4-1.6-7.6"></path>
+            </svg>
+          </sc-if>
+          <sc-if value="{{a.isLock}}" hint-placeholder-val="{{false}}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: var(--faint);" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="10.5" width="14" height="9.5" rx="2.5"></rect>
+              <path d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7"></path>
+            </svg>
+          </sc-if>
+        </div>
+
+        <div style="flex-grow: 1; min-width: 0;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+            <span class="aname" style="font-family: Literata, Georgia, serif; font-size: 16.5px; font-weight: 600; color: var(--ink);">{{a.name}}</span>
+            <span style="font-size: 11.5px; color: var(--faint); flex-shrink: 0;">{{a.when}}</span>
+          </div>
+          <p style="margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--muted);">{{a.desc}}</p>
+
+          <sc-if value="{{a.hasBar}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+              <div class="bar" style="flex-grow: 1;"><i style="width: {{a.pct}};"></i></div>
+              <span style="font-size: 11.5px; font-weight: 600; color: var(--muted); flex-shrink: 0;">{{a.progress}}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{a.showNote}}" hint-placeholder-val="{{false}}">
+            <div style="margin-top: 11px; padding: 11px 13px; border-radius: 13px; background: var(--pale);">
+              <p style="margin: 0; font-size: 13px; line-height: 1.5; color: var(--body);">{{a.note}}</p>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 46px; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--bg) 88%); pointer-events: none;"></div>
+
+</div>
+
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { dark: null, open: 4 };
+  }
+
+  isDark() {
+    return this.state.dark === null ? (this.props.dark ?? false) : this.state.dark;
+  }
+
+  renderVals() {
+    const dark = this.isDark();
+
+    const data = [
+      { icon: 'isStar', name: 'Первый шаг', when: '3 марта', got: true,
+        desc: 'Ты оставил первую историю.',
+        note: 'Самое трудное здесь — написать в первый раз. Дальше проще.' },
+      { icon: 'isHeart', name: 'Я рядом', when: '5 марта', got: true,
+        desc: 'Десять раз поддержал чужую историю.',
+        note: 'Отметку «я рядом» видит автор. Иногда её достаточно.' },
+      { icon: 'isCal', name: 'Неделя здесь', when: 'вчера', got: true,
+        desc: 'Заходил семь дней подряд.',
+        note: 'Считаются дни, когда ты просто читал, — заходить и молчать тоже нормально.' },
+      { icon: 'isCup', name: 'Услышали', when: '40 мин назад', got: true,
+        desc: 'Твою историю поддержали пять человек.',
+        note: '' },
+      { icon: 'isLock', name: 'Свой человек', when: '', got: false,
+        desc: 'Ответить пятидесяти людям.', progress: '12 / 50', pct: '24%',
+        note: 'Считаются отклики, а не отметки. Спешить некуда.' },
+      { icon: 'isLock', name: 'Ночная смена', when: '', got: false,
+        desc: 'Ответить кому-то между полуночью и пятью утра.',
+        note: 'Ночью пишут чаще всего — и отвечают реже всего.' },
+    ];
+
+    const items = data.map((a, i) => {
+      const open = this.state.open === i;
+      const item = {
+        name: a.name,
+        desc: a.desc,
+        when: a.when,
+        cls: (a.got ? '' : 'locked') + (open ? ' is-open' : ''),
+        hasBar: Boolean(a.progress),
+        progress: a.progress || '',
+        pct: a.pct || '0%',
+        showNote: open && Boolean(a.note),
+        note: a.note || '',
+        toggle: () => this.setState({ open: open ? -1 : i }),
+        isStar: false, isHeart: false, isCal: false, isCup: false, isLock: false,
+      };
+      item[a.icon] = true;
+      return item;
+    });
+
+    return {
+      themeClass: dark ? 'is-dark' : '',
+      isDark: dark,
+      isLight: !dark,
+      toggleTheme: () => this.setState({ dark: !dark }),
+      items,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -10,143 +10,464 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Golos+Text:wght@400;500;600;700&display=swap">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; color: #20322D; -webkit-font-smoothing: antialiased; }
-    a { color: #587568; text-decoration: none; }
-    a:hover { color: #46604F; }
+    body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--moss); text-decoration: none; }
+    a:hover { color: var(--ink); }
+
+    .app {
+      --bg: #F4F6F1; --card: #FFFFFF; --line: #E0E6E1; --lineSoft: #EDF1EC;
+      --ink: #20322D; --body: #34463E; --muted: #78867F; --faint: #9AA79F;
+      --moss: #587568; --pale: #E5ECE6; --sand: #F0E2D4; --sandInk: #74543D;
+      --clay: #B8845D; --ember: #B46B64; --nav: #FFFFFF; --scrim: rgba(20,32,28,0.55);
+    }
+    .app.is-dark {
+      --bg: #151E1A; --card: #1D2925; --line: #2C3A34; --lineSoft: #26332E;
+      --ink: #EAF0EA; --body: #C6D2C9; --muted: #8B9A91; --faint: #6E7D74;
+      --moss: #8FB09C; --pale: #26332E; --sand: #3A2F26; --sandInk: #D6B491;
+      --clay: #C99A72; --ember: #D08C84; --nav: #1A2420; --scrim: rgba(0,0,0,0.62);
+    }
+
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding-top: 12px; }
+    .nav-item svg { stroke: var(--faint); stroke-width: 1.7; }
+    .nav-item span { font-size: 11px; font-weight: 500; color: var(--faint); }
+    .nav-item.is-on svg { stroke: var(--ink); stroke-width: 1.9; }
+    .nav-item.is-on span { font-weight: 600; color: var(--ink); }
+
+    .chip { height: 34px; padding: 0 15px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); display: flex; align-items: center; flex-shrink: 0; cursor: pointer; }
+    .chip span { font-size: 13px; font-weight: 500; color: var(--body); white-space: nowrap; }
+    .chip.is-on { background: var(--ink); border-color: var(--ink); }
+    .chip.is-on span { color: var(--bg); font-weight: 600; }
+
+    .like { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+    .like svg { fill: none; stroke: var(--faint); stroke-width: 1.7; }
+    .like span { font-size: 13.5px; font-weight: 500; color: var(--faint); }
+    .like.is-on svg { fill: var(--ember); stroke: var(--ember); }
+    .like.is-on span { color: var(--ember); font-weight: 600; }
+
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 24px; cursor: pointer; }
+    .row { display: flex; align-items: center; gap: 13px; padding: 0 18px; height: 54px; cursor: pointer; }
+    .ach { width: 66px; flex-shrink: 0; text-align: center; cursor: pointer; }
+    .ach .medal { width: 62px; height: 62px; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: var(--sand); border: 1px solid var(--clay); }
+    .ach.locked .medal { background: var(--pale); border: 1px dashed var(--line); }
+    .ach .cap { margin-top: 7px; font-size: 10.5px; line-height: 1.25; color: var(--muted); }
   </style>
 </helmet>
 
-<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F4F6F1; display: flex; flex-direction: column;">
+<div class="app {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); display: flex; flex-direction: column;">
 
-  <div style="padding: 64px 20px 0;">
-    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
-      <div>
-        <h1 style="margin: 0; font-family: Literata, Georgia, serif; font-size: 30px; line-height: 1.14; font-weight: 500; letter-spacing: -0.4px;">Как ты?</h1>
-        <p style="margin: 7px 0 0; font-size: 14.5px; color: #78867F;">Можно написать своё или побыть рядом с чужим.</p>
-      </div>
-      <div style="width: 42px; height: 42px; border-radius: 50%; border: 1px solid #E0E6E1; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8A6 6 0 006 8c0 6-3 7-3 7h18s-3-1-3-7"></path>
-          <path d="M13.7 20a2 2 0 01-3.4 0"></path>
-        </svg>
+  <!-- ШАПКА -->
+  <div style="padding: 60px 20px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-shrink: 0;">
+    <div>
+      <h1 style="margin: 0; font-family: Literata, Georgia, serif; font-size: 28px; line-height: 1.16; font-weight: 500; letter-spacing: -0.4px; color: var(--ink);">{{screenTitle}}</h1>
+      <p style="margin: 6px 0 0; font-size: 13.5px; color: var(--muted);">{{screenHint}}</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex-shrink: 0;">
+      <div onClick="{{toggleTheme}}" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <sc-if value="{{isDark}}" hint-placeholder-val="{{true}}">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--clay);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9L5.3 5.3"></path>
+          </svg>
+        </sc-if>
+        <sc-if value="{{isLight}}" hint-placeholder-val="{{false}}">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"></path>
+          </svg>
+        </sc-if>
       </div>
     </div>
   </div>
 
-  <div style="display: flex; gap: 8px; padding: 20px 20px 4px; overflow: hidden; flex-shrink: 0;">
-    <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #20322D; display: flex; align-items: center; flex-shrink: 0;">
-      <span style="font-size: 13px; font-weight: 600; color: #F4F6F1;">Все</span>
+  <!-- ЛЕНТА -->
+  <sc-if value="{{isFeed}}" hint-placeholder-val="{{true}}">
+    <div style="display: flex; gap: 8px; padding: 18px 20px 4px; overflow: hidden; flex-shrink: 0;">
+      <sc-for list="{{cats}}" as="cat" hint-placeholder-count="4">
+        <div class="chip {{cat.cls}}" onClick="{{cat.pick}}"><span>{{cat.label}}</span></div>
+      </sc-for>
     </div>
-    <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E0E6E1; display: flex; align-items: center; flex-shrink: 0;">
-      <span style="font-size: 13px; font-weight: 500; color: #3A4F47;">Просто поговорить</span>
-    </div>
-    <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E0E6E1; display: flex; align-items: center; flex-shrink: 0;">
-      <span style="font-size: 13px; font-weight: 500; color: #3A4F47;">Тревога</span>
-    </div>
-    <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E0E6E1; display: flex; align-items: center; flex-shrink: 0;">
-      <span style="font-size: 13px; font-weight: 500; color: #3A4F47;">Семья</span>
-    </div>
-  </div>
 
-  <div style="flex: 1; overflow: hidden; padding: 12px 20px 0; display: flex; flex-direction: column; gap: 12px;">
-
-    <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 24px; padding: 20px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <div style="height: 26px; padding: 0 11px; border-radius: 999px; background: #F0E2D4; display: flex; align-items: center;">
-          <span style="font-size: 12px; font-weight: 600; color: #74543D;">Одиночество</span>
+    <div style="flex: 1; overflow: hidden; padding: 12px 20px 0; display: flex; flex-direction: column; gap: 12px;">
+      <sc-for list="{{stories}}" as="s" hint-placeholder-count="2">
+        <div class="card" style="padding: 20px;" onClick="{{s.open}}">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <div style="height: 26px; padding: 0 11px; border-radius: 999px; display: flex; align-items: center; background: {{s.catBg}};">
+              <span style="font-size: 12px; font-weight: 600; color: {{s.catFg}};">{{s.cat}}</span>
+            </div>
+            <span style="font-size: 12.5px; color: var(--faint);">{{s.time}}</span>
+          </div>
+          <h2 style="margin: 14px 0 0; font-family: Literata, Georgia, serif; font-size: 19px; line-height: 1.32; font-weight: 600; color: var(--ink);">{{s.title}}</h2>
+          <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.52; color: var(--body);">{{s.body}}</p>
+          <div style="display: flex; align-items: center; gap: 18px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--lineSoft);">
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.4 8.4 0 01-9 8.4 9 9 0 01-3.9-.9L3 20.5l1.6-4.6A8.4 8.4 0 0112 3.1a8.4 8.4 0 019 8.4z"></path>
+              </svg>
+              <span style="font-size: 13.5px; font-weight: 600; color: var(--moss);">{{s.replies}}</span>
+            </div>
+            <div class="like {{s.likeCls}}" onClick="{{s.toggleLike}}">
+              <svg width="18" height="18" viewBox="0 0 24 24" stroke-linejoin="round">
+                <path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path>
+              </svg>
+              <span>{{s.likes}} рядом</span>
+            </div>
+          </div>
         </div>
-        <span style="font-size: 12.5px; color: #9AA79F;">2 ч назад</span>
+      </sc-for>
+
+      <sc-if value="{{noStories}}" hint-placeholder-val="{{false}}">
+        <div style="text-align: center; padding: 40px 34px;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--pale); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.6" stroke-linecap="round">
+              <path d="M12 21c0-5.5 2.6-9.4 6.5-11"></path><path d="M12 21c0-5.5-2.6-9.4-6.5-11"></path><path d="M12 21V9"></path>
+            </svg>
+          </div>
+          <p style="margin: 16px 0 0; font-family: Literata, Georgia, serif; font-size: 17px; color: var(--ink);">В этой теме пока пусто</p>
+          <p style="margin: 7px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted);">Можно оставить первую запись — её увидят те, кому это близко.</p>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- СОХРАНЁННОЕ -->
+  <sc-if value="{{isSaved}}" hint-placeholder-val="{{false}}">
+    <div style="flex: 1; overflow: hidden; padding: 20px 20px 0; display: flex; flex-direction: column; gap: 12px;">
+      <div class="card" style="padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="height: 26px; padding: 0 11px; border-radius: 999px; display: flex; align-items: center; background: var(--pale);">
+            <span style="font-size: 12px; font-weight: 600; color: var(--moss);">Учёба</span>
+          </div>
+          <svg width="19" height="19" viewBox="0 0 24 24" style="fill: var(--moss); stroke: var(--moss);" stroke-width="1.7" stroke-linejoin="round">
+            <path d="M18 21l-6-4.2L6 21V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5z"></path>
+          </svg>
+        </div>
+        <h2 style="margin: 14px 0 0; font-family: Literata, Georgia, serif; font-size: 19px; line-height: 1.32; font-weight: 600; color: var(--ink);">Боюсь сказать родителям, что бросил универ</h2>
+        <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.52; color: var(--body);">Забрал документы ещё в октябре. Каждое утро выхожу из дома как будто на пары.</p>
       </div>
-      <h2 style="margin: 14px 0 0; font-family: Literata, Georgia, serif; font-size: 19px; line-height: 1.32; font-weight: 600;">Переехал в новый город и не с кем поговорить</h2>
-      <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.52; color: #46584F;">Прошло два месяца. На парах все уже с кем-то, а я как будто опоздал. Вроде и не грустно, но вечером тихо так, что слышно холодильник.</p>
-      <div style="display: flex; align-items: center; gap: 18px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #EDF1EC;">
-        <div style="display: flex; align-items: center; gap: 7px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <div style="text-align: center; padding: 26px 30px;">
+        <p style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--muted);">Сюда попадает то, к чему хочется вернуться. Видно только тебе.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ОТКЛИКИ -->
+  <sc-if value="{{isResp}}" hint-placeholder-val="{{false}}">
+    <div style="flex: 1; overflow: hidden; padding: 20px 20px 0; display: flex; flex-direction: column; gap: 10px;">
+      <div class="card" style="border-radius: 22px; padding: 16px 18px; display: flex; gap: 13px;">
+        <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--pale); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 11.5a8.4 8.4 0 01-9 8.4 9 9 0 01-3.9-.9L3 20.5l1.6-4.6A8.4 8.4 0 0112 3.1a8.4 8.4 0 019 8.4z"></path>
           </svg>
-          <span style="font-size: 13.5px; font-weight: 600; color: #587568;">4 отклика</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 7px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#B46B64" stroke="#B46B64" stroke-width="1.6" stroke-linejoin="round">
+        <div style="flex-grow: 1;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+            <span style="font-size: 14.5px; font-weight: 600; color: var(--ink);">Тебе ответил Соснарь</span>
+            <span style="font-size: 12px; color: var(--faint); flex-shrink: 0;">40 мин</span>
+          </div>
+          <p style="margin: 3px 0 0; font-size: 13px; color: var(--muted);">к «Не с кем поговорить в новом городе»</p>
+          <p style="margin: 9px 0 0; font-size: 14.5px; line-height: 1.5; color: var(--body);">Ты не опоздал. Люди на парах тоже часто держатся за первого попавшегося.</p>
+        </div>
+      </div>
+
+      <div class="card" style="border-radius: 22px; padding: 16px 18px; display: flex; gap: 13px; align-items: center;">
+        <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--sand); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" style="fill: var(--ember); stroke: var(--ember);" stroke-width="1.6" stroke-linejoin="round">
             <path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path>
           </svg>
-          <span style="font-size: 13.5px; font-weight: 600; color: #B46B64;">7 рядом</span>
         </div>
-        <div style="flex-grow: 1;"></div>
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 21l-6-4.2L6 21V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5z"></path>
-        </svg>
+        <div style="flex-grow: 1;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+            <span style="font-size: 14.5px; font-weight: 600; color: var(--ink);">7 человек рядом</span>
+            <span style="font-size: 12px; color: var(--faint); flex-shrink: 0;">2 ч</span>
+          </div>
+          <p style="margin: 3px 0 0; font-size: 13px; color: var(--muted);">с твоей записью про новый город</p>
+        </div>
       </div>
-    </div>
 
-    <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 24px; padding: 20px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <div style="height: 26px; padding: 0 11px; border-radius: 999px; background: #E5ECE6; display: flex; align-items: center;">
-          <span style="font-size: 12px; font-weight: 600; color: #46604F;">Учёба</span>
-        </div>
-        <span style="font-size: 12.5px; color: #9AA79F;">вчера</span>
-      </div>
-      <h2 style="margin: 14px 0 0; font-family: Literata, Georgia, serif; font-size: 19px; line-height: 1.32; font-weight: 600;">Боюсь сказать родителям, что бросил универ</h2>
-      <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.52; color: #46584F;">Забрал документы ещё в октябре. Каждое утро выхожу из дома как будто на пары.</p>
-      <div style="display: flex; align-items: center; gap: 18px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #EDF1EC;">
-        <div style="display: flex; align-items: center; gap: 7px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#587568" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.4 8.4 0 01-9 8.4 9 9 0 01-3.9-.9L3 20.5l1.6-4.6A8.4 8.4 0 0112 3.1a8.4 8.4 0 019 8.4z"></path>
+      <div class="card" style="border-radius: 22px; padding: 16px 18px; display: flex; gap: 13px; align-items: center; border-color: var(--clay);">
+        <div style="width: 38px; height: 38px; border-radius: 20px; background: var(--sand); border: 1px solid var(--clay); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="9" r="5"></circle>
+            <path d="M8.6 13.4L7 21l5-2.4 5 2.4-1.6-7.6"></path>
           </svg>
-          <span style="font-size: 13.5px; font-weight: 600; color: #587568;">12 откликов</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 7px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linejoin="round">
-            <path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path>
-          </svg>
-          <span style="font-size: 13.5px; font-weight: 500; color: #9AA79F;">23 рядом</span>
+        <div style="flex-grow: 1;">
+          <span style="font-size: 14.5px; font-weight: 600; color: var(--sandInk);">Новое достижение: «Услышали»</span>
+          <p style="margin: 3px 0 0; font-size: 13px; color: var(--muted);">Твою историю поддержали пять человек</p>
         </div>
       </div>
     </div>
+  </sc-if>
 
+  <!-- ПРОФИЛЬ -->
+  <sc-if value="{{isProfile}}" hint-placeholder-val="{{false}}">
+    <div style="flex: 1; overflow: hidden; padding: 20px 20px 0;">
+
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="position: relative; flex-shrink: 0; cursor: pointer;">
+          <div style="width: 70px; height: 70px; border-radius: 24px; background: var(--pale); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.5" stroke-linecap="round">
+              <path d="M12 21c0-5.5 2.6-9.4 6.5-11"></path>
+              <path d="M12 21c0-5.5-2.6-9.4-6.5-11"></path>
+              <path d="M12 21V9"></path>
+            </svg>
+          </div>
+          <div style="position: absolute; right: -4px; bottom: -4px; width: 27px; height: 27px; border-radius: 50%; background: var(--ink); border: 2.5px solid var(--bg); display: flex; align-items: center; justify-content: center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="stroke: var(--bg);" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 16V6M8 9.5L12 5.5l4 4M5 19h14"></path>
+            </svg>
+          </div>
+        </div>
+        <div style="flex-grow: 1;">
+          <div style="font-family: Literata, Georgia, serif; font-size: 21px; font-weight: 600; color: var(--ink);">Соснарь</div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 5px;">
+            <div style="height: 22px; padding: 0 9px; border-radius: 999px; background: var(--pale); display: flex; align-items: center;">
+              <span style="font-size: 11.5px; font-weight: 600; color: var(--moss);">7 дней здесь</span>
+            </div>
+            <span style="font-size: 12.5px; color: var(--muted);">имя ненастоящее — и хорошо</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: baseline; justify-content: space-between; margin: 22px 0 12px;">
+        <span style="font-family: Literata, Georgia, serif; font-size: 17px; font-weight: 600; color: var(--ink);">Достижения</span>
+        <span style="font-size: 13px; font-weight: 600; color: var(--moss); cursor: pointer;">4 из 12</span>
+      </div>
+
+      <div style="display: flex; gap: 10px; overflow: hidden;">
+        <div class="ach">
+          <div class="medal">
+            <svg width="27" height="27" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l2.3 4.9 5.2.7-3.8 3.7.9 5.2-4.6-2.5-4.6 2.5.9-5.2L4.5 8.6l5.2-.7z"></path>
+            </svg>
+          </div>
+          <div class="cap">Первый шаг</div>
+        </div>
+        <div class="ach">
+          <div class="medal">
+            <svg width="27" height="27" viewBox="0 0 24 24" style="fill: var(--ember); stroke: var(--ember);" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path>
+            </svg>
+          </div>
+          <div class="cap">Я рядом</div>
+        </div>
+        <div class="ach">
+          <div class="medal">
+            <svg width="27" height="27" viewBox="0 0 24 24" fill="none" style="stroke: var(--sandInk);" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="9" r="5"></circle>
+              <path d="M8.6 13.4L7 21l5-2.4 5 2.4-1.6-7.6"></path>
+            </svg>
+          </div>
+          <div class="cap">Услышали</div>
+        </div>
+        <div class="ach locked">
+          <div class="medal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="stroke: var(--faint);" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="10.5" width="14" height="9.5" rx="2.5"></rect>
+              <path d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7"></path>
+            </svg>
+          </div>
+          <div class="cap">Ночная смена</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden;">
+        <div class="row" style="border-bottom: 1px solid var(--lineSoft);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 4.5A1.5 1.5 0 016.5 3h11A1.5 1.5 0 0119 4.5v15l-7-3.5L5 19.5z"></path>
+          </svg>
+          <span style="flex-grow: 1; font-size: 15px; color: var(--ink);">Мои истории</span>
+          <span style="font-size: 14px; color: var(--faint);">4</span>
+        </div>
+        <div class="row" style="border-bottom: 1px solid var(--lineSoft);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l7 4v5c0 4.4-3 8.3-7 9-4-0.7-7-4.6-7-9V7z"></path>
+          </svg>
+          <span style="flex-grow: 1; font-size: 15px; color: var(--ink);">Приватность</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="stroke: var(--faint);" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+        </div>
+        <div class="row">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 11v5M12 8.2v.2"></path>
+          </svg>
+          <span style="flex-grow: 1; font-size: 15px; color: var(--ink);">Об этом месте</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="stroke: var(--faint);" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+        </div>
+      </div>
+
+    </div>
+  </sc-if>
+
+  <!-- ЗАТУХАНИЕ НАД ПАНЕЛЬЮ -->
+  <div style="position: absolute; left: 0; right: 0; bottom: 86px; height: 38px; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--bg) 92%); pointer-events: none;"></div>
+
+  <!-- НИЖНЯЯ ПАНЕЛЬ -->
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 86px; background: var(--nav); border-top: 1px solid var(--line); display: flex; align-items: flex-start;">
+    <div class="nav-item {{navFeed}}" onClick="{{goFeed}}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+      <span>Лента</span>
+    </div>
+    <div class="nav-item {{navSaved}}" onClick="{{goSaved}}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21l-6-4.2L6 21V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5z"></path></svg>
+      <span>Сохранено</span>
+    </div>
+
+    <div style="width: 76px; flex-shrink: 0; display: flex; justify-content: center; padding-top: 8px;">
+      <div onClick="{{openCompose}}" style="width: 52px; height: 52px; border-radius: 20px; background: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <svg width="23" height="23" viewBox="0 0 24 24" fill="none" style="stroke: var(--bg);" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+      </div>
+    </div>
+
+    <div class="nav-item {{navResp}}" onClick="{{goResp}}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 9 9 0 01-3.9-.9L3 20.5l1.6-4.6A8.4 8.4 0 0112 3.1a8.4 8.4 0 019 8.4z"></path></svg>
+      <span>Отклики</span>
+    </div>
+    <div class="nav-item {{navProfile}}" onClick="{{goProfile}}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.6"></circle><path d="M5 20c0-3.4 3.1-5.6 7-5.6s7 2.2 7 5.6"></path></svg>
+      <span>Профиль</span>
+    </div>
   </div>
 
-  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 176px; background: linear-gradient(180deg, rgba(244,246,241,0) 0%, #F4F6F1 46%); pointer-events: none;"></div>
+  <!-- ЛИСТ «НОВАЯ ЗАПИСЬ» -->
+  <sc-if value="{{composeOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; background: var(--scrim); display: flex; flex-direction: column; justify-content: flex-end;">
+      <div style="height: 560px; background: var(--bg); border-radius: 28px 28px 0 0; padding: 10px 20px 0; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: center; padding-bottom: 12px;">
+          <div style="width: 40px; height: 4px; border-radius: 999px; background: var(--line);"></div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <h2 style="margin: 0; font-family: Literata, Georgia, serif; font-size: 22px; font-weight: 600; color: var(--ink);">Новая запись</h2>
+          <div onClick="{{closeCompose}}" style="width: 36px; height: 36px; border-radius: 50%; background: var(--pale); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="stroke: var(--body);" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </div>
+        </div>
+        <p style="margin: 7px 0 0; font-size: 13px; color: var(--muted);">Ты подпишешься как <b style="color: var(--moss);">Соснарь</b> — настоящее имя нигде не появится.</p>
 
-  <div style="position: absolute; left: 0; right: 0; bottom: 96px; display: flex; justify-content: center;">
-    <div style="height: 50px; padding: 0 24px; border-radius: 999px; background: #20322D; display: flex; align-items: center; gap: 9px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4F6F1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 5v14M5 12h14"></path>
-      </svg>
-      <span style="font-size: 15px; font-weight: 600; color: #F4F6F1;">Написать</span>
-    </div>
-  </div>
+        <div style="margin-top: 18px; height: 52px; border-radius: 18px; background: var(--card); border: 1.5px solid var(--moss); display: flex; align-items: center; padding: 0 17px;">
+          <span style="font-family: Literata, Georgia, serif; font-size: 16px; color: var(--ink);">Не с кем поговорить в новом городе</span>
+        </div>
 
-  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: #FFFFFF; border-top: 1px solid #E0E6E1; display: flex; align-items: flex-start; padding-top: 11px;">
-    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#20322D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 6h16M4 12h16M4 18h10"></path>
-      </svg>
-      <span style="font-size: 11px; font-weight: 600; color: #20322D;">Лента</span>
+        <div style="margin-top: 12px; flex-grow: 1; border-radius: 18px; background: var(--card); border: 1px solid var(--line); padding: 15px 17px;">
+          <span style="font-size: 15px; line-height: 1.55; color: var(--faint);">Пиши как есть. Не надо красиво — надо честно.</span>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 11px; background: var(--pale); border-radius: 16px; padding: 13px 16px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss); flex-shrink: 0;" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l7 4v5c0 4.4-3 8.3-7 9-4-0.7-7-4.6-7-9V7z"></path><path d="M12 10v4"></path>
+          </svg>
+          <span style="font-size: 13.5px; line-height: 1.5; color: var(--moss);">Не пиши адрес, телефон и фамилии — ни свои, ни чужие.</span>
+        </div>
+
+        <div onClick="{{closeCompose}}" style="margin: 14px 0 24px; height: 54px; border-radius: 16px; background: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <span style="font-size: 16px; font-weight: 600; color: var(--bg);">Опубликовать</span>
+        </div>
+      </div>
     </div>
-    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 21l-6-4.2L6 21V5.5A1.5 1.5 0 017.5 4h9A1.5 1.5 0 0118 5.5z"></path>
-      </svg>
-      <span style="font-size: 11px; font-weight: 500; color: #9AA79F;">Сохранено</span>
-    </div>
-    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 11.5a8.4 8.4 0 01-9 8.4 9 9 0 01-3.9-.9L3 20.5l1.6-4.6A8.4 8.4 0 0112 3.1a8.4 8.4 0 019 8.4z"></path>
-      </svg>
-      <div style="position: absolute; top: -2px; left: 54%; width: 8px; height: 8px; border-radius: 50%; background: #B8845D;"></div>
-      <span style="font-size: 11px; font-weight: 500; color: #9AA79F;">Отклики</span>
-    </div>
-    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8.5" r="3.6"></circle>
-        <path d="M5 20c0-3.4 3.1-5.6 7-5.6s7 2.2 7 5.6"></path>
-      </svg>
-      <span style="font-size: 11px; font-weight: 500; color: #9AA79F;">Профиль</span>
-    </div>
-  </div>
+  </sc-if>
 
 </div>
-</x-dc>
+
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tab: 0,
+      dark: null,
+      cat: 'Все',
+      liked: { s1: true, s2: false },
+      likes: { s1: 7, s2: 23 },
+      compose: false,
+    };
+  }
+
+  isDark() {
+    return this.state.dark === null ? (this.props.dark ?? false) : this.state.dark;
+  }
+
+  renderVals() {
+    const dark = this.isDark();
+    const tab = this.state.tab;
+
+    const heads = [
+      { t: 'Как ты?', h: 'Можно написать своё или побыть рядом с чужим.' },
+      { t: 'Сохранённое', h: 'То, к чему захотелось вернуться.' },
+      { t: 'Отклики', h: 'Что произошло, пока тебя не было.' },
+      { t: 'Профиль', h: 'Имя видят другие, всё остальное — только ты.' },
+    ];
+
+    const catNames = ['Все', 'Одиночество', 'Учёба', 'Тревога'];
+    const cats = catNames.map((label) => ({
+      label,
+      cls: this.state.cat === label ? 'is-on' : '',
+      pick: () => this.setState({ cat: label }),
+    }));
+
+    const raw = [
+      {
+        id: 's1', cat: 'Одиночество', catBg: 'var(--sand)', catFg: 'var(--sandInk)', time: '2 ч назад',
+        title: 'Переехал в новый город и не с кем поговорить',
+        body: 'Прошло два месяца. На парах все уже с кем-то, а я как будто опоздал. Вроде и не грустно, но вечером тихо так, что слышно холодильник.',
+        replies: '4 отклика',
+      },
+      {
+        id: 's2', cat: 'Учёба', catBg: 'var(--pale)', catFg: 'var(--moss)', time: 'вчера',
+        title: 'Боюсь сказать родителям, что бросил универ',
+        body: 'Забрал документы ещё в октябре. Каждое утро выхожу из дома как будто на пары.',
+        replies: '12 откликов',
+      },
+    ];
+
+    const stories = raw
+      .filter((s) => this.state.cat === 'Все' || s.cat === this.state.cat)
+      .map((s) => ({
+        ...s,
+        likes: this.state.likes[s.id],
+        likeCls: this.state.liked[s.id] ? 'is-on' : '',
+        toggleLike: () => {
+          const on = !this.state.liked[s.id];
+          this.setState({
+            liked: { ...this.state.liked, [s.id]: on },
+            likes: { ...this.state.likes, [s.id]: this.state.likes[s.id] + (on ? 1 : -1) },
+          });
+        },
+        open: () => {},
+      }));
+
+    return {
+      themeClass: dark ? 'is-dark' : '',
+      isDark: dark,
+      isLight: !dark,
+      toggleTheme: () => this.setState({ dark: !dark }),
+
+      screenTitle: heads[tab].t,
+      screenHint: heads[tab].h,
+
+      isFeed: tab === 0,
+      isSaved: tab === 1,
+      isResp: tab === 2,
+      isProfile: tab === 3,
+
+      navFeed: tab === 0 ? 'is-on' : '',
+      navSaved: tab === 1 ? 'is-on' : '',
+      navResp: tab === 2 ? 'is-on' : '',
+      navProfile: tab === 3 ? 'is-on' : '',
+
+      goFeed: () => this.setState({ tab: 0 }),
+      goSaved: () => this.setState({ tab: 1 }),
+      goResp: () => this.setState({ tab: 2 }),
+      goProfile: () => this.setState({ tab: 3 }),
+
+      cats,
+      stories,
+      noStories: stories.length === 0,
+
+      composeOpen: this.state.compose,
+      openCompose: () => this.setState({ compose: true }),
+      closeCompose: () => this.setState({ compose: false }),
+    };
+  }
+}
+</script>
 </body>
 </html>

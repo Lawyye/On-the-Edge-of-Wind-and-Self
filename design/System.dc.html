@@ -12,137 +12,144 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; color: #20322D; -webkit-font-smoothing: antialiased; }
     a { color: #587568; text-decoration: none; }
-    a:hover { color: #46604F; }
+    a:hover { color: #20322D; }
     .lbl { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #8B998F; }
-    .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 11.5px; color: #78867F; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 11px; color: #78867F; }
+    .sw { border-radius: 12px; height: 44px; }
+    .swname { margin-top: 6px; font-size: 11.5px; font-weight: 600; }
   </style>
 </helmet>
 
-<div style="width: 1180px; height: 940px; background: #F4F6F1; padding: 44px 48px; display: flex; flex-direction: column; gap: 30px;">
+<div style="width: 1240px; height: 1000px; background: #F4F6F1; padding: 40px 44px; display: flex; flex-direction: column; gap: 24px;">
 
   <div>
-    <h1 style="margin: 0; font-family: Literata, Georgia, serif; font-size: 30px; font-weight: 600; letter-spacing: -0.3px;">On the Edge — визуальная система</h1>
-    <p style="margin: 7px 0 0; font-size: 14px; color: #78867F;">Значения перенесены из существующего кода приложения и дополнены. Имена совпадают с константами в <span class="mono">story_card.dart</span> и <span class="mono">app.dart</span>.</p>
+    <h1 style="margin: 0; font-family: Literata, Georgia, serif; font-size: 28px; font-weight: 600; letter-spacing: -0.3px;">On the Edge — визуальная система</h1>
+    <p style="margin: 6px 0 0; font-size: 13.5px; color: #78867F;">Светлая палитра развивает константы из <span class="mono">story_card.dart</span>. Тёмная построена так, чтобы карточка оставалась светлее фона, а мох не выцветал в серый.</p>
   </div>
 
-  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px; flex-grow: 1;">
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px;">
 
-    <div style="display: flex; flex-direction: column; gap: 26px;">
-
-      <div>
-        <span class="lbl">ЦВЕТ</span>
-        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 13px;">
-          <div><div style="height: 56px; border-radius: 14px; background: #20322D;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">ink</div><div class="mono">#20322D</div></div>
-          <div><div style="height: 56px; border-radius: 14px; background: #587568;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">moss</div><div class="mono">#587568</div></div>
-          <div><div style="height: 56px; border-radius: 14px; background: #F4F6F1; border: 1px solid #E0E6E1;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">mist</div><div class="mono">#F4F6F1</div></div>
-          <div><div style="height: 56px; border-radius: 14px; background: #FFFFFF; border: 1px solid #E0E6E1;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">paper</div><div class="mono">#FFFFFF</div></div>
-          <div><div style="height: 56px; border-radius: 14px; background: #E5ECE6;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">paleMoss</div><div class="mono">#E5ECE6</div></div>
-          <div><div style="height: 56px; border-radius: 14px; background: #F0E2D4;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">sand</div><div class="mono">#F0E2D4</div></div>
-          <div><div style="height: 56px; border-radius: 14px; background: #B8845D;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">clay</div><div class="mono">#B8845D</div></div>
-          <div><div style="height: 56px; border-radius: 14px; background: #B46B64;"></div><div style="margin-top: 7px; font-size: 12.5px; font-weight: 600;">ember</div><div class="mono">#B46B64</div></div>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px;">
-          <div><div style="height: 30px; border-radius: 10px; background: #34463E;"></div><div style="margin-top: 6px; font-size: 12px;">text-body</div><div class="mono">#34463E</div></div>
-          <div><div style="height: 30px; border-radius: 10px; background: #78867F;"></div><div style="margin-top: 6px; font-size: 12px;">text-muted</div><div class="mono">#78867F</div></div>
-          <div><div style="height: 30px; border-radius: 10px; background: #9AA79F;"></div><div style="margin-top: 6px; font-size: 12px;">text-faint</div><div class="mono">#9AA79F</div></div>
-          <div><div style="height: 30px; border-radius: 10px; background: #E0E6E1;"></div><div style="margin-top: 6px; font-size: 12px;">line</div><div class="mono">#E0E6E1</div></div>
-        </div>
+    <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 22px; padding: 20px;">
+      <span class="lbl">СВЕТЛАЯ</span>
+      <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 12px;">
+        <div><div class="sw" style="background: #F4F6F1; border: 1px solid #E0E6E1;"></div><div class="swname">bg</div><div class="mono">#F4F6F1</div></div>
+        <div><div class="sw" style="background: #FFFFFF; border: 1px solid #E0E6E1;"></div><div class="swname">card</div><div class="mono">#FFFFFF</div></div>
+        <div><div class="sw" style="background: #E0E6E1;"></div><div class="swname">line</div><div class="mono">#E0E6E1</div></div>
+        <div><div class="sw" style="background: #20322D;"></div><div class="swname">ink</div><div class="mono">#20322D</div></div>
+        <div><div class="sw" style="background: #34463E;"></div><div class="swname">body</div><div class="mono">#34463E</div></div>
+        <div><div class="sw" style="background: #78867F;"></div><div class="swname">muted</div><div class="mono">#78867F</div></div>
+        <div><div class="sw" style="background: #9AA79F;"></div><div class="swname">faint</div><div class="mono">#9AA79F</div></div>
+        <div><div class="sw" style="background: #587568;"></div><div class="swname">moss</div><div class="mono">#587568</div></div>
+        <div><div class="sw" style="background: #E5ECE6;"></div><div class="swname">pale</div><div class="mono">#E5ECE6</div></div>
+        <div><div class="sw" style="background: #F0E2D4;"></div><div class="swname">sand</div><div class="mono">#F0E2D4</div></div>
+        <div><div class="sw" style="background: #B8845D;"></div><div class="swname">clay</div><div class="mono">#B8845D</div></div>
+        <div><div class="sw" style="background: #B46B64;"></div><div class="swname">ember</div><div class="mono">#B46B64</div></div>
       </div>
-
-      <div>
-        <span class="lbl">ТИПОГРАФИКА</span>
-        <div style="margin-top: 13px; background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 20px; padding: 20px 22px; display: flex; flex-direction: column; gap: 15px;">
-          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
-            <span style="font-family: Literata, Georgia, serif; font-size: 30px; font-weight: 500; letter-spacing: -0.4px;">Как ты?</span>
-            <span class="mono" style="flex-shrink: 0;">Literata 30 / 500 / 1.14</span>
-          </div>
-          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
-            <span style="font-family: Literata, Georgia, serif; font-size: 26px; font-weight: 600;">Заголовок истории</span>
-            <span class="mono" style="flex-shrink: 0;">Literata 26 / 600 / 1.26</span>
-          </div>
-          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
-            <span style="font-family: Literata, Georgia, serif; font-size: 19px; font-weight: 600;">Заголовок в карточке</span>
-            <span class="mono" style="flex-shrink: 0;">Literata 19 / 600 / 1.32</span>
-          </div>
-          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
-            <span style="font-size: 16px; color: #34463E;">Основной текст истории</span>
-            <span class="mono" style="flex-shrink: 0;">Golos 16 / 400 / 1.62</span>
-          </div>
-          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
-            <span style="font-size: 15px; color: #46584F;">Текст в карточке ленты</span>
-            <span class="mono" style="flex-shrink: 0;">Golos 15 / 400 / 1.52</span>
-          </div>
-          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
-            <span style="font-size: 12.5px; color: #9AA79F;">Время, служебное</span>
-            <span class="mono" style="flex-shrink: 0;">Golos 12.5 / 400</span>
-          </div>
-        </div>
-        <p style="margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: #78867F;">Literata — заголовки и всё, что человек написал сам: даёт тексту вес книги, а не поста. Golos Text — интерфейс; обе гарнитуры нарисованы с кириллицей в основе, а не с латиницей и приделанной кириллицей.</p>
-      </div>
-
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 26px;">
+    <div style="background: #1D2925; border: 1px solid #2C3A34; border-radius: 22px; padding: 20px;">
+      <span class="lbl" style="color: #8B9A91;">ТЁМНАЯ</span>
+      <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 12px;">
+        <div><div class="sw" style="background: #151E1A; border: 1px solid #2C3A34;"></div><div class="swname" style="color: #EAF0EA;">bg</div><div class="mono" style="color: #8B9A91;">#151E1A</div></div>
+        <div><div class="sw" style="background: #1D2925; border: 1px solid #2C3A34;"></div><div class="swname" style="color: #EAF0EA;">card</div><div class="mono" style="color: #8B9A91;">#1D2925</div></div>
+        <div><div class="sw" style="background: #2C3A34;"></div><div class="swname" style="color: #EAF0EA;">line</div><div class="mono" style="color: #8B9A91;">#2C3A34</div></div>
+        <div><div class="sw" style="background: #EAF0EA;"></div><div class="swname" style="color: #EAF0EA;">ink</div><div class="mono" style="color: #8B9A91;">#EAF0EA</div></div>
+        <div><div class="sw" style="background: #C6D2C9;"></div><div class="swname" style="color: #EAF0EA;">body</div><div class="mono" style="color: #8B9A91;">#C6D2C9</div></div>
+        <div><div class="sw" style="background: #8B9A91;"></div><div class="swname" style="color: #EAF0EA;">muted</div><div class="mono" style="color: #8B9A91;">#8B9A91</div></div>
+        <div><div class="sw" style="background: #6E7D74;"></div><div class="swname" style="color: #EAF0EA;">faint</div><div class="mono" style="color: #8B9A91;">#6E7D74</div></div>
+        <div><div class="sw" style="background: #8FB09C;"></div><div class="swname" style="color: #EAF0EA;">moss</div><div class="mono" style="color: #8B9A91;">#8FB09C</div></div>
+        <div><div class="sw" style="background: #26332E;"></div><div class="swname" style="color: #EAF0EA;">pale</div><div class="mono" style="color: #8B9A91;">#26332E</div></div>
+        <div><div class="sw" style="background: #3A2F26;"></div><div class="swname" style="color: #EAF0EA;">sand</div><div class="mono" style="color: #8B9A91;">#3A2F26</div></div>
+        <div><div class="sw" style="background: #C99A72;"></div><div class="swname" style="color: #EAF0EA;">clay</div><div class="mono" style="color: #8B9A91;">#C99A72</div></div>
+        <div><div class="sw" style="background: #D08C84;"></div><div class="swname" style="color: #EAF0EA;">ember</div><div class="mono" style="color: #8B9A91;">#D08C84</div></div>
+      </div>
+    </div>
+  </div>
 
-      <div>
-        <span class="lbl">ФОРМА</span>
-        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 13px;">
-          <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 24px; padding: 15px 17px;">
-            <div style="font-size: 13px; font-weight: 600;">Карточка</div>
-            <div class="mono" style="margin-top: 4px;">R24 · 1px #E0E6E1 · без тени</div>
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 20px; padding: 15px 17px;">
-            <div style="font-size: 13px; font-weight: 600;">Отклик</div>
-            <div class="mono" style="margin-top: 4px;">R20 · #E9EFE9 · без обводки</div>
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 18px; padding: 15px 17px;">
-            <div style="font-size: 13px; font-weight: 600;">Поле ввода</div>
-            <div class="mono" style="margin-top: 4px;">R18 · h54 · фокус #587568 1.5px</div>
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 16px; padding: 15px 17px;">
-            <div style="font-size: 13px; font-weight: 600;">Кнопка</div>
-            <div class="mono" style="margin-top: 4px;">R16 · h54 · чип R999 h34</div>
-          </div>
+  <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 26px; flex-grow: 1;">
+
+    <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 22px; padding: 20px 22px;">
+      <span class="lbl">ТИПОГРАФИКА</span>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 13px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+          <span style="font-family: Literata, Georgia, serif; font-size: 28px; font-weight: 500; letter-spacing: -0.4px;">Как ты?</span>
+          <span class="mono" style="flex-shrink: 0;">Literata 28 / 500 / 1.16</span>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+          <span style="font-family: Literata, Georgia, serif; font-size: 26px; font-weight: 600;">Заголовок истории</span>
+          <span class="mono" style="flex-shrink: 0;">Literata 26 / 600 / 1.26</span>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+          <span style="font-family: Literata, Georgia, serif; font-size: 19px; font-weight: 600;">Заголовок в карточке</span>
+          <span class="mono" style="flex-shrink: 0;">Literata 19 / 600 / 1.32</span>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+          <span style="font-size: 16px; color: #34463E;">Основной текст истории</span>
+          <span class="mono" style="flex-shrink: 0;">Golos 16 / 400 / 1.62</span>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+          <span style="font-size: 15px; color: #34463E;">Текст в карточке ленты</span>
+          <span class="mono" style="flex-shrink: 0;">Golos 15 / 400 / 1.52</span>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+          <span style="font-size: 14px; font-weight: 600;">Имя, подпись</span>
+          <span class="mono" style="flex-shrink: 0;">Golos 14 / 600</span>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px;">
+          <span style="font-size: 12.5px; color: #9AA79F;">Время, служебное</span>
+          <span class="mono" style="flex-shrink: 0;">Golos 12.5 / 400</span>
         </div>
       </div>
+      <p style="margin: 14px 0 0; font-size: 12.5px; line-height: 1.5; color: #78867F;">Literata — заголовки и всё, что человек написал сам. Golos Text — интерфейс. Обе нарисованы с кириллицей в основе, а не с латиницей и приделанной кириллицей.</p>
+    </div>
 
-      <div>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 22px; padding: 20px 22px;">
         <span class="lbl">ЭЛЕМЕНТЫ</span>
-        <div style="margin-top: 13px; background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 20px; padding: 20px 22px; display: flex; flex-direction: column; gap: 18px;">
-
-          <div style="display: flex; align-items: center; gap: 9px; flex-wrap: wrap;">
-            <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #20322D; display: flex; align-items: center;"><span style="font-size: 13px; font-weight: 600; color: #F4F6F1;">Все</span></div>
-            <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E0E6E1; display: flex; align-items: center;"><span style="font-size: 13px; font-weight: 500; color: #3A4F47;">Тревога</span></div>
-            <div style="height: 26px; padding: 0 11px; border-radius: 999px; background: #F0E2D4; display: flex; align-items: center;"><span style="font-size: 12px; font-weight: 600; color: #74543D;">Одиночество</span></div>
-            <div style="height: 26px; padding: 0 11px; border-radius: 999px; background: #E5ECE6; display: flex; align-items: center;"><span style="font-size: 12px; font-weight: 600; color: #46604F;">Учёба</span></div>
+        <div style="display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 14px;">
+          <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #20322D; display: flex; align-items: center;"><span style="font-size: 13px; font-weight: 600; color: #F4F6F1;">Все</span></div>
+          <div style="height: 34px; padding: 0 15px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E0E6E1; display: flex; align-items: center;"><span style="font-size: 13px; font-weight: 500; color: #34463E;">Тревога</span></div>
+          <div style="height: 26px; padding: 0 11px; border-radius: 999px; background: #F0E2D4; display: flex; align-items: center;"><span style="font-size: 12px; font-weight: 600; color: #74543D;">Одиночество</span></div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <div style="flex: 1; height: 48px; border-radius: 16px; background: #20322D; display: flex; align-items: center; justify-content: center;"><span style="font-size: 15px; font-weight: 600; color: #F4F6F1;">Опубликовать</span></div>
+          <div style="flex: 1; height: 48px; border-radius: 16px; background: #FFFFFF; border: 1px solid #B46B64; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#B46B64" stroke="#B46B64" stroke-width="1.6" stroke-linejoin="round"><path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path></svg>
+            <span style="font-size: 14.5px; font-weight: 600; color: #B46B64;">Я рядом · 8</span>
           </div>
-
-          <div style="display: flex; gap: 10px;">
-            <div style="flex: 1; height: 50px; border-radius: 16px; background: #20322D; display: flex; align-items: center; justify-content: center;"><span style="font-size: 15px; font-weight: 600; color: #F4F6F1;">Опубликовать</span></div>
-            <div style="flex: 1; height: 50px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E8D6D4; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#B46B64" stroke="#B46B64" stroke-width="1.6" stroke-linejoin="round"><path d="M12 20.2l-1.5-1.4C5.4 14.2 2.5 11.6 2.5 8.4 2.5 6 4.4 4 6.8 4c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.4 0 4.3 2 4.3 4.4 0 3.2-2.9 5.8-8 10.4z"></path></svg>
-              <span style="font-size: 14.5px; font-weight: 600; color: #B46B64;">Я рядом</span>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 16px; align-items: flex-end;">
+          <div style="text-align: center;">
+            <div style="width: 52px; height: 52px; border-radius: 17px; background: #F0E2D4; border: 1px solid #B8845D; display: flex; align-items: center; justify-content: center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#74543D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.3 4.9 5.2.7-3.8 3.7.9 5.2-4.6-2.5-4.6 2.5.9-5.2L4.5 8.6l5.2-.7z"></path></svg>
             </div>
+            <div style="margin-top: 6px; font-size: 10.5px; color: #78867F;">открыто</div>
           </div>
-
-          <div style="display: flex; align-items: center; gap: 14px;">
-            <span class="mono">Иконки: обводка 1.7–1.8px, сетка 24, скругления round</span>
+          <div style="text-align: center;">
+            <div style="width: 52px; height: 52px; border-radius: 17px; background: #E5ECE6; border: 1px dashed #E0E6E1; display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AA79F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"></rect><path d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7"></path></svg>
+            </div>
+            <div style="margin-top: 6px; font-size: 10.5px; color: #78867F;">закрыто</div>
           </div>
-
+          <div style="flex-grow: 1;">
+            <div style="height: 6px; border-radius: 999px; background: #E5ECE6; overflow: hidden;"><i style="display: block; height: 100%; width: 24%; border-radius: 999px; background: #587568;"></i></div>
+            <div style="margin-top: 6px; font-size: 10.5px; color: #78867F;">прогресс достижения · 12 / 50</div>
+          </div>
         </div>
       </div>
 
-      <div>
-        <span class="lbl">ПРАВИЛА</span>
-        <div style="margin-top: 13px; display: flex; flex-direction: column; gap: 8px;">
-          <div style="background: #E9EFE9; border-radius: 14px; padding: 12px 16px; font-size: 13px; line-height: 1.5; color: #34463E;"><b>Счётчики не соревнование.</b> Лайк называется «я рядом» и не выносится крупно — здесь не за что бороться.</div>
-          <div style="background: #E9EFE9; border-radius: 14px; padding: 12px 16px; font-size: 13px; line-height: 1.5; color: #34463E;"><b>Никаких аватаров в ленте.</b> Аноним — значит без лица рядом с текстом. Аватар живёт только в профиле.</div>
-          <div style="background: #E9EFE9; border-radius: 14px; padding: 12px 16px; font-size: 13px; line-height: 1.5; color: #34463E;"><b>Цель касания ≥ 44px</b>, даже если иконка 18–22px.</div>
+      <div style="background: #FFFFFF; border: 1px solid #E0E6E1; border-radius: 22px; padding: 20px 22px; flex-grow: 1;">
+        <span class="lbl">ФОРМА И ПРАВИЛА</span>
+        <div style="display: flex; flex-direction: column; gap: 7px; margin-top: 13px;">
+          <div class="mono" style="font-size: 11.5px;">карточка R24 · отклик R20 · поле R18 h56 · кнопка R16 h54 · чип R999 h34 · аватар R22 · медаль R17</div>
+          <div style="background: #E5ECE6; border-radius: 13px; padding: 11px 14px; font-size: 12.5px; line-height: 1.5; color: #34463E;"><b>Ачивки — за участие, не за боль.</b> Их дают за отклики другим и за то, что ты возвращаешься. Ни одна не выдаётся за количество своих тяжёлых историй.</div>
+          <div style="background: #E5ECE6; border-radius: 13px; padding: 11px 14px; font-size: 12.5px; line-height: 1.5; color: #34463E;"><b>Имя есть, фамилии нет.</b> Никнейм придумывает человек, он виден рядом с записью. Почты, телефона и пароля нет вообще.</div>
+          <div style="background: #E5ECE6; border-radius: 13px; padding: 11px 14px; font-size: 12.5px; line-height: 1.5; color: #34463E;"><b>Цель касания ≥ 44px</b>, даже если иконка 18–22px. Кнопка «Написать» стоит внутри нижней панели и ничего не перекрывает.</div>
         </div>
       </div>
 
     </div>
-
   </div>
 </div>
 </x-dc>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=Golos+Text:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--moss); text-decoration: none; }
+    a:hover { color: var(--ink); }
+
+    .app {
+      --bg: #F4F6F1; --card: #FFFFFF; --line: #E0E6E1; --lineSoft: #EDF1EC;
+      --ink: #20322D; --body: #34463E; --muted: #78867F; --faint: #9AA79F;
+      --moss: #587568; --pale: #E5ECE6; --sand: #F0E2D4; --sandInk: #74543D; --clay: #B8845D;
+    }
+    .app.is-dark {
+      --bg: #151E1A; --card: #1D2925; --line: #2C3A34; --lineSoft: #26332E;
+      --ink: #EAF0EA; --body: #C6D2C9; --muted: #8B9A91; --faint: #6E7D74;
+      --moss: #8FB09C; --pale: #26332E; --sand: #3A2F26; --sandInk: #D6B491; --clay: #C99A72;
+    }
+
+    .av { width: 100%; aspect-ratio: 1; border-radius: 22px; border: 2px solid var(--line); background: var(--card); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .av.is-on { border-color: var(--ink); }
+    .av.is-on .halo { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--ink); }
+
+    .nameField { width: 100%; height: 56px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--card);
+      padding: 0 52px 0 18px; font-family: Literata, Georgia, serif; font-size: 18px; color: var(--ink); outline: none; }
+    .nameField:focus { border-color: var(--moss); }
+    .nameField::placeholder { font-family: 'Golos Text', sans-serif; font-size: 15px; color: var(--faint); }
+  </style>
+</helmet>
+
+<div class="app {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); display: flex; flex-direction: column; padding: 62px 24px 30px;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; gap: 6px;">
+      <div style="width: 26px; height: 4px; border-radius: 999px; background: var(--ink);"></div>
+      <div style="width: 26px; height: 4px; border-radius: 999px; background: var(--line);"></div>
+    </div>
+    <div onClick="{{toggleTheme}}" style="width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <sc-if value="{{isDark}}" hint-placeholder-val="{{true}}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="stroke: var(--clay);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4.2"></circle>
+          <path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9L5.3 5.3"></path>
+        </svg>
+      </sc-if>
+      <sc-if value="{{isLight}}" hint-placeholder-val="{{false}}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"></path>
+        </svg>
+      </sc-if>
+    </div>
+  </div>
+
+  <h1 style="margin: 26px 0 0; font-family: Literata, Georgia, serif; font-size: 32px; line-height: 1.14; font-weight: 500; letter-spacing: -0.5px; color: var(--ink);">Как тебя называть?</h1>
+  <p style="margin: 12px 0 0; font-size: 15px; line-height: 1.55; color: var(--muted);">Придумай имя — любое, кроме настоящего. Оно будет стоять рядом с твоими историями, чтобы тебя можно было узнать и поблагодарить.</p>
+
+  <div style="margin-top: 26px; position: relative;">
+    <input class="nameField" value="{{name}}" onInput="{{onName}}" placeholder="например, Соснарь" aria-label="Имя">
+    <div onClick="{{shuffle}}" title="Придумать за меня" style="position: absolute; right: 8px; top: 8px; width: 40px; height: 40px; border-radius: 13px; background: var(--pale); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss);" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7h4l10 10h4"></path><path d="M18 4l3 3-3 3"></path>
+        <path d="M3 17h4l3-3"></path><path d="M14 10l3-3h4"></path><path d="M18 14l3 3-3 3"></path>
+      </svg>
+    </div>
+  </div>
+  <p style="margin: 9px 2px 0; font-size: 12.5px; color: var(--faint);">{{nameHint}}</p>
+
+  <div style="margin-top: 26px;">
+    <span style="font-size: 12px; font-weight: 700; letter-spacing: 1.1px; color: var(--muted);">АВАТАР</span>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px;">
+      <sc-for list="{{avatars}}" as="a" hint-placeholder-count="7">
+        <div class="av {{a.cls}}" onClick="{{a.pick}}">
+          <div class="halo" style="width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: {{a.bg}};">
+            <sc-if value="{{a.isLeaf}}" hint-placeholder-val="{{true}}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: {{a.fg}};" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21c0-5.5 2.6-9.4 6.5-11"></path><path d="M12 21c0-5.5-2.6-9.4-6.5-11"></path><path d="M12 21V9"></path>
+              </svg>
+            </sc-if>
+            <sc-if value="{{a.isMoon}}" hint-placeholder-val="{{false}}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: {{a.fg}};" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z"></path>
+              </svg>
+            </sc-if>
+            <sc-if value="{{a.isStone}}" hint-placeholder-val="{{false}}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: {{a.fg}};" stroke-width="1.6" stroke-linejoin="round">
+                <path d="M4.5 14.5L9 5.5l7 2.5 3.5 7-6 4z"></path>
+              </svg>
+            </sc-if>
+            <sc-if value="{{a.isWave}}" hint-placeholder-val="{{false}}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: {{a.fg}};" stroke-width="1.6" stroke-linecap="round">
+                <path d="M3 9c2.5-2.4 4.5-2.4 7 0s4.5 2.4 7 0"></path><path d="M3 15c2.5-2.4 4.5-2.4 7 0s4.5 2.4 7 0"></path>
+              </svg>
+            </sc-if>
+            <sc-if value="{{a.isUpload}}" hint-placeholder-val="{{false}}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="stroke: {{a.fg}};" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 16V5.5M8 9l4-4 4 4"></path><path d="M4.5 15v3.5A1.5 1.5 0 006 20h12a1.5 1.5 0 001.5-1.5V15"></path>
+              </svg>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin: 11px 2px 0; font-size: 12.5px; line-height: 1.5; color: var(--faint);">Последняя плитка — загрузить своё фото. Аватар виден рядом с именем; настоящее лицо ставить не обязательно.</p>
+  </div>
+
+  <div style="flex-grow: 1;"></div>
+
+  <div style="background: var(--pale); border-radius: 16px; padding: 13px 16px; display: flex; gap: 11px;">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="stroke: var(--moss); flex-shrink: 0; margin-top: 1px;" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l7 4v5c0 4.4-3 8.3-7 9-4-0.7-7-4.6-7-9V7z"></path>
+    </svg>
+    <span style="font-size: 13px; line-height: 1.5; color: var(--moss);">Ни почты, ни телефона, ни пароля. Имя и аватар — всё, что о тебе будет известно.</span>
+  </div>
+
+  <div style="margin-top: 14px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: {{ctaBg}};">
+    <span style="font-size: 16px; font-weight: 600; color: {{ctaFg}};">{{ctaText}}</span>
+  </div>
+
+</div>
+
+<script data-dc-script data-props='{"dark":{"editor":"boolean","default":false}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { name: 'Соснарь', avatar: 0, dark: null, pool: 0 };
+  }
+
+  isDark() {
+    return this.state.dark === null ? (this.props.dark ?? false) : this.state.dark;
+  }
+
+  renderVals() {
+    const dark = this.isDark();
+    const names = ['Соснарь', 'Тихий Спутник', 'Полынь', 'Северный', 'Кто-то с окна', 'Мятный Чай'];
+
+    const kinds = [
+      { key: 'isLeaf',   bg: 'var(--pale)', fg: 'var(--moss)' },
+      { key: 'isMoon',   bg: 'var(--sand)', fg: 'var(--sandInk)' },
+      { key: 'isStone',  bg: 'var(--pale)', fg: 'var(--moss)' },
+      { key: 'isWave',   bg: 'var(--sand)', fg: 'var(--sandInk)' },
+      { key: 'isLeaf',   bg: 'var(--sand)', fg: 'var(--sandInk)' },
+      { key: 'isMoon',   bg: 'var(--pale)', fg: 'var(--moss)' },
+      { key: 'isUpload', bg: 'transparent', fg: 'var(--faint)' },
+    ];
+
+    const avatars = kinds.map((k, i) => {
+      const item = {
+        bg: k.bg,
+        fg: k.fg,
+        cls: this.state.avatar === i ? 'is-on' : '',
+        pick: () => this.setState({ avatar: i }),
+        isLeaf: false, isMoon: false, isStone: false, isWave: false, isUpload: false,
+      };
+      item[k.key] = true;
+      return item;
+    });
+
+    const named = (this.state.name || '').trim().length > 1;
+
+    return {
+      themeClass: dark ? 'is-dark' : '',
+      isDark: dark,
+      isLight: !dark,
+      toggleTheme: () => this.setState({ dark: !dark }),
+
+      name: this.state.name,
+      onName: (e) => this.setState({ name: e.target.value }),
+      shuffle: () => {
+        const next = (this.state.pool + 1) % names.length;
+        this.setState({ pool: next, name: names[next] });
+      },
+      nameHint: named ? 'Имя можно поменять когда угодно.' : 'Хотя бы две буквы.',
+
+      avatars,
+
+      ctaText: named ? 'Продолжить' : 'Придумай имя',
+      ctaBg: named ? 'var(--ink)' : 'var(--line)',
+      ctaFg: named ? 'var(--bg)' : 'var(--faint)',
+    };
+  }
+}
+</script>
+</body>
+</html>

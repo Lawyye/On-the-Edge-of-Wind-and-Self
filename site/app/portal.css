@@ -548,6 +548,17 @@
 .editor-links .portal-field + .portal-field { margin-top: 17px; }
 .editor-card > .portal-form-grid { margin-top: 20px; }
 
+.editor-note { margin: 0 0 18px; color: #697d82; font-size: 13px; line-height: 1.55; }
+.editor-card > .month-block + .editor-note { margin: 20px 0 0; }
+
+.month-block + .month-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #e4edee; }
+.month-block details { margin-top: 8px; }
+.month-block summary { color: #4f6d73; cursor: pointer; font-size: 12px; }
+.month-block ul { margin: 8px 0 0; padding-left: 18px; color: #697d82; font-size: 12px; line-height: 1.7; }
+
+.month-new { margin-top: 14px; padding: 16px; border-radius: 12px; background: #f4f9fa; }
+.month-new > div { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
+
 .image-control { display: grid; gap: 8px; margin-bottom: 20px; }
 .image-control > div { display: flex; align-items: center; gap: 14px; }
 .image-control img { width: 90px; height: 68px; border: 1px solid #d8e3e5; border-radius: 8px; object-fit: cover; }

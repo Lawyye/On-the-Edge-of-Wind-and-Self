@@ -10,7 +10,10 @@ import {
 import type { PortalSettings, SiteContent, Submission, SubmissionStatus } from '@/lib/types';
 
 type Tab = 'overview' | 'submissions' | 'editor' | 'settings';
-type EditorSection = 'home' | 'curators' | 'events' | 'covers';
+type EditorSection = 'home' | 'curators' | 'months' | 'events' | 'covers';
+
+/** Sentinel for the month dropdown's "name a month that does not exist yet" option. */
+const NEW_MONTH = '__new__';
 
 const STATUS_LABEL: Record<SubmissionStatus, string> = {
   pending: 'На проверке',
@@ -498,10 +501,13 @@ function EditorTab({
 }) {
   const [section, setSection] = useState<EditorSection>('home');
   const [eventIndex, setEventIndex] = useState(0);
+  const [creatingMonth, setCreatingMonth] = useState(false);
+  const [newMonth, setNewMonth] = useState('');
 
   const sections: { key: EditorSection; label: string }[] = [
     { key: 'home', label: 'Главная' },
     { key: 'curators', label: 'Кураторы' },
+    { key: 'months', label: 'Месяцы' },
     { key: 'events', label: 'Мероприятия' },
     { key: 'covers', label: 'Обложки' },
   ];
@@ -517,6 +523,54 @@ function EditorTab({
       ...prev,
       events: prev.events.map((item, i) => (i === eventIndex ? { ...item, ...patch } : item)),
     }));
+
+  /**
+   * The months in the left menu are not stored anywhere of their own: each event
+   * carries the section it belongs to, and the menu groups them. So a month
+   * exists exactly as long as some event is in it, and these two operations —
+   * rename the section, move an event between sections — are all there is.
+   */
+  const monthGroups = useMemo(() => {
+    const groups: { key: string; label: string; titles: string[] }[] = [];
+    for (const item of content.events) {
+      let group = groups.find((g) => g.key === item.month);
+      if (!group) {
+        group = { key: item.month, label: item.monthLabel, titles: [] };
+        groups.push(group);
+      }
+      group.titles.push(item.title);
+    }
+    return groups;
+  }, [content.events]);
+
+  /** Renames a whole section; every event inside it takes the new name. */
+  const renameMonth = (key: string, label: string) =>
+    setContent((prev) => ({
+      ...prev,
+      events: prev.events.map((item) =>
+        (item.month === key ? { ...item, monthLabel: label } : item)),
+    }));
+
+  /**
+   * Moves the event being edited into another month, and physically next to the
+   * events already there: the menu builds its sections in this array's order, so
+   * leaving the event where it sits would drag its new section to that position.
+   */
+  const moveEventToMonth = (key: string, label: string) => {
+    const moving = content.events[eventIndex];
+    if (!moving || (moving.month === key && moving.monthLabel === label)) return;
+
+    const rest = content.events.filter((_, i) => i !== eventIndex);
+    let insertAt = rest.length;
+    for (let i = rest.length - 1; i >= 0; i -= 1) {
+      if (rest[i].month === key) { insertAt = i + 1; break; }
+    }
+    const next = [...rest];
+    next.splice(insertAt, 0, { ...moving, month: key, monthLabel: label });
+
+    setContent((prev) => ({ ...prev, events: next }));
+    setEventIndex(insertAt);
+  };
 
   const lines = (value: string) => value.split('\n').map((l) => l.trim()).filter(Boolean);
 
@@ -673,12 +727,53 @@ function EditorTab({
           </div>
         )}
 
+        {section === 'months' && (
+          <div className="portal-card editor-card">
+            <h3>Месяцы в меню</h3>
+            <p className="editor-note">
+              Это разделы левого меню сайта. Название меняется здесь — вместе со всеми
+              мероприятиями внутри. Адреса страниц и уже присланные материалы
+              остаются на месте.
+            </p>
+
+            {monthGroups.map((group, i) => (
+              <div className="month-block" key={group.key}>
+                <Text
+                  label={`Раздел ${i + 1}`}
+                  value={group.label}
+                  onChange={(v) => renameMonth(group.key, v)}
+                />
+                <details>
+                  <summary>Мероприятий внутри: {group.titles.length}</summary>
+                  <ul>
+                    {group.titles.map((title, j) => (
+                      <li key={j}>{title}</li>
+                    ))}
+                  </ul>
+                </details>
+              </div>
+            ))}
+
+            <p className="editor-note">
+              Чтобы перенести отдельное мероприятие в другой месяц, откройте вкладку
+              «Мероприятия» — там есть поле «Месяц».
+            </p>
+          </div>
+        )}
+
         {section === 'events' && event && (
           <div className="portal-card editor-card">
             <h3>Мероприятия</h3>
             <label className="portal-field">
               <span>Выберите мероприятие</span>
-              <select value={eventIndex} onChange={(e) => setEventIndex(Number(e.target.value))}>
+              <select
+                value={eventIndex}
+                onChange={(e) => {
+                  setEventIndex(Number(e.target.value));
+                  setCreatingMonth(false);
+                  setNewMonth('');
+                }}
+              >
                 {content.events.map((item, i) => (
                   <option key={item.route} value={i}>
                     {item.monthLabel} — {item.title}
@@ -686,6 +781,67 @@ function EditorTab({
                 ))}
               </select>
             </label>
+
+            <label className="portal-field">
+              <span>Месяц</span>
+              <select
+                value={creatingMonth ? NEW_MONTH : event.month}
+                onChange={(e) => {
+                  if (e.target.value === NEW_MONTH) {
+                    setCreatingMonth(true);
+                    return;
+                  }
+                  const target = monthGroups.find((g) => g.key === e.target.value);
+                  if (target) moveEventToMonth(target.key, target.label);
+                }}
+              >
+                {monthGroups.map((group) => (
+                  <option key={group.key} value={group.key}>
+                    {group.label}
+                  </option>
+                ))}
+                <option value={NEW_MONTH}>Другой месяц…</option>
+              </select>
+              <small>
+                Переносит мероприятие в другой раздел меню. Адрес страницы не меняется.
+              </small>
+            </label>
+
+            {creatingMonth && (
+              <div className="month-new">
+                <Text
+                  label="Название нового месяца"
+                  hint="Например «Қыркүйек». Мероприятие переедет в новый раздел меню."
+                  value={newMonth}
+                  onChange={setNewMonth}
+                />
+                <div>
+                  <button
+                    type="button"
+                    className="portal-button portal-button-secondary"
+                    disabled={!newMonth.trim()}
+                    onClick={() => {
+                      const label = newMonth.trim();
+                      moveEventToMonth(label.toLowerCase(), label);
+                      setNewMonth('');
+                      setCreatingMonth(false);
+                    }}
+                  >
+                    Перенести
+                  </button>
+                  <button
+                    type="button"
+                    className="portal-button portal-button-quiet"
+                    onClick={() => {
+                      setNewMonth('');
+                      setCreatingMonth(false);
+                    }}
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </div>
+            )}
 
             <ImageControl
               label="Изображение мероприятия"

@@ -38,7 +38,7 @@ jobs:
       # lib/, pubspec.yaml и assets/.
       - name: Восстановить платформенные папки
         working-directory: app
-        run: flutter create --org com.ontheedge --project-name edgewind --platforms android .
+        run: flutter create --org com.ontheedge --project-name edgewind --platforms android,ios .
 
       - name: Название на экране телефона
         working-directory: app
@@ -56,9 +56,11 @@ jobs:
         run: dart run flutter_launcher_icons
 
       # Анализатор не валит сборку: замечания к стилю не повод не получить APK.
+      # Но его вывод важен — он единственное место, где видно замечания к коду.
       - name: Проверка кода
         working-directory: app
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings || true
+        continue-on-error: true
+        run: flutter analyze
 
       - name: Релизная сборка
         working-directory: app

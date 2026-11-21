@@ -40,6 +40,5 @@ flutter_launcher_icons:
   adaptive_icon_background: "#0A0C0B"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
   remove_alpha_ios: true
-  windows:
-    generate: true
-    image_path: "assets/icon/app_icon.png"
+  # Десктопные папки в сборке не создаются, поэтому windows здесь нет:
+  # генератор падает, если пишет иконку в несуществующую платформу.

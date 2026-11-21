@@ -49,12 +49,26 @@ jobs:
         working-directory: app
         run: rm -f test/widget_test.dart
 
-      - name: Название на экране телефона
+      # flutter create кладёт разрешение на интернет только в отладочный
+      # манифест. В релизной сборке его нет, и приложение не может открыть
+      # ни одного соединения — что и случилось с первой выложенной сборкой.
+      - name: Дописать манифест
         working-directory: app
         run: |
-          sed -i 's/android:label="edgewind"/android:label="On the Edge"/' \
-            android/app/src/main/AndroidManifest.xml
-          grep -o 'android:label="[^"]*"' android/app/src/main/AndroidManifest.xml
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's/android:label="edgewind"/android:label="On the Edge"/' "$M"
+          grep -q 'android.permission.INTERNET' "$M" || sed -i \
+            's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' "$M"
+          echo '--- манифест ---'
+          grep -E 'uses-permission|android:label' "$M"
+
+      # Отдельной проверкой, потому что без интернета приложение собирается
+      # и ставится как ни в чём не бывало, а падает уже у человека на экране.
+      - name: Убедиться, что интернет разрешён
+        working-directory: app
+        run: |
+          grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml \
+            || { echo '::error::В основном манифесте нет разрешения INTERNET'; exit 1; }
 
       - name: Зависимости
         working-directory: app

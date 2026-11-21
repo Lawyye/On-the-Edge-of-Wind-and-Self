@@ -3,7 +3,7 @@ description: "On the Edge — место, где можно рассказать
 publish_to: "none"
 # Номер сборки растёт с каждой выкладкой: Android не ставит версию поверх
 # той, у которой номер больше.
-version: 1.1.0+3
+version: 1.1.0+4
 
 environment:
   sdk: ^3.12.0

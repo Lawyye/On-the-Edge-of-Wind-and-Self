@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -39,6 +39,12 @@ jobs:
       - name: Восстановить платформенные папки
         working-directory: app
         run: flutter create --org com.ontheedge --project-name edgewind --platforms android,ios .
+
+      # flutter create кладёт заготовку теста под класс MyApp, которого в этом
+      # приложении нет. Она ничего не проверяет и только мешает анализатору.
+      - name: Убрать заготовку теста
+        working-directory: app
+        run: rm -f test/widget_test.dart
 
       - name: Название на экране телефона
         working-directory: app

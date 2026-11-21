@@ -176,7 +176,9 @@ class EdgewindStore extends ChangeNotifier {
       _changed();
       unawaited(refreshAll());
     } catch (e) {
-      if (_isDeadSession(e)) {
+      // Сессию могли стереть на ходу: истёк и не обновился вход, аккаунт
+      // удалён. Тогда сервер ответит отказом в доступе — это не обрыв сети.
+      if (_isDeadSession(e) || !_api.hasSession || _isDenied(e)) {
         await _restartSession();
         return;
       }
@@ -256,7 +258,7 @@ class EdgewindStore extends ChangeNotifier {
     ]);
     final failure = results.whereType<Object>().firstOrNull;
     if (failure != null) {
-      if (_isDeadSession(failure)) {
+      if (_isDeadSession(failure) || !_api.hasSession) {
         await _restartSession();
         return;
       }
@@ -618,6 +620,9 @@ class EdgewindStore extends ChangeNotifier {
         s.contains('HandshakeException') ||
         s.contains('Network is unreachable');
   }
+
+  /// Отказ в доступе к собственному профилю бывает только без живой сессии.
+  bool _isDenied(Object e) => e is PostgrestException && (e.code == '42501' || e.code == 'PGRST301');
 
   bool _isDeadSession(Object e) {
     if (e is AuthApiException) {

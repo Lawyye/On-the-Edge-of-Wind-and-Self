@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _Header(title: head.$1, count: head.$2, sub: head.$3),
               Expanded(
                 child: RefreshIndicator(
-                  color: context.c.amber,
+                  color: context.c.cyan,
                   backgroundColor: context.c.panel,
                   onRefresh: _store.refreshAll,
                   child: IndexedStack(
@@ -151,21 +151,12 @@ class _Header extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: 29,
-                  height: 1,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 5,
-                  color: c.amber,
-                ),
-              ),
+              GlitchText(title),
               const Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  TermLabel(count, color: c.amber),
+                  TermLabel(count, color: c.cyan),
                   const SizedBox(height: 3),
                   TermLabel(sub),
                 ],
@@ -254,10 +245,10 @@ class _Chip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 11),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          border: Border.all(color: on ? c.amber : c.line),
-          color: on ? c.amber.withValues(alpha: 0.08) : null,
+          border: Border.all(color: on ? c.cyan : c.line),
+          color: on ? c.cyan.withValues(alpha: 0.08) : null,
         ),
-        child: TermLabel(label, color: on ? c.amber : c.muted, size: 10, tracking: 1.2),
+        child: TermLabel(label, color: on ? c.cyan : c.muted, size: 10, tracking: 1.2),
       ),
     );
   }
@@ -338,7 +329,7 @@ class _InboxTab extends StatelessWidget {
                   Expanded(
                     child: TermLabel(
                       item.authorNickname,
-                      color: c.amber,
+                      color: c.cyan,
                       size: 10.5,
                       tracking: 1.3,
                       weight: FontWeight.w700,
@@ -423,7 +414,7 @@ class _ProfileTab extends StatelessWidget {
             TermLabel(
               '${store.earnedCount.toString().padLeft(2, '0')} / '
               '${store.achievements.length.toString().padLeft(2, '0')}',
-              color: c.amber,
+              color: c.cyan,
             ),
           ],
         ),
@@ -468,7 +459,7 @@ class _AchievementRow extends StatelessWidget {
 
     return Pane(
       padding: const EdgeInsets.all(13),
-      cornerColor: a.earned ? c.amberDim : c.line,
+      cornerColor: a.earned ? c.amber : c.line,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -477,7 +468,7 @@ class _AchievementRow extends StatelessWidget {
             height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              border: Border.all(color: a.earned ? c.amberDim : c.line),
+              border: Border.all(color: a.earned ? c.amber : c.line),
               color: a.earned ? c.amber.withValues(alpha: 0.07) : null,
             ),
             child: a.earned
@@ -503,7 +494,7 @@ class _AchievementRow extends StatelessWidget {
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
                             widthFactor: a.fraction,
-                            child: Container(color: c.amber),
+                            child: Container(color: c.cyan),
                           ),
                         ),
                       ),
@@ -555,12 +546,12 @@ class _Empty extends StatelessWidget {
                     height: 44,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      border: Border.all(color: c.amber),
-                      color: c.amber.withValues(alpha: 0.1),
+                      border: Border.all(color: c.cyan),
+                      color: c.cyan.withValues(alpha: 0.1),
                     ),
                     child: TermLabel(
                       action!,
-                      color: c.amber,
+                      color: c.cyan,
                       size: 11,
                       tracking: 3,
                       weight: FontWeight.w700,
@@ -610,13 +601,13 @@ class _BottomBar extends StatelessWidget {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        border: Border.all(color: c.amber),
-                        color: c.amber.withValues(alpha: 0.1),
+                        border: Border.all(color: c.cyan),
+                        color: c.cyan.withValues(alpha: 0.1),
                         boxShadow: [
-                          BoxShadow(color: c.amber.withValues(alpha: 0.22), blurRadius: 14),
+                          BoxShadow(color: c.cyan.withValues(alpha: 0.22), blurRadius: 14),
                         ],
                       ),
-                      child: Icon(Icons.add, size: 20, color: c.amber),
+                      child: Icon(Icons.add, size: 20, color: c.cyan),
                     ),
                   ),
                 ),
@@ -651,14 +642,14 @@ class _NavItem extends StatelessWidget {
               width: 16,
               height: 2,
               decoration: BoxDecoration(
-                color: on ? c.amber : Colors.transparent,
+                color: on ? c.cyan : Colors.transparent,
                 boxShadow: on
-                    ? [BoxShadow(color: c.amber.withValues(alpha: 0.8), blurRadius: 8)]
+                    ? [BoxShadow(color: c.cyan.withValues(alpha: 0.8), blurRadius: 8)]
                     : null,
               ),
             ),
             const SizedBox(height: 7),
-            TermLabel(label, color: on ? c.amber : c.faint, size: 9.5, tracking: 1.3),
+            TermLabel(label, color: on ? c.cyan : c.faint, size: 9.5, tracking: 1.3),
           ],
         ),
       ),

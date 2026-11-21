@@ -126,16 +126,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const TermRule(),
 
               const SizedBox(height: 24),
-              Text(
-                'ПРИВЕТ',
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: 31,
-                  height: 1,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 5,
-                  color: c.amber,
-                ),
-              ),
+              const GlitchText('ПРИВЕТ', size: 31),
               const SizedBox(height: 14),
               Text(
                 'Иногда просто нужен разговор. Для этого всё и сделано.',
@@ -251,18 +242,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   height: 54,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    border: Border.all(color: _named ? c.amber : c.line),
-                    color: _named ? c.amber.withValues(alpha: 0.12) : null,
+                    border: Border.all(color: _named ? c.cyan : c.line),
+                    color: _named ? c.cyan.withValues(alpha: 0.12) : null,
                   ),
                   child: _sending
                       ? SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 1.4, color: c.amber),
+                          child: CircularProgressIndicator(strokeWidth: 1.4, color: c.cyan),
                         )
                       : TermLabel(
                           _named ? 'ВОЙТИ' : 'ПРИДУМАЙ ИМЯ',
-                          color: _named ? c.amber : c.faint,
+                          color: _named ? c.cyan : c.faint,
                           size: 11.5,
                           tracking: 3.4,
                           weight: FontWeight.w700,

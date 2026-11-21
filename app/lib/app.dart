@@ -57,10 +57,10 @@ class _EdgewindAppState extends State<EdgewindApp> {
       scaffoldBackgroundColor: c.voidBg,
       extensions: [c],
       colorScheme: ColorScheme.fromSeed(
-        seedColor: c.amber,
+        seedColor: c.cyan,
         brightness: brightness,
       ).copyWith(
-        primary: c.amber,
+        primary: c.cyan,
         surface: c.voidBg,
         onSurface: c.bone,
         outline: c.line,
@@ -83,9 +83,9 @@ class _EdgewindAppState extends State<EdgewindApp> {
         ),
       ),
       textSelectionTheme: TextSelectionThemeData(
-        cursorColor: c.amber,
-        selectionColor: c.amber.withValues(alpha: 0.28),
-        selectionHandleColor: c.amber,
+        cursorColor: c.cyan,
+        selectionColor: c.cyan.withValues(alpha: 0.28),
+        selectionHandleColor: c.cyan,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -93,7 +93,7 @@ class _EdgewindAppState extends State<EdgewindApp> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: c.line)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: c.line)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: c.amber)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: c.cyan)),
         hintStyle: GoogleFonts.literata(color: c.faint, fontSize: 15),
       ),
       snackBarTheme: SnackBarThemeData(
@@ -104,10 +104,10 @@ class _EdgewindAppState extends State<EdgewindApp> {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.zero,
-          side: BorderSide(color: c.amberDim),
+          side: BorderSide(color: c.steel),
         ),
       ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(color: c.amber),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: c.cyan),
     );
   }
 }
@@ -149,7 +149,7 @@ class _Booting extends StatelessWidget {
             SizedBox(
               width: 22,
               height: 22,
-              child: CircularProgressIndicator(strokeWidth: 1.4, color: c.amber),
+              child: CircularProgressIndicator(strokeWidth: 1.4, color: c.cyan),
             ),
             const SizedBox(height: 18),
             const TermLabel('УСТАНОВКА СВЯЗИ', tracking: 2.6),
@@ -197,12 +197,12 @@ class _Trouble extends StatelessWidget {
                     height: 46,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      border: Border.all(color: c.amber),
-                      color: c.amber.withValues(alpha: 0.1),
+                      border: Border.all(color: c.cyan),
+                      color: c.cyan.withValues(alpha: 0.1),
                     ),
                     child: TermLabel(
                       'ПОВТОРИТЬ',
-                      color: c.amber,
+                      color: c.cyan,
                       size: 11,
                       tracking: 3,
                       weight: FontWeight.w700,

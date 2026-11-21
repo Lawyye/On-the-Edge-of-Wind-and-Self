@@ -61,7 +61,7 @@ class _ComposeSheetState extends State<ComposeSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: c.voidBg,
-          border: Border(top: BorderSide(color: c.amberDim)),
+          border: Border(top: BorderSide(color: c.steel)),
         ),
         child: SafeArea(
           top: false,
@@ -72,7 +72,7 @@ class _ComposeSheetState extends State<ComposeSheet> {
               children: [
                 Row(
                   children: [
-                    TermLabel('НОВАЯ ЗАПИСЬ', color: c.amber, tracking: 2.4),
+                    TermLabel('НОВАЯ ЗАПИСЬ', color: c.cyan, tracking: 2.4),
                     const SizedBox(width: 10),
                     Expanded(child: Container(height: 1, color: c.line)),
                     const SizedBox(width: 10),
@@ -105,12 +105,12 @@ class _ComposeSheetState extends State<ComposeSheet> {
                           padding: const EdgeInsets.symmetric(horizontal: 11),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            border: Border.all(color: _category == cat ? c.amber : c.line),
-                            color: _category == cat ? c.amber.withValues(alpha: 0.08) : null,
+                            border: Border.all(color: _category == cat ? c.cyan : c.line),
+                            color: _category == cat ? c.cyan.withValues(alpha: 0.08) : null,
                           ),
                           child: TermLabel(
                             cat,
-                            color: _category == cat ? c.amber : c.muted,
+                            color: _category == cat ? c.cyan : c.muted,
                             size: 10,
                             tracking: 1.2,
                           ),
@@ -182,18 +182,18 @@ class _ComposeSheetState extends State<ComposeSheet> {
                     height: 50,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      border: Border.all(color: _filled ? c.amber : c.line),
-                      color: _filled ? c.amber.withValues(alpha: 0.12) : null,
+                      border: Border.all(color: _filled ? c.cyan : c.line),
+                      color: _filled ? c.cyan.withValues(alpha: 0.12) : null,
                     ),
                     child: _sending
                         ? SizedBox(
                             width: 17,
                             height: 17,
-                            child: CircularProgressIndicator(strokeWidth: 1.4, color: c.amber),
+                            child: CircularProgressIndicator(strokeWidth: 1.4, color: c.cyan),
                           )
                         : TermLabel(
                             'ОТПРАВИТЬ',
-                            color: _filled ? c.amber : c.faint,
+                            color: _filled ? c.cyan : c.faint,
                             size: 11,
                             tracking: 3,
                             weight: FontWeight.w700,

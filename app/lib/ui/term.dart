@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,6 +34,53 @@ class TermLabel extends StatelessWidget {
   );
 }
 
+/// Крупный заголовок с хроматическим расслоением: два цветных канала уезжают
+/// в стороны, как на плохо сведённой трубке. Смещение постоянное, а не
+/// мигающее — приложение и так про тяжёлое, дёргаться экрану незачем.
+class GlitchText extends StatelessWidget {
+  const GlitchText(
+    this.text, {
+    super.key,
+    this.size = 29,
+    this.tracking = 5,
+    this.shift = 1.6,
+  });
+
+  final String text;
+  final double size;
+  final double tracking;
+
+  /// На сколько пикселей разъезжаются цветные каналы.
+  final double shift;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    TextStyle style(Color color) => GoogleFonts.jetBrainsMono(
+      fontSize: size,
+      height: 1,
+      letterSpacing: tracking,
+      fontWeight: FontWeight.w700,
+      color: color,
+    );
+
+    final up = text.toUpperCase();
+    return Stack(
+      children: [
+        Transform.translate(
+          offset: Offset(-shift, 0),
+          child: Text(up, style: style(c.magenta.withValues(alpha: 0.85))),
+        ),
+        Transform.translate(
+          offset: Offset(shift, 0),
+          child: Text(up, style: style(c.cyan.withValues(alpha: 0.85))),
+        ),
+        Text(up, style: style(c.bone)),
+      ],
+    );
+  }
+}
+
 /// Пластина с уголками. Уголки вместо скруглений: интерфейс собран из
 /// пластин, а не из пилюль, и рамка должна это показывать.
 class Pane extends StatelessWidget {
@@ -56,7 +105,7 @@ class Pane extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.c;
     final body = CustomPaint(
-      foregroundPainter: _CornerPainter(cornerColor ?? c.amberDim),
+      foregroundPainter: _CornerPainter(cornerColor ?? c.steel),
       child: Container(
         decoration: BoxDecoration(
           color: fill ?? c.panel,
@@ -82,8 +131,8 @@ class _CornerPainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
     const n = 9.0;
-    // Левый верхний и правый нижний — по диагонали, чтобы рамка не выглядела
-    // замкнутой: пластина продолжается за край экрана.
+    // По диагонали, а не на всех четырёх углах: рамка не выглядит замкнутой,
+    // пластина словно продолжается за край экрана.
     canvas.drawPath(
       Path()
         ..moveTo(0, n)
@@ -116,12 +165,68 @@ class TermRule extends StatelessWidget {
       height: 1,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [lead ?? c.amber, c.line, c.line.withValues(alpha: 0)],
+          colors: [lead ?? c.cyan, c.line, c.line.withValues(alpha: 0)],
           stops: const [0, 0.7, 1],
         ),
       ),
     );
   }
+}
+
+/// Поле глифов — редкая россыпь моноширинных знаков на самой границе
+/// видимости. Даёт пустым местам фактуру данных вместо плоской черноты.
+/// Раскладка берётся от постоянного зерна, поэтому не пляшет при перерисовке.
+class GlyphField extends StatelessWidget {
+  const GlyphField({super.key, this.seed = 7, this.count = 90});
+
+  final int seed;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    child: RepaintBoundary(
+      child: CustomPaint(
+        size: Size.infinite,
+        painter: _GlyphPainter(seed: seed, count: count, color: context.c.steel),
+      ),
+    ),
+  );
+}
+
+class _GlyphPainter extends CustomPainter {
+  _GlyphPainter({required this.seed, required this.count, required this.color});
+
+  final int seed;
+  final int count;
+  final Color color;
+
+  static const _glyphs = '0123456789ABCDEF/\\|-_=+<>[]{}:;.*#†‡◇△≈○╳┼╎╏';
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rnd = Random(seed);
+    for (var i = 0; i < count; i++) {
+      final g = _glyphs[rnd.nextInt(_glyphs.length)];
+      final tp = TextPainter(
+        text: TextSpan(
+          text: g,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 9 + rnd.nextInt(4).toDouble(),
+            color: color.withValues(alpha: 0.05 + rnd.nextDouble() * 0.07),
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(
+        canvas,
+        Offset(rnd.nextDouble() * size.width, rnd.nextDouble() * size.height),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_GlyphPainter old) => old.color != color || old.seed != seed;
 }
 
 /// Развёртка поверх всего экрана. Чисто декоративная и не перехватывает
@@ -156,33 +261,41 @@ class Vignette extends StatelessWidget {
   const Vignette({super.key});
 
   @override
-  Widget build(BuildContext context) => IgnorePointer(
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.2),
-          radius: 1.1,
-          colors: [
-            Colors.transparent,
-            Colors.black.withValues(alpha: context.c.voidBg.computeLuminance() > 0.5 ? 0.06 : 0.5),
-          ],
-          stops: const [0.55, 1],
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final paper = c.voidBg.computeLuminance() > 0.5;
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0, -0.2),
+            radius: 1.15,
+            colors: [
+              Colors.transparent,
+              Colors.black.withValues(alpha: paper ? 0.07 : 0.62),
+            ],
+            stops: const [0.45, 1],
+          ),
         ),
+        child: const SizedBox.expand(),
       ),
-      child: const SizedBox.expand(),
-    ),
-  );
+    );
+  }
 }
 
-/// Экран целиком: фон, содержимое, развёртка и затемнение поверх.
+/// Экран целиком: фон, поле глифов, содержимое, развёртка и затемнение.
+/// Порядок важен — глифы под интерфейсом, развёртка поверх всего.
 class TermScreen extends StatelessWidget {
-  const TermScreen({super.key, required this.child});
+  const TermScreen({super.key, required this.child, this.seed = 7});
+
   final Widget child;
+  final int seed;
 
   @override
   Widget build(BuildContext context) => Scaffold(
     body: Stack(
       children: [
+        Positioned.fill(child: GlyphField(seed: seed)),
         Positioned.fill(child: child),
         const Positioned.fill(child: Vignette()),
         const Positioned.fill(child: Scanlines()),

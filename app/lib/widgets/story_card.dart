@@ -39,7 +39,7 @@ class StoryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              TermLabel(code, color: c.amber),
+              TermLabel(code, color: c.cyan),
               const SizedBox(width: 8),
               Container(width: 1, height: 9, color: c.line),
               const SizedBox(width: 8),
@@ -64,7 +64,7 @@ class StoryCard extends StatelessWidget {
             children: [
               TermLabel(
                 story.responseCount == 0 ? 'ОТКЛИКНУТЬСЯ' : '${story.responseCount} ОТКЛ.',
-                color: c.amber,
+                color: c.cyan,
               ),
               const SizedBox(width: 16),
               NearbyMark(count: story.likes, on: story.likedByMe, onTap: onLike),

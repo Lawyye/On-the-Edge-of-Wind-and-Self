@@ -41,7 +41,7 @@ class Avatar extends StatelessWidget {
     }
 
     final c = context.c;
-    final edge = lit ? c.amber : c.amberDim;
+    final edge = lit ? c.amber : c.steel;
 
     final Widget inner = (url != null && url!.isNotEmpty)
         ? Image.network(

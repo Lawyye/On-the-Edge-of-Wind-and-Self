@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
-/// Палитра терминала. Тёмная — основная: весь язык интерфейса построен на
-/// свечении на чёрном. Светлая существует для тех, кому тёмное неудобно, и
-/// сделана не инверсией, а «бумажным» вариантом того же терминала.
+/// Палитра терминала.
 ///
 /// Принцип, на котором держится всё оформление: ОБВЯЗКА ХОЛОДНАЯ, ЛЮДИ ТЁПЛЫЕ.
-/// Служебное набрано моноширинным в верхнем регистре, а то, что человек
-/// написал сам, — книжной гарнитурой цветом [bone], и это единственное
-/// по-настоящему тёплое пятно на экране.
+/// Машинная часть — сталь, электрический циан, развёртка и глитч; всё, что
+/// человек написал сам, набрано книжной гарнитурой цветом [bone] и остаётся
+/// единственным тёплым пятном на экране. Чем холоднее обвязка, тем сильнее
+/// видно живой текст, поэтому синее здесь намеренно доведено до предела.
 @immutable
 class EdgeColors extends ThemeExtension<EdgeColors> {
   const EdgeColors({
     required this.voidBg,
     required this.panel,
     required this.line,
+    required this.steel,
+    required this.cyan,
+    required this.magenta,
     required this.amber,
-    required this.amberDim,
     required this.rust,
     required this.bone,
     required this.boneDim,
@@ -34,11 +35,17 @@ class EdgeColors extends ThemeExtension<EdgeColors> {
   /// Разделители и рамки.
   final Color line;
 
-  /// Главный акцент — янтарь CRT.
-  final Color amber;
+  /// Холодная сталь: уголки рамок, служебные подписи второго плана.
+  final Color steel;
 
-  /// Приглушённый янтарь: уголки рамок, неяркие рамки.
-  final Color amberDim;
+  /// Главный машинный акцент — электрический циан.
+  final Color cyan;
+
+  /// Второй канал расслоения при глитче. Как самостоятельный цвет не ставится.
+  final Color magenta;
+
+  /// Тёплый акцент. Достаётся только человеческому: имени, достижению.
+  final Color amber;
 
   /// Тревожный. Им горит «я рядом» и предупреждения — больше ничем.
   final Color rust;
@@ -59,35 +66,39 @@ class EdgeColors extends ThemeExtension<EdgeColors> {
   final Color scanline;
 
   static const dark = EdgeColors(
-    voidBg: Color(0xFF0A0C0B),
-    panel: Color(0xFF121716),
-    line: Color(0xFF222A28),
+    voidBg: Color(0xFF05070B),
+    panel: Color(0xFF0C111A),
+    line: Color(0xFF1A2432),
+    steel: Color(0xFF4C6682),
+    cyan: Color(0xFF4FD6E8),
+    magenta: Color(0xFFE8486B),
     amber: Color(0xFFE8A33D),
-    amberDim: Color(0xFF7A5620),
-    rust: Color(0xFFC4563B),
-    bone: Color(0xFFD9D5C8),
-    boneDim: Color(0xFFA8A598),
-    muted: Color(0xFF8A8878),
-    faint: Color(0xFF55584F),
-    phos: Color(0xFF7FB08A),
-    scanline: Color(0x09FFFFFF),
+    rust: Color(0xFFD4453A),
+    bone: Color(0xFFDAD6C9),
+    boneDim: Color(0xFF9FA7AE),
+    muted: Color(0xFF6E8294),
+    faint: Color(0xFF42566A),
+    phos: Color(0xFF5FE3A1),
+    scanline: Color(0x0DFFFFFF),
   );
 
-  /// «Бумажный терминал»: распечатка, а не экран. Янтарь уходит в охру,
-  /// иначе на светлом он слепнет и перестаёт читаться как акцент.
+  /// «Засвеченная плёнка»: бумажный вариант того же терминала. Циан уходит в
+  /// глубокий индиго, иначе на светлом он слепнет и перестаёт быть акцентом.
   static const light = EdgeColors(
-    voidBg: Color(0xFFE8E4D8),
-    panel: Color(0xFFF2EFE5),
-    line: Color(0xFFCFC9B8),
-    amber: Color(0xFF9A6A18),
-    amberDim: Color(0xFFC2A268),
-    rust: Color(0xFF9E3B23),
-    bone: Color(0xFF1E211C),
-    boneDim: Color(0xFF454840),
-    muted: Color(0xFF6B6E62),
-    faint: Color(0xFF8E9184),
-    phos: Color(0xFF3C6B47),
-    scanline: Color(0x07000000),
+    voidBg: Color(0xFFE6E4DC),
+    panel: Color(0xFFF1EFE8),
+    line: Color(0xFFC7C9C4),
+    steel: Color(0xFF5A6B7D),
+    cyan: Color(0xFF186B86),
+    magenta: Color(0xFFA32347),
+    amber: Color(0xFF8A5C13),
+    rust: Color(0xFF9E2B22),
+    bone: Color(0xFF14181E),
+    boneDim: Color(0xFF3C444C),
+    muted: Color(0xFF5D6B77),
+    faint: Color(0xFF8A96A0),
+    phos: Color(0xFF1F6B47),
+    scanline: Color(0x08000000),
   );
 
   @override
@@ -101,8 +112,10 @@ class EdgeColors extends ThemeExtension<EdgeColors> {
       voidBg: m(voidBg, other.voidBg),
       panel: m(panel, other.panel),
       line: m(line, other.line),
+      steel: m(steel, other.steel),
+      cyan: m(cyan, other.cyan),
+      magenta: m(magenta, other.magenta),
       amber: m(amber, other.amber),
-      amberDim: m(amberDim, other.amberDim),
       rust: m(rust, other.rust),
       bone: m(bone, other.bone),
       boneDim: m(boneDim, other.boneDim),

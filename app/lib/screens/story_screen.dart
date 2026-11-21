@@ -118,7 +118,7 @@ class _StoryScreenState extends State<StoryScreen> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      TermLabel(story.category, color: c.amber),
+                      TermLabel(story.category, color: c.cyan),
                       const SizedBox(width: 10),
                       Expanded(child: Container(height: 1, color: c.line)),
                       const SizedBox(width: 10),
@@ -202,7 +202,7 @@ class _StoryScreenState extends State<StoryScreen> {
                         const SizedBox(width: 10),
                         TermLabel(
                           story.responseCount.toString().padLeft(2, '0'),
-                          color: c.amber,
+                          color: c.cyan,
                         ),
                       ],
                     ),
@@ -218,7 +218,7 @@ class _StoryScreenState extends State<StoryScreen> {
                               child: SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 1.4, color: c.amber),
+                                child: CircularProgressIndicator(strokeWidth: 1.4, color: c.cyan),
                               ),
                             ),
                           );
@@ -331,7 +331,7 @@ class _ResponseRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(13, 2, 0, 2),
       decoration: BoxDecoration(
         border: Border(
-          left: BorderSide(color: response.isMine ? c.amberDim : c.line, width: 2),
+          left: BorderSide(color: response.isMine ? c.amber : c.line, width: 2),
         ),
       ),
       child: Column(
@@ -409,16 +409,16 @@ class _ReplyBar extends StatelessWidget {
                   height: 46,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    border: Border.all(color: c.amber),
-                    color: c.amber.withValues(alpha: 0.1),
+                    border: Border.all(color: c.cyan),
+                    color: c.cyan.withValues(alpha: 0.1),
                   ),
                   child: sending
                       ? SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 1.4, color: c.amber),
+                          child: CircularProgressIndicator(strokeWidth: 1.4, color: c.cyan),
                         )
-                      : Icon(Icons.arrow_forward, size: 18, color: c.amber),
+                      : Icon(Icons.arrow_forward, size: 18, color: c.cyan),
                 ),
               ),
             ],

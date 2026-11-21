@@ -1,5 +1,12 @@
-/// Модели ложатся на таблицы ew_* в Supabase. Разбор идёт из строк PostgREST,
-/// поэтому ключи — как в базе, в нижнем регистре с подчёркиваниями.
+/// Модели ложатся на строки PostgREST, поэтому ключи — как в базе. Каждая
+/// модель умеет вернуться обратно в строку: так лента и профиль кэшируются на
+/// телефоне и показываются сразу при запуске, ещё до ответа сервера.
+library;
+
+DateTime _date(Object? v) =>
+    v is String ? (DateTime.tryParse(v)?.toLocal() ?? DateTime.now()) : DateTime.now();
+
+int _int(Object? v, [int fallback = 0]) => (v as num?)?.toInt() ?? fallback;
 
 class Profile {
   const Profile({
@@ -20,12 +27,21 @@ class Profile {
 
   factory Profile.fromRow(Map<String, dynamic> row) => Profile(
     id: row['id'] as String,
-    nickname: row['nickname'] as String,
-    avatarKind: (row['avatar_kind'] as num?)?.toInt() ?? 0,
+    nickname: row['nickname'] as String? ?? '',
+    avatarKind: _int(row['avatar_kind']),
     avatarUrl: row['avatar_url'] as String?,
-    createdAt: DateTime.parse(row['created_at'] as String),
-    streakDays: (row['streak_days'] as num?)?.toInt() ?? 1,
+    createdAt: _date(row['created_at']),
+    streakDays: _int(row['streak_days'], 1),
   );
+
+  Map<String, dynamic> toRow() => {
+    'id': id,
+    'nickname': nickname,
+    'avatar_kind': avatarKind,
+    'avatar_url': avatarUrl,
+    'created_at': createdAt.toUtc().toIso8601String(),
+    'streak_days': streakDays,
+  };
 }
 
 class Story {
@@ -44,6 +60,7 @@ class Story {
     this.likedByMe = false,
     this.savedByMe = false,
     this.isMine = false,
+    this.hidden = false,
   });
 
   final String id;
@@ -61,40 +78,70 @@ class Story {
   final bool savedByMe;
   final bool isMine;
 
-  /// Читается из представления ew_feed: имя автора и признаки «я отметил» и
-  /// «я сохранил» оно уже приложило, поэтому на карточку не нужен отдельный запрос.
+  /// Скрыта по жалобам. Такую историю видит только её автор — с пометкой.
+  final bool hidden;
+
   factory Story.fromRow(Map<String, dynamic> row) => Story(
     id: row['id'] as String,
-    category: row['category'] as String,
-    title: row['title'] as String,
-    body: row['body'] as String,
-    createdAt: DateTime.parse(row['created_at'] as String),
-    authorId: row['author_id'] as String,
+    category: row['category'] as String? ?? 'Другое',
+    title: row['title'] as String? ?? '',
+    body: row['body'] as String? ?? '',
+    createdAt: _date(row['created_at']),
+    authorId: row['author_id'] as String? ?? '',
     authorNickname: row['author_nickname'] as String? ?? 'без имени',
-    authorAvatarKind: (row['author_avatar_kind'] as num?)?.toInt() ?? 0,
+    authorAvatarKind: _int(row['author_avatar_kind']),
     authorAvatarUrl: row['author_avatar_url'] as String?,
-    likes: (row['like_count'] as num?)?.toInt() ?? 0,
-    responseCount: (row['response_count'] as num?)?.toInt() ?? 0,
+    likes: _int(row['like_count']),
+    responseCount: _int(row['response_count']),
     likedByMe: row['liked_by_me'] as bool? ?? false,
     savedByMe: row['saved_by_me'] as bool? ?? false,
     isMine: row['is_mine'] as bool? ?? false,
+    hidden: row['hidden'] as bool? ?? false,
   );
 
-  Story copyWith({int? likes, int? responseCount, bool? likedByMe, bool? savedByMe}) => Story(
+  Map<String, dynamic> toRow() => {
+    'id': id,
+    'category': category,
+    'title': title,
+    'body': body,
+    'created_at': createdAt.toUtc().toIso8601String(),
+    'author_id': authorId,
+    'author_nickname': authorNickname,
+    'author_avatar_kind': authorAvatarKind,
+    'author_avatar_url': authorAvatarUrl,
+    'like_count': likes,
+    'response_count': responseCount,
+    'liked_by_me': likedByMe,
+    'saved_by_me': savedByMe,
+    'is_mine': isMine,
+    'hidden': hidden,
+  };
+
+  Story copyWith({
+    int? likes,
+    int? responseCount,
+    bool? likedByMe,
+    bool? savedByMe,
+    String? authorNickname,
+    int? authorAvatarKind,
+    String? authorAvatarUrl,
+    bool clearAvatarUrl = false,
+  }) => Story(
     id: id,
     category: category,
     title: title,
     body: body,
     createdAt: createdAt,
     authorId: authorId,
-    authorNickname: authorNickname,
-    authorAvatarKind: authorAvatarKind,
-    authorAvatarUrl: authorAvatarUrl,
+    authorNickname: authorNickname ?? this.authorNickname,
+    authorAvatarKind: authorAvatarKind ?? this.authorAvatarKind,
+    authorAvatarUrl: clearAvatarUrl ? null : (authorAvatarUrl ?? this.authorAvatarUrl),
     likes: likes ?? this.likes,
     responseCount: responseCount ?? this.responseCount,
     likedByMe: likedByMe ?? this.likedByMe,
     savedByMe: savedByMe ?? this.savedByMe,
     isMine: isMine,
+    hidden: hidden,
   );
 }
 
@@ -123,15 +170,15 @@ class StoryResponse {
 
   factory StoryResponse.fromRow(Map<String, dynamic> row, {String? myId}) {
     final author = row['author'] as Map<String, dynamic>?;
-    final authorId = row['author_id'] as String;
+    final authorId = row['author_id'] as String? ?? '';
     return StoryResponse(
       id: row['id'] as String,
-      storyId: row['story_id'] as String,
-      body: row['body'] as String,
-      createdAt: DateTime.parse(row['created_at'] as String),
+      storyId: row['story_id'] as String? ?? '',
+      body: row['body'] as String? ?? '',
+      createdAt: _date(row['created_at']),
       authorId: authorId,
       authorNickname: author?['nickname'] as String? ?? 'без имени',
-      authorAvatarKind: (author?['avatar_kind'] as num?)?.toInt() ?? 0,
+      authorAvatarKind: _int(author?['avatar_kind']),
       authorAvatarUrl: author?['avatar_url'] as String?,
       isMine: myId != null && myId == authorId,
     );
@@ -165,12 +212,12 @@ class InboxItem {
     final story = row['story'] as Map<String, dynamic>?;
     return InboxItem(
       id: row['id'] as String,
-      body: row['body'] as String,
-      createdAt: DateTime.parse(row['created_at'] as String),
+      body: row['body'] as String? ?? '',
+      createdAt: _date(row['created_at']),
       authorNickname: author?['nickname'] as String? ?? 'без имени',
-      authorAvatarKind: (author?['avatar_kind'] as num?)?.toInt() ?? 0,
+      authorAvatarKind: _int(author?['avatar_kind']),
       authorAvatarUrl: author?['avatar_url'] as String?,
-      storyId: story?['id'] as String? ?? '',
+      storyId: story?['id'] as String? ?? row['story_id'] as String? ?? '',
       storyTitle: story?['title'] as String? ?? '',
     );
   }
@@ -200,10 +247,10 @@ class Achievement {
 
   factory Achievement.fromRow(Map<String, dynamic> row) => Achievement(
     code: row['code'] as String,
-    title: row['title'] as String,
-    description: row['description'] as String,
-    goal: (row['goal'] as num?)?.toInt() ?? 1,
-    progress: (row['progress'] as num?)?.toInt() ?? 0,
-    earnedAt: row['earned_at'] == null ? null : DateTime.parse(row['earned_at'] as String),
+    title: row['title'] as String? ?? '',
+    description: row['description'] as String? ?? '',
+    goal: _int(row['goal'], 1),
+    progress: _int(row['progress']),
+    earnedAt: row['earned_at'] == null ? null : _date(row['earned_at']),
   );
 }

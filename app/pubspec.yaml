@@ -1,7 +1,9 @@
 name: edgewind
 description: "On the Edge — место, где можно рассказать свою историю и получить отклик."
 publish_to: "none"
-version: 1.0.0+1
+# Номер сборки растёт с каждой выкладкой: Android не ставит версию поверх
+# той, у которой номер больше.
+version: 1.1.0+3
 
 environment:
   sdk: ^3.12.0
@@ -13,12 +15,14 @@ dependencies:
   # Данные и анонимный вход.
   supabase_flutter: ^2.8.0
 
-  # Гарнитуры тянутся с Google Fonts и кешируются на устройстве: JetBrains Mono
-  # на обвязку, Literata на то, что человек написал сам. Обе с кириллицей.
-  google_fonts: ^6.2.1
-
   image_picker: ^1.2.3
-  cupertino_icons: ^1.0.8
+
+  # Кэш ленты и профиля, чтобы приложение открывалось сразу, а не после сети.
+  # Уже лежит в зависимостях supabase_flutter — размер не растёт.
+  shared_preferences: ^2.3.0
+
+  # Звонок на телефон доверия одним нажатием.
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
@@ -29,16 +33,43 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/quiet-field.png
+    - assets/images/
+
+  # Шрифты вшиты в приложение и урезаны до латиницы, кириллицы (с казахскими
+  # буквами) и нужных значков. Раньше они тянулись из интернета при первом
+  # запуске — текст моргал и без сети оставался системным.
+  fonts:
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Light.ttf
+          weight: 300
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
+          weight: 700
+    - family: Literata
+      fonts:
+        - asset: assets/fonts/Literata-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Literata-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Literata-SemiBold.ttf
+          weight: 600
+    # Только знаки для вертикальных подписей — около тридцати символов.
+    - family: NotoSansJP
+      fonts:
+        - asset: assets/fonts/NotoSansJP-Light.ttf
+          weight: 300
 
 # Иконка приложения. Генерируется командой:
 #   dart run flutter_launcher_icons
+# Столб с проводами на закате: фон адаптивной иконки — сама картинка,
+# передний слой пустой, система обрезает её под форму иконки на телефоне.
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "#0A0C0B"
+  adaptive_icon_background: "assets/icon/app_icon_background.png"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
   remove_alpha_ios: true
-  # Десктопные папки в сборке не создаются, поэтому windows здесь нет:
-  # генератор падает, если пишет иконку в несуществующую платформу.

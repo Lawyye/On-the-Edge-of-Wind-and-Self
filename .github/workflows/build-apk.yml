@@ -1,10 +1,8 @@
 # Собирает APK на серверах GitHub, чтобы для проверки приложения не нужно было
 # ставить Flutter и Android SDK на свой компьютер.
 #
-# Как получить файл:
-#   вкладка Actions → запуск «Сборка APK» → раздел Artifacts внизу →
-#   скачать edgewind-apk. Внутри архива нужен app-arm64-v8a-release.apk —
-#   он подходит почти всем современным телефонам.
+# Готовый файл выкладывается в релиз «apk» — там у каждого APK прямая ссылка,
+# которую можно открыть на телефоне и сразу установить.
 #
 # Запускается кнопкой (Run workflow) и сам при изменениях в app/.
 
@@ -31,20 +29,23 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      # Версия закреплена: та же, на которой код проверен локально. Новый
+      # Flutter может объявить устаревшим то, на чём стоит приложение.
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: 3.50.1
           channel: stable
           cache: true
 
       # Платформенных папок в репозитории нет — они восстанавливаются прямо здесь.
       # В существующей папке create дописывает только недостающее и не трогает
-      # lib/, pubspec.yaml и assets/.
+      # lib/, test/, pubspec.yaml и assets/.
       - name: Восстановить платформенные папки
         working-directory: app
         run: flutter create --org com.ontheedge --project-name edgewind --platforms android,ios .
 
       # flutter create кладёт заготовку теста под класс MyApp, которого в этом
-      # приложении нет. Она ничего не проверяет и только мешает анализатору.
+      # приложении нет. Она ничего не проверяет и только мешает.
       - name: Убрать заготовку теста
         working-directory: app
         run: rm -f test/widget_test.dart
@@ -52,6 +53,7 @@ jobs:
       # flutter create кладёт разрешение на интернет только в отладочный
       # манифест. В релизной сборке его нет, и приложение не может открыть
       # ни одного соединения — что и случилось с первой выложенной сборкой.
+      # Запрос на звонилку нужен, чтобы кнопка «Позвонить 150» открывала набор.
       - name: Дописать манифест
         working-directory: app
         run: |
@@ -59,8 +61,16 @@ jobs:
           sed -i 's/android:label="edgewind"/android:label="On the Edge"/' "$M"
           grep -q 'android.permission.INTERNET' "$M" || sed -i \
             's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' "$M"
+          if ! grep -q 'android.intent.action.DIAL' "$M"; then
+            DIAL='<intent>\n            <action android:name="android.intent.action.DIAL"/>\n            <data android:scheme="tel"/>\n        </intent>'
+            if grep -q '<queries>' "$M"; then
+              sed -i "0,/<queries>/s|<queries>|<queries>\n        $DIAL|" "$M"
+            else
+              sed -i "s|</manifest>|    <queries>\n        $DIAL\n    </queries>\n</manifest>|" "$M"
+            fi
+          fi
           echo '--- манифест ---'
-          grep -E 'uses-permission|android:label' "$M"
+          grep -E 'uses-permission|android:label|DIAL' "$M"
 
       # Отдельной проверкой, потому что без интернета приложение собирается
       # и ставится как ни в чём не бывало, а падает уже у человека на экране.
@@ -69,6 +79,23 @@ jobs:
         run: |
           grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml \
             || { echo '::error::В основном манифесте нет разрешения INTERNET'; exit 1; }
+
+      # Android ставит новую версию поверх старой, только если обе подписаны
+      # одним ключом. Без постоянного ключа каждая сборка подписывалась новым
+      # случайным — и обновление требовало удалить приложение, а вместе с ним
+      # и анонимный аккаунт. Ключ лежит в секрете репозитория и кладётся туда,
+      # откуда его берёт подпись по умолчанию.
+      - name: Ключ подписи
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          mkdir -p ~/.android
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
+            echo "Подпись постоянным ключом."
+          else
+            echo "::warning::Секрета ANDROID_KEYSTORE_B64 нет — APK подписан временным ключом и поверх прежней версии не встанет."
+          fi
 
       - name: Зависимости
         working-directory: app
@@ -79,15 +106,26 @@ jobs:
         run: dart run flutter_launcher_icons
 
       # Анализатор не валит сборку: замечания к стилю не повод не получить APK.
-      # Но его вывод важен — он единственное место, где видно замечания к коду.
       - name: Проверка кода
         working-directory: app
         continue-on-error: true
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
+
+      # Тесты нажимают кнопки за человека и проверяют вёрстку на маленьком
+      # экране. Снимки экранов (метка golden) сравниваются только локально.
+      - name: Тесты
+        working-directory: app
+        run: flutter test --exclude-tags golden
 
       - name: Релизная сборка
         working-directory: app
         run: flutter build apk --release --split-per-abi
+
+      - name: Отпечаток подписи
+        working-directory: app/build/app/outputs/flutter-apk
+        run: |
+          SIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$SIGNER" verify --print-certs app-arm64-v8a-release.apk | grep -i 'SHA-256' | head -1
 
       - uses: actions/upload-artifact@v4
         with:
@@ -96,10 +134,6 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      # Артефакт сборки скачивается только архивом и только с компьютера —
-      # с телефона из него ничего не поставить. Поэтому те же файлы кладутся
-      # в релиз: там у каждого APK прямая ссылка, которую можно открыть
-      # на телефоне и сразу установить.
       - name: Выложить APK отдельной ссылкой
         env:
           GH_TOKEN: ${{ github.token }}

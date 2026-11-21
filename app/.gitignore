@@ -4,7 +4,13 @@
 .flutter-plugins
 .flutter-plugins-dependencies
 build/
-pubspec.lock
+
+# Снимки экранов для работы над дизайном — тяжёлые, в репозиторий не идут.
+test/goldens/
+
+# Создаются при сборке командой `flutter create .`.
+/android/
+/ios/
 
 # Платформенные папки восстанавливаются командой `flutter create .`
 # (см. README.md). Держать их в репозитории не обязательно.

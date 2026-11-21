@@ -1,104 +1,101 @@
 import 'package:flutter/material.dart';
 
-/// Палитра терминала.
-///
-/// Принцип, на котором держится всё оформление: ОБВЯЗКА ХОЛОДНАЯ, ЛЮДИ ТЁПЛЫЕ.
-/// Машинная часть — сталь, электрический циан, развёртка и глитч; всё, что
-/// человек написал сам, набрано книжной гарнитурой цветом [bone] и остаётся
-/// единственным тёплым пятном на экране. Чем холоднее обвязка, тем сильнее
-/// видно живой текст, поэтому синее здесь намеренно доведено до предела.
+/// Палитра снята с трёх картинок приложения: индиго ночной комнаты, сирень
+/// закатного неба над проводами, голубое свечение монитора и тёплый свет
+/// окна. Тёплый цвет один и редкий — им горит только человеческое: «я рядом»,
+/// полученные достижения, свои отклики.
 @immutable
 class EdgeColors extends ThemeExtension<EdgeColors> {
   const EdgeColors({
-    required this.voidBg,
+    required this.isDark,
+    required this.bg,
     required this.panel,
+    required this.raised,
     required this.line,
-    required this.steel,
-    required this.cyan,
-    required this.magenta,
-    required this.amber,
-    required this.rust,
-    required this.bone,
-    required this.boneDim,
-    required this.muted,
-    required this.faint,
-    required this.phos,
-    required this.scanline,
+    required this.text,
+    required this.textDim,
+    required this.textFaint,
+    required this.violet,
+    required this.lilac,
+    required this.crt,
+    required this.lamp,
+    required this.alarm,
+    required this.button,
+    required this.onButton,
   });
 
-  /// Фон приложения.
-  final Color voidBg;
+  final bool isDark;
 
-  /// Пластина карточки.
+  /// Фон приложения.
+  final Color bg;
+
+  /// Листы, поля ввода, меню.
   final Color panel;
 
-  /// Разделители и рамки.
+  /// То, что лежит поверх панели: выбранная плитка, нажатая строка.
+  final Color raised;
+
+  /// Волоски-разделители и рамки.
   final Color line;
 
-  /// Холодная сталь: уголки рамок, служебные подписи второго плана.
-  final Color steel;
+  final Color text;
+  final Color textDim;
+  final Color textFaint;
 
-  /// Главный машинный акцент — электрический циан.
-  final Color cyan;
+  /// Сирень заката — выбор, ссылки, активная вкладка.
+  final Color violet;
+  final Color lilac;
 
-  /// Второй канал расслоения при глитче. Как самостоятельный цвет не ставится.
-  final Color magenta;
+  /// Голубое свечение монитора — служебное: время, счётчики, сигнал.
+  final Color crt;
 
-  /// Тёплый акцент. Достаётся только человеческому: имени, достижению.
-  final Color amber;
+  /// Тёплый свет — только человеческое.
+  final Color lamp;
 
-  /// Тревожный. Им горит «я рядом» и предупреждения — больше ничем.
-  final Color rust;
+  /// Ошибки и жалобы.
+  final Color alarm;
 
-  /// Цвет человеческого текста.
-  final Color bone;
+  /// Главная кнопка: белая плашка на тёмном, чернильная на светлом.
+  final Color button;
+  final Color onButton;
 
-  /// Человеческий текст второго плана.
-  final Color boneDim;
-
-  final Color muted;
-  final Color faint;
-
-  /// Фосфорная зелень: «всё хорошо», живой индикатор.
-  final Color phos;
-
-  /// Цвет полос развёртки поверх экрана.
-  final Color scanline;
+  /// Текст поверх картинок всегда светлый — картинки тёмные в обеих темах.
+  Color get onArt => const Color(0xFFF4F2FB);
 
   static const dark = EdgeColors(
-    voidBg: Color(0xFF05070B),
-    panel: Color(0xFF0C111A),
-    line: Color(0xFF1A2432),
-    steel: Color(0xFF4C6682),
-    cyan: Color(0xFF4FD6E8),
-    magenta: Color(0xFFE8486B),
-    amber: Color(0xFFE8A33D),
-    rust: Color(0xFFD4453A),
-    bone: Color(0xFFDAD6C9),
-    boneDim: Color(0xFF9FA7AE),
-    muted: Color(0xFF6E8294),
-    faint: Color(0xFF42566A),
-    phos: Color(0xFF5FE3A1),
-    scanline: Color(0x0DFFFFFF),
+    isDark: true,
+    bg: Color(0xFF08070F),
+    panel: Color(0xFF111120),
+    raised: Color(0xFF1A1930),
+    line: Color(0xFF25243B),
+    text: Color(0xFFEEEDF6),
+    textDim: Color(0xFFA9A7C4),
+    textFaint: Color(0xFF6E6C8E),
+    violet: Color(0xFF8F86EE),
+    lilac: Color(0xFFC8BBF3),
+    crt: Color(0xFFA6C6FF),
+    lamp: Color(0xFFFFC56E),
+    alarm: Color(0xFFFF6F86),
+    button: Color(0xFFF2F0FA),
+    onButton: Color(0xFF0A0912),
   );
 
-  /// «Засвеченная плёнка»: бумажный вариант того же терминала. Циан уходит в
-  /// глубокий индиго, иначе на светлом он слепнет и перестаёт быть акцентом.
   static const light = EdgeColors(
-    voidBg: Color(0xFFE6E4DC),
-    panel: Color(0xFFF1EFE8),
-    line: Color(0xFFC7C9C4),
-    steel: Color(0xFF5A6B7D),
-    cyan: Color(0xFF186B86),
-    magenta: Color(0xFFA32347),
-    amber: Color(0xFF8A5C13),
-    rust: Color(0xFF9E2B22),
-    bone: Color(0xFF14181E),
-    boneDim: Color(0xFF3C444C),
-    muted: Color(0xFF5D6B77),
-    faint: Color(0xFF8A96A0),
-    phos: Color(0xFF1F6B47),
-    scanline: Color(0x08000000),
+    isDark: false,
+    bg: Color(0xFFF3F1F9),
+    panel: Color(0xFFFFFFFF),
+    raised: Color(0xFFE9E6F5),
+    line: Color(0xFFDAD6EB),
+    text: Color(0xFF17152B),
+    textDim: Color(0xFF4D4A6B),
+    textFaint: Color(0xFF8C89AA),
+    violet: Color(0xFF5A4ED6),
+    lilac: Color(0xFF6E5FD0),
+    crt: Color(0xFF2D6BD8),
+    lamp: Color(0xFFB8740F),
+    alarm: Color(0xFFD62F4E),
+    button: Color(0xFF17152B),
+    onButton: Color(0xFFF7F6FC),
   );
 
   @override
@@ -109,24 +106,25 @@ class EdgeColors extends ThemeExtension<EdgeColors> {
     if (other is! EdgeColors) return this;
     Color m(Color a, Color b) => Color.lerp(a, b, t)!;
     return EdgeColors(
-      voidBg: m(voidBg, other.voidBg),
+      isDark: t < 0.5 ? isDark : other.isDark,
+      bg: m(bg, other.bg),
       panel: m(panel, other.panel),
+      raised: m(raised, other.raised),
       line: m(line, other.line),
-      steel: m(steel, other.steel),
-      cyan: m(cyan, other.cyan),
-      magenta: m(magenta, other.magenta),
-      amber: m(amber, other.amber),
-      rust: m(rust, other.rust),
-      bone: m(bone, other.bone),
-      boneDim: m(boneDim, other.boneDim),
-      muted: m(muted, other.muted),
-      faint: m(faint, other.faint),
-      phos: m(phos, other.phos),
-      scanline: m(scanline, other.scanline),
+      text: m(text, other.text),
+      textDim: m(textDim, other.textDim),
+      textFaint: m(textFaint, other.textFaint),
+      violet: m(violet, other.violet),
+      lilac: m(lilac, other.lilac),
+      crt: m(crt, other.crt),
+      lamp: m(lamp, other.lamp),
+      alarm: m(alarm, other.alarm),
+      button: m(button, other.button),
+      onButton: m(onButton, other.onButton),
     );
   }
 }
 
-extension EdgeColorsOf on BuildContext {
+extension EdgeColorsX on BuildContext {
   EdgeColors get c => Theme.of(this).extension<EdgeColors>()!;
 }

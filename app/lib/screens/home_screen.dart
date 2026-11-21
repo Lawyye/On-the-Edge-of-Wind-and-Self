@@ -1,619 +1,184 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../data/edgewind_store.dart';
-import '../domain/categories.dart';
 import '../domain/models.dart';
-import '../ui/term.dart';
-import '../ui/time_text.dart';
 import '../ui/tokens.dart';
-import '../widgets/avatar.dart';
-import '../widgets/story_card.dart';
-import 'compose_sheet.dart';
+import '../ui/type.dart';
+import 'compose_screen.dart';
+import 'feed_tab.dart';
+import 'help_screen.dart';
+import 'inbox_tab.dart';
+import 'profile_tab.dart';
+import 'saved_tab.dart';
 import 'story_screen.dart';
 
+/// Четыре вкладки и кнопка записи между ними. Сообщения хранилища
+/// (ошибки сети, «запись удалена») всплывают здесь, внизу экрана.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.store, required this.onToggleTheme});
+  const HomeScreen({super.key, required this.store, required this.onToggleTheme, this.initialTab = 0});
 
   final EdgewindStore store;
   final VoidCallback onToggleTheme;
+  final int initialTab;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _tab = 0;
+  late int _tab = widget.initialTab;
 
   EdgewindStore get _store => widget.store;
 
+  @override
+  void initState() {
+    super.initState();
+    _store.notice.addListener(_showNotice);
+  }
+
+  @override
+  void dispose() {
+    _store.notice.removeListener(_showNotice);
+    super.dispose();
+  }
+
+  void _showNotice() {
+    final n = _store.notice.value;
+    if (n == null || !mounted) return;
+    final c = context.c;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Row(
+          children: [
+            Container(width: 2, height: 18, color: n.error ? c.alarm : c.violet),
+            const SizedBox(width: 12),
+            Expanded(child: Text(n.text, style: T.body(c.text, size: 14, height: 1.35))),
+          ],
+        ),
+        backgroundColor: c.panel,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2), side: BorderSide(color: c.line)),
+        duration: Duration(milliseconds: n.error ? 4200 : 2600),
+      ));
+  }
+
+  void _select(int i) {
+    if (i == _tab) return;
+    setState(() => _tab = i);
+    if (i == 2) _store.markInboxSeen();
+  }
+
   Future<void> _compose() async {
-    final created = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => ComposeSheet(store: _store),
+    final created = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(fullscreenDialog: true, builder: (_) => ComposeScreen(store: _store)),
     );
     if (created == true && mounted) {
       setState(() => _tab = 0);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('ЗАПИСЬ ОПУБЛИКОВАНА')));
+      _store.say('Запись опубликована. Отклики появятся во вкладке «Отклик».');
     }
   }
 
-  Future<void> _openStory(Story story) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => StoryScreen(store: _store, storyId: story.id)),
-    );
-  }
+  Future<void> _openStory(Story story) => openStory(context, _store, story.id);
+
+  void _openHelp() => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HelpScreen()));
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _store,
-      builder: (context, _) {
-        final heads = [
-          ('ЛЕНТА', '${_store.stories.length} ЗАПИСЕЙ', 'ОБЩАЯ ДЛЯ ВСЕХ'),
-          ('АРХИВ', '${_store.savedStories.length} СОХРАНЕНО', 'ВИДНО ТОЛЬКО ТЕБЕ'),
-          ('ОТКЛИК', '${_store.inbox.length} ВСЕГО', 'НА ТВОИ ЗАПИСИ'),
-          ('ПРОФИЛЬ', '${_store.earnedCount} / ${_store.achievements.length}', 'ДОСТИЖЕНИЙ'),
-        ];
-        final head = heads[_tab];
-
-        return TermScreen(
-          child: Column(
-            children: [
-              SafeArea(bottom: false, child: _TopBar(onToggleTheme: widget.onToggleTheme)),
-              _Header(title: head.$1, count: head.$2, sub: head.$3),
-              Expanded(
-                child: RefreshIndicator(
-                  color: context.c.cyan,
-                  backgroundColor: context.c.panel,
-                  onRefresh: _store.refreshAll,
-                  child: IndexedStack(
-                    index: _tab,
-                    children: [
-                      _FeedTab(store: _store, onOpen: _openStory, onCompose: _compose),
-                      _SavedTab(store: _store, onOpen: _openStory),
-                      _InboxTab(store: _store, onOpen: _openStory),
-                      _ProfileTab(store: _store),
-                    ],
-                  ),
-                ),
-              ),
-              _BottomBar(
-                tab: _tab,
-                onTab: (i) => setState(() => _tab = i),
-                onCompose: _compose,
-              ),
-            ],
-          ),
-        );
+    final c = context.c;
+    return PopScope(
+      canPop: _tab == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) setState(() => _tab = 0);
       },
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onToggleTheme});
-  final VoidCallback onToggleTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 0),
-      child: Row(
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(
-              color: c.phos,
-              boxShadow: [BoxShadow(color: c.phos.withValues(alpha: 0.8), blurRadius: 7)],
-            ),
-          ),
-          const SizedBox(width: 8),
-          const TermLabel('ON THE EDGE'),
-          const SizedBox(width: 10),
-          Expanded(child: Container(height: 1, color: c.line)),
-          const SizedBox(width: 10),
-          InkResponse(
-            onTap: onToggleTheme,
-            radius: 20,
-            child: Icon(
-              dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-              size: 17,
-              color: c.muted,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({required this.title, required this.count, required this.sub});
-  final String title;
-  final String count;
-  final String sub;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+      child: Scaffold(
+        backgroundColor: c.bg,
+        body: ListenableBuilder(
+          listenable: _store,
+          builder: (context, _) => IndexedStack(
+            index: _tab,
             children: [
-              GlitchText(title),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  TermLabel(count, color: c.cyan),
-                  const SizedBox(height: 3),
-                  TermLabel(sub),
-                ],
-              ),
+              FeedTab(store: _store, onOpen: _openStory, onCompose: _compose, onHelp: _openHelp),
+              SavedTab(store: _store, onOpen: _openStory),
+              InboxTab(store: _store, onOpenStory: (id) => openStory(context, _store, id)),
+              ProfileTab(store: _store, onOpen: _openStory, onToggleTheme: widget.onToggleTheme, onHelp: _openHelp),
             ],
           ),
-          const SizedBox(height: 11),
-          const TermRule(),
-        ],
-      ),
-    );
-  }
-}
-
-// ── ЛЕНТА ─────────────────────────────────────────────────────────────────
-
-class _FeedTab extends StatelessWidget {
-  const _FeedTab({required this.store, required this.onOpen, required this.onCompose});
-
-  final EdgewindStore store;
-  final ValueChanged<Story> onOpen;
-  final VoidCallback onCompose;
-
-  @override
-  Widget build(BuildContext context) {
-    final cats = [EdgewindStore.kAllCategories, ...storyCategories];
-    return Column(
-      children: [
-        SizedBox(
-          height: 48,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-            itemCount: cats.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 6),
-            itemBuilder: (_, i) => _Chip(
-              label: cats[i],
-              on: store.category == cats[i],
-              onTap: () => store.setCategory(cats[i]),
-            ),
+        ),
+        bottomNavigationBar: ListenableBuilder(
+          listenable: _store,
+          builder: (context, _) => _NavBar(
+            tab: _tab,
+            unread: _store.unreadCount,
+            onTab: _select,
+            onCompose: _compose,
           ),
         ),
-        Expanded(
-          child: store.stories.isEmpty
-              ? _Empty(
-                  title: 'НЕТ ЗАПИСЕЙ',
-                  text: store.category == EdgewindStore.kAllCategories
-                      ? 'Пока пусто. Можно оставить первую — её увидят те, кому это близко.'
-                      : 'В этой теме пока пусто. Можно оставить первую.',
-                  action: 'НАПИСАТЬ',
-                  onAction: onCompose,
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
-                  itemCount: store.stories.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 11),
-                  itemBuilder: (_, i) {
-                    final s = store.stories[i];
-                    return StoryCard(
-                      story: s,
-                      index: i,
-                      onTap: () => onOpen(s),
-                      onLike: () => store.toggleLike(s.id),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.label, required this.on, required this.onTap});
-  final String label;
-  final bool on;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 28,
-        padding: const EdgeInsets.symmetric(horizontal: 11),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          border: Border.all(color: on ? c.cyan : c.line),
-          color: on ? c.cyan.withValues(alpha: 0.08) : null,
-        ),
-        child: TermLabel(label, color: on ? c.cyan : c.muted, size: 10, tracking: 1.2),
       ),
     );
   }
 }
 
-// ── АРХИВ ─────────────────────────────────────────────────────────────────
-
-class _SavedTab extends StatelessWidget {
-  const _SavedTab({required this.store, required this.onOpen});
-  final EdgewindStore store;
-  final ValueChanged<Story> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    if (store.savedStories.isEmpty) {
-      return const _Empty(
-        title: 'АРХИВ ПУСТ',
-        text: 'Сюда попадает то, к чему захочется вернуться. Видно только тебе.',
-      );
+/// Открывает историю: из кэша сразу, иначе — догружает по id.
+Future<void> openStory(BuildContext context, EdgewindStore store, String id) async {
+  var story = store.storyById(id);
+  if (story == null) {
+    try {
+      story = await store.fetchStory(id);
+    } catch (e) {
+      store.say(store.describe(e), error: true);
+      return;
     }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-      itemCount: store.savedStories.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 11),
-      itemBuilder: (_, i) {
-        final s = store.savedStories[i];
-        return StoryCard(
-          story: s,
-          index: i,
-          onTap: () => onOpen(s),
-          onLike: () => store.toggleLike(s.id),
-          onSave: () => store.toggleSaved(s.id),
-        );
-      },
-    );
-  }
-}
-
-// ── ОТКЛИКИ ───────────────────────────────────────────────────────────────
-
-class _InboxTab extends StatelessWidget {
-  const _InboxTab({required this.store, required this.onOpen});
-  final EdgewindStore store;
-  final ValueChanged<Story> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    if (store.inbox.isEmpty) {
-      return const _Empty(
-        title: 'ТИХО',
-        text: 'Здесь появятся отклики на твои записи.',
-      );
+    if (story == null) {
+      store.say('Этой записи уже нет: её удалили или скрыли.');
+      return;
     }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-      itemCount: store.inbox.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 9),
-      itemBuilder: (_, i) {
-        final item = store.inbox[i];
-        return Pane(
-          onTap: () {
-            final s = store.storyById(item.storyId);
-            if (s != null) onOpen(s);
-          },
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Avatar(
-                    kind: item.authorAvatarKind,
-                    url: item.authorAvatarUrl,
-                    size: 26,
-                  ),
-                  const SizedBox(width: 9),
-                  Expanded(
-                    child: TermLabel(
-                      item.authorNickname,
-                      color: c.cyan,
-                      size: 10.5,
-                      tracking: 1.3,
-                      weight: FontWeight.w700,
-                    ),
-                  ),
-                  TermLabel(timeText(item.createdAt)),
-                ],
-              ),
-              const SizedBox(height: 9),
-              Text(
-                item.body,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 9),
-              TermLabel('К ЗАПИСИ «${item.storyTitle}»', size: 9, tracking: 0.8),
-            ],
-          ),
-        );
-      },
-    );
   }
+  if (!context.mounted) return;
+  await Navigator.of(context).push(MaterialPageRoute(builder: (_) => StoryScreen(store: store, storyId: id)));
 }
 
-// ── ПРОФИЛЬ ───────────────────────────────────────────────────────────────
-
-class _ProfileTab extends StatelessWidget {
-  const _ProfileTab({required this.store});
-  final EdgewindStore store;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    final p = store.profile;
-    if (p == null) return const SizedBox.shrink();
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
-      children: [
-        Pane(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Avatar(kind: p.avatarKind, url: p.avatarUrl, size: 56, lit: true),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      p.nickname,
-                      style: GoogleFonts.literata(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: c.bone,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    const TermLabel('ИМЯ НЕНАСТОЯЩЕЕ — И ХОРОШО'),
-                    const SizedBox(height: 9),
-                    Row(
-                      children: [
-                        TermLabel('${store.myStories.length} ИСТОРИЙ', color: c.amber),
-                        const SizedBox(width: 12),
-                        TermLabel('${p.streakDays} ДНЕЙ', color: c.amber),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            const TermLabel('ДОСТИЖЕНИЯ', tracking: 2.2),
-            const SizedBox(width: 10),
-            Expanded(child: Container(height: 1, color: c.line)),
-            const SizedBox(width: 10),
-            TermLabel(
-              '${store.earnedCount.toString().padLeft(2, '0')} / '
-              '${store.achievements.length.toString().padLeft(2, '0')}',
-              color: c.cyan,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        for (final a in store.achievements) ...[
-          _AchievementRow(a: a),
-          const SizedBox(height: 8),
-        ],
-        const SizedBox(height: 10),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(border: Border.all(color: c.line)),
-          child: Row(
-            children: [
-              Container(width: 3, height: 32, color: c.rust),
-              const SizedBox(width: 11),
-              Expanded(
-                child: TermLabel(
-                  'ЗДЕСЬ ОТВЕЧАЮТ ТАКИЕ ЖЕ ЛЮДИ, НЕ ВРАЧИ.\n'
-                  'ЕСТЬ УГРОЗА ЖИЗНИ — ЗВОНИ В ЭКСТРЕННУЮ СЛУЖБУ.',
-                  size: 10,
-                  tracking: 0.6,
-                  color: c.muted,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AchievementRow extends StatelessWidget {
-  const _AchievementRow({required this.a});
-  final Achievement a;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    final ink = a.earned ? c.amber : c.faint;
-
-    return Pane(
-      padding: const EdgeInsets.all(13),
-      cornerColor: a.earned ? c.amber : c.line,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: Border.all(color: a.earned ? c.amber : c.line),
-              color: a.earned ? c.amber.withValues(alpha: 0.07) : null,
-            ),
-            child: a.earned
-                ? Icon(Icons.check, size: 17, color: c.amber)
-                : Icon(Icons.lock_outline, size: 15, color: c.faint),
-          ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TermLabel(a.title, color: ink, size: 11.5, tracking: 1.3, weight: FontWeight.w700),
-                const SizedBox(height: 5),
-                Text(a.description, style: Theme.of(context).textTheme.bodyMedium),
-                if (!a.earned && a.goal > 1) ...[
-                  const SizedBox(height: 9),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 3,
-                          color: c.line,
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: a.fraction,
-                            child: Container(color: c.cyan),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 9),
-                      TermLabel('${a.progress}/${a.goal}', size: 9.5),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── ОБЩЕЕ ─────────────────────────────────────────────────────────────────
-
-class _Empty extends StatelessWidget {
-  const _Empty({required this.title, required this.text, this.action, this.onAction});
-  final String title;
-  final String text;
-  final String? action;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 60, 18, 24),
-      children: [
-        Pane(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 30),
-          child: Column(
-            children: [
-              TermLabel(title, tracking: 2.6, color: c.muted),
-              const SizedBox(height: 12),
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              if (action != null) ...[
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: onAction,
-                  child: Container(
-                    height: 44,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: c.cyan),
-                      color: c.cyan.withValues(alpha: 0.1),
-                    ),
-                    child: TermLabel(
-                      action!,
-                      color: c.cyan,
-                      size: 11,
-                      tracking: 3,
-                      weight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Нижняя панель. Кнопка записи стоит ВНУТРИ панели, а не висит над лентой:
-/// плавающая перекрывала последнюю карточку.
-class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.tab, required this.onTab, required this.onCompose});
+class _NavBar extends StatelessWidget {
+  const _NavBar({required this.tab, required this.unread, required this.onTab, required this.onCompose});
 
   final int tab;
+  final int unread;
   final ValueChanged<int> onTab;
   final VoidCallback onCompose;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return Container(
-      decoration: BoxDecoration(
-        color: c.voidBg,
-        border: Border(top: BorderSide(color: c.line)),
-      ),
+    return DecoratedBox(
+      decoration: BoxDecoration(color: c.bg, border: Border(top: BorderSide(color: c.line))),
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 64,
+          height: 62,
           child: Row(
             children: [
-              _NavItem(label: 'ЛЕНТА', on: tab == 0, onTap: () => onTab(0)),
-              _NavItem(label: 'АРХИВ', on: tab == 1, onTap: () => onTab(1)),
+              _NavItem(icon: Icons.blur_on_outlined, label: 'ЛЕНТА', on: tab == 0, onTap: () => onTab(0)),
+              _NavItem(icon: Icons.bookmark_border_rounded, label: 'АРХИВ', on: tab == 1, onTap: () => onTab(1)),
               SizedBox(
-                width: 68,
+                width: 72,
                 child: Center(
-                  child: GestureDetector(
-                    onTap: onCompose,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: c.cyan),
-                        color: c.cyan.withValues(alpha: 0.1),
-                        boxShadow: [
-                          BoxShadow(color: c.cyan.withValues(alpha: 0.22), blurRadius: 14),
-                        ],
+                  child: Semantics(
+                    button: true,
+                    label: 'Написать',
+                    child: Material(
+                      color: c.button,
+                      borderRadius: BorderRadius.circular(2),
+                      child: InkWell(
+                        onTap: onCompose,
+                        borderRadius: BorderRadius.circular(2),
+                        child: SizedBox(width: 48, height: 40, child: Icon(Icons.add, size: 22, color: c.onButton)),
                       ),
-                      child: Icon(Icons.add, size: 20, color: c.cyan),
                     ),
                   ),
                 ),
               ),
-              _NavItem(label: 'ОТКЛИК', on: tab == 2, onTap: () => onTab(2)),
-              _NavItem(label: 'ПРОФИЛЬ', on: tab == 3, onTap: () => onTab(3)),
+              _NavItem(icon: Icons.forum_outlined, label: 'ОТКЛИК', on: tab == 2, onTap: () => onTab(2), badge: unread),
+              _NavItem(icon: Icons.person_outline_rounded, label: 'Я', on: tab == 3, onTap: () => onTab(3)),
             ],
           ),
         ),
@@ -623,34 +188,69 @@ class _BottomBar extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  const _NavItem({required this.label, required this.on, required this.onTap});
+  const _NavItem({required this.icon, required this.label, required this.on, required this.onTap, this.badge = 0});
+
+  final IconData icon;
   final String label;
   final bool on;
   final VoidCallback onTap;
+  final int badge;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final ink = on ? c.text : c.textFaint;
     return Expanded(
-      child: InkResponse(
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: 16,
-              height: 2,
-              decoration: BoxDecoration(
-                color: on ? c.cyan : Colors.transparent,
-                boxShadow: on
-                    ? [BoxShadow(color: c.cyan.withValues(alpha: 0.8), blurRadius: 8)]
-                    : null,
-              ),
+      child: Semantics(
+        button: true,
+        selected: on,
+        label: badge > 0 ? '$label, новых: $badge' : label,
+        child: ExcludeSemantics(
+          child: InkResponse(
+            onTap: onTap,
+            radius: 36,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(icon, size: 21, color: ink),
+                    if (badge > 0)
+                      Positioned(
+                        right: -9,
+                        top: -5,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          constraints: const BoxConstraints(minWidth: 15),
+                          decoration: BoxDecoration(
+                            color: c.lamp,
+                            boxShadow: [BoxShadow(color: c.lamp.withValues(alpha: 0.6), blurRadius: 8)],
+                          ),
+                          child: Text(
+                            badge > 9 ? '9+' : '$badge',
+                            textAlign: TextAlign.center,
+                            style: T.label(const Color(0xFF1A1206), size: 9, tracking: 0, weight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Text(label, style: T.label(ink, size: 9, tracking: 1.4)),
+                const SizedBox(height: 4),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: on ? 16 : 0,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    color: c.violet,
+                    boxShadow: on ? [BoxShadow(color: c.violet.withValues(alpha: 0.8), blurRadius: 8)] : null,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 7),
-            TermLabel(label, color: on ? c.cyan : c.faint, size: 9.5, tracking: 1.3),
-          ],
+          ),
         ),
       ),
     );

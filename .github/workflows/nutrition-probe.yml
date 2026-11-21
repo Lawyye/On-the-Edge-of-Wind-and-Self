@@ -1,0 +1,84 @@
+# Разовая разведка для Nutrition Tracker: какие версии Google-библиотек сейчас
+# стабильны и как на самом деле выглядят ответы USDA и Open Food Facts.
+# Среда разработки не видит dl.google.com и эти API, а раннер GitHub видит.
+name: Nutrition probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ccr-75be79e5-6nopc2]
+    paths:
+      - '.github/workflows/nutrition-probe.yml'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Google Maven versions
+        run: |
+          meta() {
+            curl -sL "https://dl.google.com/dl/android/maven2/$1/maven-metadata.xml" \
+              | grep -oE '<version>[^<]+' | sed 's/<version>//' \
+              | grep -viE 'alpha|beta|rc|dev' | tail -4 | tr '\n' ' '
+            echo " <= $1"
+          }
+          for a in \
+            com/android/tools/build/gradle \
+            androidx/compose/compose-bom \
+            androidx/compose/material/material-icons-extended \
+            androidx/activity/activity-compose \
+            androidx/core/core-ktx \
+            androidx/core/core-splashscreen \
+            androidx/lifecycle/lifecycle-runtime-compose \
+            androidx/lifecycle/lifecycle-viewmodel-compose \
+            androidx/navigation/navigation-compose \
+            androidx/room/room-runtime \
+            androidx/datastore/datastore-preferences \
+            androidx/work/work-runtime-ktx \
+            androidx/test/ext/junit \
+            androidx/test/runner \
+            androidx/test/core \
+            androidx/test/espresso/espresso-core \
+            androidx/test/uiautomator/uiautomator \
+            androidx/profileinstaller/profileinstaller \
+            com/google/android/material/material ; do meta $a; done
+
+      - name: AGP and BOM details
+        run: |
+          AGP=$(curl -sL https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/maven-metadata.xml | grep -oE '<version>[^<]+' | sed 's/<version>//' | grep -viE 'alpha|beta|rc|dev' | tail -1)
+          echo "AGP=$AGP"
+          curl -sL "https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/$AGP/gradle-$AGP.pom" | grep -B2 -A3 -E 'kotlin-gradle-plugin|kotlin-stdlib' | head -30
+          BOM=$(curl -sL https://dl.google.com/dl/android/maven2/androidx/compose/compose-bom/maven-metadata.xml | grep -oE '<version>[^<]+' | sed 's/<version>//' | grep -viE 'alpha|beta|rc|dev' | tail -1)
+          echo "BOM=$BOM"
+          curl -sL "https://dl.google.com/dl/android/maven2/androidx/compose/compose-bom/$BOM/compose-bom-$BOM.pom" \
+            | grep -A1 -E '<artifactId>(material3|material-icons-extended|material-icons-core|ui|ui-test-junit4|foundation|animation)</artifactId>' | grep -oE '<(artifactId|version)>[^<]+' | paste - -
+          echo "--- sdk platforms on runner ---"
+          ls "$ANDROID_HOME/platforms" || true
+          ls "$ANDROID_HOME/build-tools" || true
+
+      - name: USDA FoodData Central samples
+        run: |
+          set -x
+          K=DEMO_KEY
+          B=https://api.nal.usda.gov/fdc/v1
+          curl -s "$B/foods/search?api_key=$K&query=chicken%20breast%20raw&dataType=Foundation,SR%20Legacy&pageSize=2" | jq . > usda_search_chicken.json
+          curl -s "$B/foods/search?api_key=$K&query=apple&dataType=Foundation,SR%20Legacy,Branded&pageSize=3" | jq . > usda_search_apple.json
+          F=$(jq -r '[.foods[] | select(.dataType=="Foundation")][0].fdcId // .foods[0].fdcId' usda_search_chicken.json)
+          S=$(jq -r '[.foods[] | select(.dataType=="SR Legacy")][0].fdcId // empty' usda_search_apple.json)
+          BR=$(jq -r '[.foods[] | select(.dataType=="Branded")][0].fdcId // empty' usda_search_apple.json)
+          curl -s "$B/food/$F?api_key=$K" | jq . > usda_food_foundation.json
+          [ -n "$S" ] && curl -s "$B/food/$S?api_key=$K" | jq . > usda_food_sr.json
+          [ -n "$BR" ] && curl -s "$B/food/$BR?api_key=$K" | jq . > usda_food_branded.json
+          curl -s -i "$B/foods/search?api_key=BAD_KEY_FOR_TEST&query=apple&pageSize=1" | head -20 > usda_bad_key.txt
+          for f in usda_*; do echo "=====BEGIN $f"; cat "$f"; echo "=====END $f"; done
+
+      - name: Open Food Facts samples
+        run: |
+          UA='NutritionTrackerProbe/0.1 (personal app; CI probe)'
+          FIELDS='code,product_name,product_name_ru,product_name_en,generic_name,generic_name_ru,brands,categories,categories_tags,nutriments,serving_size,serving_quantity,quantity,last_modified_t,lang,lc'
+          curl -s -A "$UA" "https://world.openfoodfacts.org/cgi/search.pl?search_terms=%D1%82%D0%B2%D0%BE%D1%80%D0%BE%D0%B3&search_simple=1&action=process&json=1&page_size=2&fields=$FIELDS" | jq . > off_search_cgi.json || true
+          curl -s -A "$UA" "https://search.openfoodfacts.org/search?q=%D1%82%D0%B2%D0%BE%D1%80%D0%BE%D0%B3&page_size=2&fields=$FIELDS" | jq . > off_search_sal.json || true
+          C=$(jq -r '.products[0].code // empty' off_search_cgi.json)
+          [ -n "$C" ] && curl -s -A "$UA" "https://world.openfoodfacts.org/api/v2/product/$C?fields=$FIELDS" | jq . > off_product.json
+          curl -s -A "$UA" "https://world.openfoodfacts.org/api/v2/product/3017620422003?fields=$FIELDS" | jq . > off_product_nutella.json
+          for f in off_*; do echo "=====BEGIN $f"; cat "$f"; echo "=====END $f"; done

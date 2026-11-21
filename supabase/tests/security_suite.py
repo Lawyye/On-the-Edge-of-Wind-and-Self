@@ -9,7 +9,7 @@
 Запуск: python3 security_suite.py out.json
 Печатает ОК или ПРОВАЛ по каждому пункту. Ходит в настоящую базу.
 """
-import json, os, ssl, sys, time, urllib.request, urllib.error
+import atexit, json, os, ssl, sys, time, urllib.request, urllib.error, uuid
 
 BASE = 'https://wwwxthxyfglcgpuscafz.supabase.co'
 ANON_JWT = ('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3d3h0aHh5ZmdsY2dwdXNjYWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMjUxODcsImV4cCI6MjEwMzcwMTE4N30.1Gcq8BKJw1WEP4xKfvhQW46qxTv4sEGjh74EAK_1GyU')
@@ -50,22 +50,33 @@ def ok(name, cond, detail=''):
 rep = {'Prefer': 'return=representation'}
 stamp = str(int(time.time()))[-5:]
 users = []
+
+
+@atexit.register
+def _cleanup():
+    # Убирает за собой при любом исходе — даже если проверка упала посередине:
+    # иначе тестовые записи остаются в общей ленте.
+    for t, uid in users:
+        for ext in ('png', 'jpg', 'webp'):
+            call('DELETE', f'/storage/v1/object/ew-avatars/{uid}/avatar.{ext}', t)
+        call('POST', '/rest/v1/rpc/ew_delete_me', t, {})
 def new_user(nick):
     t, uid = signup()
-    s, j = call('POST', '/rest/v1/ew_profiles', t, {'id': uid, 'nickname': nick, 'avatar_kind': 2}, rep)
+    s, _ = call('POST', '/rest/v1/ew_profiles', t, {'id': uid, 'nickname': nick, 'avatar_kind': 2})
+    _, me_row = call('POST', '/rest/v1/rpc/ew_me', t, {})
     users.append((t, uid))
-    return t, uid, s, j
+    return t, uid, s, me_row
 
 print('ОБЫЧНЫЕ ДЕЙСТВИЯ')
 A, a, s, j = new_user(f'Проверка А {stamp}')
-ok('регистрация с именем и знаком', s == 201 and j and j[0]['nickname'] == f'Проверка А {stamp}', f'HTTP {s}')
+ok('регистрация с именем и знаком', s == 201 and isinstance(j, dict) and j.get('nickname') == f'Проверка А {stamp}', f'HTTP {s}')
 B, b, s, _ = new_user(f'Проверка Б {stamp}')
 C, c, s, _ = new_user(f'Проверка В {stamp}')
 s, j = call('POST', '/rest/v1/rpc/ew_touch', A, {})
 ok('ew_touch возвращает свой профиль', s == 200 and isinstance(j, dict) and j.get('id') == a, f'HTTP {s}')
 s, j = call('POST', '/rest/v1/rpc/ew_me', A, {})
 ok('ew_me: свой профиль целиком', s == 200 and isinstance(j, dict) and 'streak_days' in j and j['id'] == a, f'HTTP {s}')
-s, j = call('POST', '/rest/v1/ew_stories', A, {'author_id': a, 'category': 'Одиночество',
+s, j = call('POST', '/rest/v1/ew_stories?select=id,body', A, {'author_id': a, 'category': 'Одиночество',
             'title': 'Проверочная история', 'body': '  Текст проверки.  '}, rep)
 story = j[0]['id'] if s == 201 else None
 ok('публикация истории', s == 201 and j[0]['body'] == 'Текст проверки.', f'HTTP {s}')
@@ -75,14 +86,14 @@ s, j = call('GET', f'/rest/v1/ew_feed?id=eq.{story}&select=like_count,liked_by_m
 ok('лента: счётчик и отметка Б', s == 200 and j and j[0]['like_count'] == 1 and j[0]['liked_by_me'] and not j[0]['is_mine'], json.dumps(j))
 s, j = call('POST', '/rest/v1/ew_likes', A, {'story_id': story, 'user_id': a})
 ok('«я рядом» на свою историю отклонено', s >= 400, f'HTTP {s}')
-s, j = call('POST', '/rest/v1/ew_responses', B, {'story_id': story, 'author_id': b, 'body': 'Я рядом, правда.'}, rep)
+s, j = call('POST', '/rest/v1/ew_responses?select=id,story_id,body,created_at,author_id', B, {'story_id': story, 'author_id': b, 'body': 'Я рядом, правда.'}, rep)
 resp = j[0]['id'] if s == 201 else None
 ok('Б отвечает', s == 201, f'HTTP {s}')
 s, j = call('POST', '/rest/v1/ew_responses', B, {'story_id': story, 'author_id': b, 'body': 'Я рядом, правда.'})
 ok('двойная отправка того же отклика отклонена', s >= 400 and 'duplicate' in json.dumps(j, ensure_ascii=False), f'HTTP {s}')
 s, j = call('GET', f'/rest/v1/ew_stories?id=eq.{story}&select=response_count', A)
 ok('счётчик откликов', j and j[0]['response_count'] == 1, json.dumps(j))
-s, j = call('GET', '/rest/v1/ew_responses?select=id,body,created_at,author_id,'
+s, j = call('GET', '/rest/v1/ew_responses?select=id,body,created_at,author_id,story_id,'
             'author:ew_profiles!inner(nickname,avatar_kind,avatar_url),story:ew_stories!inner(id,title,author_id)'
             f'&story.author_id=eq.{a}&author_id=neq.{a}&order=created_at.desc&limit=50', A)
 ok('А видит отклик в «Откликах»', s == 200 and len(j) == 1 and j[0]['author']['nickname'].startswith('Проверка Б'), f'HTTP {s}')
@@ -94,7 +105,7 @@ s, j = call('DELETE', f'/rest/v1/ew_saves?story_id=eq.{story}&user_id=eq.{c}', C
 ok('В убирает из архива', s in (200, 204), f'HTTP {s}')
 s, j = call('POST', '/rest/v1/ew_reports', C, {'target_type': 'response', 'target_id': resp, 'reporter_id': c, 'reason': 'Оскорбления'})
 ok('В жалуется на отклик Б', s == 201, f'HTTP {s}')
-s, j = call('PATCH', f'/rest/v1/ew_profiles?id=eq.{a}', A, {'nickname': f'Новое Имя {stamp}'}, rep)
+s, j = call('PATCH', f'/rest/v1/ew_profiles?id=eq.{a}&select=nickname', A, {'nickname': f'Новое Имя {stamp}'}, rep)
 ok('переименование', s == 200 and j and j[0]['nickname'] == f'Новое Имя {stamp}', f'HTTP {s}')
 s, j = call('PATCH', f'/rest/v1/ew_profiles?id=eq.{a}', A, {'nickname': 'Модератор Аня'})
 ok('служебное имя «Модератор» отклонено', s >= 400 and 'nickname_reserved' in json.dumps(j), f'HTTP {s}')
@@ -116,7 +127,7 @@ ok('повторная загрузка (замена)', s == 200, f'HTTP {s} {s
 s, j = call('POST', f'/storage/v1/object/ew-avatars/{a}/spam-{stamp}.png', A, raw=png, ctype='image/png')
 ok('лишний файл в своей папке отклонён', s >= 400, f'HTTP {s}')
 url = f'{BASE}/storage/v1/object/public/ew-avatars/{a}/avatar.png?v={int(time.time()*1000)}'
-s, j = call('PATCH', f'/rest/v1/ew_profiles?id=eq.{a}', A, {'avatar_url': url}, rep)
+s, j = call('PATCH', f'/rest/v1/ew_profiles?id=eq.{a}&select=avatar_url', A, {'avatar_url': url}, rep)
 ok('адрес своего фото принят', s == 200, f'HTTP {s}')
 s, j = call('PATCH', f'/rest/v1/ew_profiles?id=eq.{a}', A, {'avatar_url': f'{BASE}/storage/v1/object/public/ew-avatars/{b}/avatar.png'})
 ok('чужое фото как своё отклонено', s >= 400, f'HTTP {s}')
@@ -174,10 +185,17 @@ s, j = call('GET', '/rest/v1/ew_feed?select=id')
 ok('гость без входа', s >= 400 or j == [], f'HTTP {s}')
 
 print('\nУДАЛЕНИЕ')
-s, j = call('DELETE', f'/rest/v1/ew_responses?id=eq.{resp}', B, headers=rep)
-ok('Б удаляет свой отклик', s == 200 and len(j) == 1, f'HTTP {s}')
+s, _ = call('DELETE', f'/rest/v1/ew_responses?id=eq.{resp}', B)
+_, j = call('GET', f'/rest/v1/ew_responses?id=eq.{resp}&select=id', B)
+ok('Б удаляет свой отклик', s in (200, 204) and j == [], f'HTTP {s}')
 s, j = call('GET', f'/rest/v1/ew_stories?id=eq.{story}&select=response_count', A)
 ok('счётчик откликов уменьшился', j and j[0]['response_count'] == 0, json.dumps(j))
+s, _ = call('DELETE', f'/rest/v1/ew_stories?id=eq.{story}', B)
+_, j = call('GET', f'/rest/v1/ew_stories?id=eq.{story}&select=id', A)
+ok('Б не может удалить историю А', j and j[0]['id'] == story, f'HTTP {s}')
+s, _ = call('DELETE', f'/rest/v1/ew_stories?id=eq.{story}', A)
+_, j = call('GET', f'/rest/v1/ew_stories?id=eq.{story}&select=id', A)
+ok('А удаляет свою историю', s in (200, 204) and j == [], f'HTTP {s}')
 s, j = call('DELETE', f'/storage/v1/object/ew-avatars/{a}/avatar.png', A)
 ok('А удаляет своё фото', s == 200, f'HTTP {s}')
 for t, uid in users:

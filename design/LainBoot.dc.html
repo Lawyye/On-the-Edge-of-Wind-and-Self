@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; -webkit-font-smoothing: antialiased; }
+    a { color: #E8A33D; text-decoration: none; }
+    a:hover { color: #F2BE6E; }
+
+    .term {
+      --void: #0A0C0B; --panel: #121716; --line: #222A28;
+      --amber: #E8A33D; --amberDim: #7A5620; --rust: #C4563B;
+      --bone: #D9D5C8; --muted: #8A8878; --faint: #55584F; --phos: #7FB08A;
+      font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--bone);
+    }
+    .scan { position: absolute; inset: 0; pointer-events: none; z-index: 40;
+      background: repeating-linear-gradient(180deg,
+        rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
+        transparent 1px, transparent 3px); }
+    .vign { position: absolute; inset: 0; pointer-events: none; z-index: 39;
+      background: radial-gradient(130% 80% at 50% 38%, transparent 52%, rgba(0,0,0,0.6) 100%); }
+
+    .lbl { font-size: 9.5px; letter-spacing: 1.6px; color: var(--faint); text-transform: uppercase; }
+    .human { font-family: Literata, Georgia, serif; }
+
+    .pane { position: relative; background: var(--panel); border: 1px solid var(--line); }
+    .pane::before, .pane::after { content: ''; position: absolute; width: 9px; height: 9px; border: 1px solid var(--amberDim); }
+    .pane::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+    .pane::after  { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    .caret { display: inline-block; width: 9px; height: 19px; background: var(--amber);
+      vertical-align: -3px; margin-left: 3px; animation: blink 1.05s steps(1) infinite; }
+
+    .av { aspect-ratio: 1; border: 1px solid var(--line); display: flex; align-items: center;
+      justify-content: center; cursor: pointer; background: transparent; }
+    .av.is-on { border-color: var(--amber); background: rgba(232,163,61,0.09); }
+  </style>
+</helmet>
+
+<div class="term" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--void); display: flex; flex-direction: column; padding: 54px 20px 26px;">
+  <div class="scan"></div>
+  <div class="vign"></div>
+
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="width: 7px; height: 7px; background: var(--phos); box-shadow: 0 0 7px rgba(127,176,138,0.9);"></div>
+    <span class="lbl">СЕАНС ОТКРЫТ</span>
+    <div style="flex-grow: 1; height: 1px; background: var(--line);"></div>
+    <span class="lbl">УЗЕЛ 07-КЗ</span>
+  </div>
+
+  <!-- Загрузка. Намеренно сообщает не «версию ядра», а то, что человеку важно знать. -->
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px;">
+    <sc-for list="{{boot}}" as="b" hint-placeholder-count="5">
+      <div style="display: flex; gap: 9px; align-items: baseline;">
+        <span style="font-size: 10px; color: {{b.markColor}}; width: 13px; flex-shrink: 0;">{{b.mark}}</span>
+        <span style="font-size: 10.5px; letter-spacing: 0.7px; color: {{b.color}}; text-transform: uppercase;">{{b.text}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin-top: 26px; height: 1px; background: linear-gradient(90deg, var(--amber), var(--line) 60%, transparent);"></div>
+
+  <div style="margin-top: 26px;">
+    <div style="font-size: 32px; font-weight: 700; letter-spacing: 5px; color: var(--amber); line-height: 1;">ПРИВЕТ</div>
+    <div class="human" style="margin-top: 14px; font-size: 17px; line-height: 1.5; color: #A8A598;">
+      Иногда просто нужен разговор. Для этого всё и сделано.
+    </div>
+  </div>
+
+  <div style="margin-top: 28px;">
+    <span class="lbl">КАК ТЕБЯ НАЗЫВАТЬ</span>
+    <div class="pane" style="margin-top: 9px; padding: 14px 15px; border-color: var(--amberDim); display: flex; align-items: center;">
+      <span class="human" style="font-size: 19px; color: var(--bone);">{{name}}</span><span class="caret"></span>
+      <div style="flex-grow: 1;"></div>
+      <div onClick="{{shuffle}}" style="width: 28px; height: 28px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8878" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7h4l10 10h4M18 4l3 3-3 3M3 17h4l3-3M14 10l3-3h4M18 14l3 3-3 3"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="lbl" style="margin-top: 8px; letter-spacing: 1.1px;">{{hint}}</div>
+  </div>
+
+  <div style="margin-top: 22px;">
+    <span class="lbl">ЗНАК</span>
+    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 7px; margin-top: 9px;">
+      <sc-for list="{{marks}}" as="m" hint-placeholder-count="6">
+        <div class="av {{m.cls}}" onClick="{{m.pick}}">
+          <span style="font-size: 15px; font-weight: 700; color: {{m.ink}};">{{m.glyph}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="flex-grow: 1;"></div>
+
+  <div style="border: 1px solid var(--line); padding: 12px 14px; display: flex; gap: 11px; align-items: center;">
+    <div style="width: 3px; height: 30px; background: var(--phos); flex-shrink: 0;"></div>
+    <span style="font-size: 10.5px; line-height: 1.55; letter-spacing: 0.5px; color: var(--muted);">
+      НИ ПОЧТЫ, НИ ТЕЛЕФОНА, НИ ПАРОЛЯ.<br>ИМЯ И ЗНАК — ВСЁ, ЧТО О ТЕБЕ БУДЕТ ИЗВЕСТНО.
+    </span>
+  </div>
+
+  <div style="margin-top: 12px; height: 54px; border: 1px solid {{ctaEdge}}; background: {{ctaFill}}; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+    <span style="font-size: 12px; font-weight: 700; letter-spacing: 3.4px; color: {{ctaInk}};">{{ctaText}}</span>
+  </div>
+</div>
+
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { name: 'Соснарь', mark: 0, pool: 0 };
+  }
+
+  renderVals() {
+    const names = ['Соснарь', 'Полынь', 'Северный', 'Мятный Чай', 'Кто-то с окна', 'Заря'];
+    const glyphs = ['┼', '◇', '△', '≈', '○', '╳'];
+
+    const boot = [
+      { mark: 'OK', text: 'связь установлена',            ok: true },
+      { mark: 'OK', text: 'имя придумываешь сам',          ok: true },
+      { mark: 'OK', text: 'настоящее имя не передаётся',   ok: true },
+      { mark: '--', text: 'почта не требуется',            ok: false },
+      { mark: '--', text: 'пароль не требуется',           ok: false },
+    ].map((b) => ({
+      mark: b.mark,
+      text: b.text,
+      markColor: b.ok ? '#7FB08A' : '#55584F',
+      color: b.ok ? '#8A8878' : '#55584F',
+    }));
+
+    const marks = glyphs.map((g, i) => ({
+      glyph: g,
+      cls: this.state.mark === i ? 'is-on' : '',
+      ink: this.state.mark === i ? '#E8A33D' : '#55584F',
+      pick: () => this.setState({ mark: i }),
+    }));
+
+    const named = (this.state.name || '').trim().length > 1;
+
+    return {
+      boot,
+      name: this.state.name,
+      shuffle: () => {
+        const next = (this.state.pool + 1) % names.length;
+        this.setState({ pool: next, name: names[next] });
+      },
+      hint: named ? 'ИМЯ МОЖНО ПОМЕНЯТЬ КОГДА УГОДНО' : 'ХОТЯ БЫ ДВЕ БУКВЫ',
+      marks,
+      ctaText: named ? 'ВОЙТИ' : 'ПРИДУМАЙ ИМЯ',
+      ctaEdge: named ? '#E8A33D' : '#222A28',
+      ctaFill: named ? 'rgba(232,163,61,0.12)' : 'transparent',
+      ctaInk: named ? '#E8A33D' : '#55584F',
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,28 +1,45 @@
 name: edgewind
-description: "On the Edge — анонимное место, где можно рассказать свою историю и ответить другому."
+description: "On the Edge — место, где можно рассказать свою историю и получить отклик."
 publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  # Debug-сборка, из которой восстановлен исходник, собрана на Dart SDK 3.12.2.
   sdk: ^3.12.0
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # Версии взяты из путей pub-кеша, зашитых в восстановленную сборку,
-  # поэтому это ровно то, на чём приложение собиралось.
-  image_picker: 1.2.3
-  shared_preferences: 2.5.5
+  # Данные и анонимный вход.
+  supabase_flutter: ^2.8.0
+
+  # Гарнитуры тянутся с Google Fonts и кешируются на устройстве: JetBrains Mono
+  # на обвязку, Literata на то, что человек написал сам. Обе с кириллицей.
+  google_fonts: ^6.2.1
+
+  image_picker: ^1.2.3
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/quiet-field.png
+
+# Иконка приложения. Генерируется командой:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#0A0C0B"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  remove_alpha_ios: true
+  windows:
+    generate: true
+    image_path: "assets/icon/app_icon.png"

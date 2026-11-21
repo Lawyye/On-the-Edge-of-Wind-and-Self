@@ -1,96 +1,225 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import 'data/edgewind_store.dart';
 import 'screens/home_screen.dart';
+import 'screens/signup_screen.dart';
+import 'ui/term.dart';
+import 'ui/tokens.dart';
 
-class EdgewindApp extends StatelessWidget {
+class EdgewindApp extends StatefulWidget {
   const EdgewindApp({super.key});
 
-  static const _ink = Color(0xFF20322D);
-  static const _moss = Color(0xFF587568);
-  static const _mist = Color(0xFFF4F6F1);
+  @override
+  State<EdgewindApp> createState() => _EdgewindAppState();
+}
+
+class _EdgewindAppState extends State<EdgewindApp> {
+  final EdgewindStore _store = EdgewindStore();
+
+  /// Тёмная по умолчанию: весь язык интерфейса построен на свечении на чёрном.
+  ThemeMode _mode = ThemeMode.dark;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme =
-        ColorScheme.fromSeed(
-          seedColor: _moss,
-          brightness: Brightness.light,
-          surface: _mist,
-        ).copyWith(
-          primary: _moss,
-          onPrimary: Colors.white,
-          secondary: const Color(0xFFB8845D),
-          onSecondary: Colors.white,
-          surface: _mist,
-          onSurface: _ink,
-          outline: const Color(0xFFC8D1CA),
-        );
+  void initState() {
+    super.initState();
+    _store.load();
+  }
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'On the Edge',
-      scrollBehavior: const _EdgewindScrollBehavior(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: scheme,
-        scaffoldBackgroundColor: _mist,
-        fontFamily: 'sans-serif',
-        textTheme: const TextTheme(
-          headlineLarge: TextStyle(
-            color: _ink,
-            fontSize: 34,
-            height: 1.08,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.8,
-          ),
-          headlineSmall: TextStyle(
-            color: _ink,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.25,
-          ),
-          titleMedium: TextStyle(
-            color: _ink,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-          bodyLarge: TextStyle(color: _ink, fontSize: 16, height: 1.48),
-          bodyMedium: TextStyle(color: _ink, fontSize: 14, height: 1.45),
+  @override
+  void dispose() {
+    _store.dispose();
+    super.dispose();
+  }
+
+  void _toggleTheme() => setState(
+    () => _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
+  );
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: 'On the Edge',
+    theme: _theme(EdgeColors.light, Brightness.light),
+    darkTheme: _theme(EdgeColors.dark, Brightness.dark),
+    themeMode: _mode,
+    scrollBehavior: const _Bouncy(),
+    home: _Gate(store: _store, onToggleTheme: _toggleTheme),
+  );
+
+  ThemeData _theme(EdgeColors c, Brightness brightness) {
+    final mono = GoogleFonts.jetBrainsMonoTextTheme();
+    final human = GoogleFonts.literataTextTheme();
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      scaffoldBackgroundColor: c.voidBg,
+      extensions: [c],
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: c.amber,
+        brightness: brightness,
+      ).copyWith(
+        primary: c.amber,
+        surface: c.voidBg,
+        onSurface: c.bone,
+        outline: c.line,
+        error: c.rust,
+      ),
+      // Заголовки и тела историй — книжной гарнитурой: это написал человек.
+      // Всё служебное живёт в моноширинном и набирается через TermLabel.
+      textTheme: mono.copyWith(
+        headlineSmall: human.headlineSmall!.copyWith(
+          color: c.bone, fontSize: 25, height: 1.28, fontWeight: FontWeight.w600,
         ),
-        cardTheme: const CardThemeData(
-          color: Colors.white,
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-            side: BorderSide(color: Color(0xFFE0E6E1)),
-          ),
+        titleMedium: human.titleMedium!.copyWith(
+          color: c.bone, fontSize: 18, height: 1.34, fontWeight: FontWeight.w600,
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(18)),
-            borderSide: BorderSide(color: Color(0xFFD9E1DB)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(18)),
-            borderSide: BorderSide(color: Color(0xFFD9E1DB)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(18)),
-            borderSide: BorderSide(color: _moss, width: 1.5),
-          ),
+        bodyLarge: human.bodyLarge!.copyWith(
+          color: c.boneDim, fontSize: 15.5, height: 1.66,
+        ),
+        bodyMedium: human.bodyMedium!.copyWith(
+          color: c.boneDim, fontSize: 14.5, height: 1.58,
         ),
       ),
-      home: const HomeScreen(),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: c.amber,
+        selectionColor: c.amber.withValues(alpha: 0.28),
+        selectionHandleColor: c.amber,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: c.panel,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: c.line)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: c.line)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: c.amber)),
+        hintStyle: GoogleFonts.literata(color: c.faint, fontSize: 15),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: c.panel,
+        contentTextStyle: GoogleFonts.jetBrainsMono(
+          color: c.bone, fontSize: 12, letterSpacing: 0.8,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+          side: BorderSide(color: c.amberDim),
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: c.amber),
     );
   }
 }
 
-class _EdgewindScrollBehavior extends MaterialScrollBehavior {
-  const _EdgewindScrollBehavior();
+/// Пока не знаем, есть ли имя — ждём; без имени — знакомство.
+class _Gate extends StatelessWidget {
+  const _Gate({required this.store, required this.onToggleTheme});
 
+  final EdgewindStore store;
+  final VoidCallback onToggleTheme;
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: store,
+    builder: (context, _) {
+      if (!store.ready) return const _Booting();
+      if (store.error != null && !store.hasProfile) {
+        return _Trouble(message: store.error!, onRetry: store.load);
+      }
+      if (!store.hasProfile) {
+        return SignupScreen(store: store, onToggleTheme: onToggleTheme);
+      }
+      return HomeScreen(store: store, onToggleTheme: onToggleTheme);
+    },
+  );
+}
+
+class _Booting extends StatelessWidget {
+  const _Booting();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return TermScreen(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 1.4, color: c.amber),
+            ),
+            const SizedBox(height: 18),
+            const TermLabel('УСТАНОВКА СВЯЗИ', tracking: 2.6),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Trouble extends StatelessWidget {
+  const _Trouble({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return TermScreen(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Pane(
+            padding: const EdgeInsets.all(22),
+            borderColor: c.rust,
+            cornerColor: c.rust,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(width: 3, height: 16, color: c.rust),
+                    const SizedBox(width: 10),
+                    TermLabel('СВЯЗИ НЕТ', color: c.rust, tracking: 2.4),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(message, style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: onRetry,
+                  child: Container(
+                    height: 46,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: c.amber),
+                      color: c.amber.withValues(alpha: 0.1),
+                    ),
+                    child: TermLabel(
+                      'ПОВТОРИТЬ',
+                      color: c.amber,
+                      size: 11,
+                      tracking: 3,
+                      weight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Bouncy extends MaterialScrollBehavior {
+  const _Bouncy();
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) =>
       const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());

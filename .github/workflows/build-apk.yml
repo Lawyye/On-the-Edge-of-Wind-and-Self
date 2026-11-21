@@ -17,6 +17,9 @@ on:
       - 'app/**'
       - '.github/workflows/build-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -78,3 +81,30 @@ jobs:
           path: app/build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
           retention-days: 30
+
+      # Артефакт сборки скачивается только архивом и только с компьютера —
+      # с телефона из него ничего не поставить. Поэтому те же файлы кладутся
+      # в релиз: там у каждого APK прямая ссылка, которую можно открыть
+      # на телефоне и сразу установить.
+      - name: Выложить APK отдельной ссылкой
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: app/build/app/outputs/flutter-apk
+        run: |
+          cat > notes.md <<'EOF'
+          Для почти всех современных телефонов нужен **app-arm64-v8a-release.apk**.
+          Второй файл — для старых 32-битных.
+
+          Android спросит разрешение поставить приложение из неизвестного
+          источника: так он реагирует на любой APK не из Play Market.
+          EOF
+          sed -i 's/^          //' notes.md
+          gh release delete apk --yes --cleanup-tag 2>/dev/null || true
+          gh release create apk \
+            app-arm64-v8a-release.apk \
+            app-armeabi-v7a-release.apk \
+            --target "$GITHUB_SHA" \
+            --latest \
+            --title "On the Edge — свежая сборка" \
+            --notes-file notes.md
+          echo "Ссылка: $(gh release view apk --json url --jq .url)"

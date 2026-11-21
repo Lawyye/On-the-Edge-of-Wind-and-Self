@@ -135,15 +135,6 @@ class _ComposeScreenState extends State<ComposeScreen> {
                                   style: T.label(c.lamp, size: 10, tracking: 1.6),
                                 ),
                               ),
-                              Flexible(
-                                child: Text(
-                                  '  · НАСТОЯЩЕЕ ИМЯ НЕ НУЖНО',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.fade,
-                                  softWrap: false,
-                                  style: T.label(c.onArt.withValues(alpha: 0.55), size: 9.5, tracking: 1),
-                                ),
-                              ),
                             ],
                           ),
                         ),

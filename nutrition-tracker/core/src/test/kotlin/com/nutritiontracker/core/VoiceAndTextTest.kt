@@ -1,0 +1,200 @@
+package com.nutritiontracker.core
+
+import com.nutritiontracker.core.model.AmountUnit
+import com.nutritiontracker.core.model.MealType
+import com.nutritiontracker.core.model.ServingKind
+import com.nutritiontracker.core.model.ServingSize
+import com.nutritiontracker.core.text.FoodQueryTranslator
+import com.nutritiontracker.core.text.FoodSearch
+import com.nutritiontracker.core.text.RussianStemmer
+import com.nutritiontracker.core.voice.CountKind
+import com.nutritiontracker.core.voice.ParsedQuantity
+import com.nutritiontracker.core.voice.QuantityResolver
+import com.nutritiontracker.core.voice.ResolvedAmount
+import com.nutritiontracker.core.voice.RussianNumbers
+import com.nutritiontracker.core.voice.VoiceInputParser
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class VoiceAndTextTest {
+    private val eps = 1e-9
+
+    @Test
+    fun `пример из ТЗ разбирается на три продукта`() {
+        val r = VoiceInputParser.parse("Сегодня я съел 200 граммов куриного филе, три картофелины по 100 граммов и одно яблоко")
+        assertEquals(0, r.dayOffset)
+        assertEquals(3, r.items.size)
+        val (chicken, potato, apple) = r.items
+        assertEquals("куриного филе", chicken.name)
+        assertEquals(ParsedQuantity.Mass(200.0), chicken.quantity)
+        assertEquals("картофелины", potato.name)
+        assertEquals(ParsedQuantity.Count(3.0, CountKind.PIECE, eachGrams = 100.0), potato.quantity)
+        assertEquals("яблоко", apple.name)
+        assertEquals(ParsedQuantity.Count(1.0, CountKind.PIECE), apple.quantity)
+    }
+
+    @Test
+    fun `числа словами`() {
+        fun n(s: String) = RussianNumbers.parse(s.split(' '), 0)?.value
+        assertEquals(250.0, n("двести пятьдесят")!!, eps)
+        assertEquals(125.0, n("сто двадцать пять")!!, eps)
+        assertEquals(1.5, n("полтора")!!, eps)
+        assertEquals(2.5, n("два с половиной")!!, eps)
+        assertEquals(2000.0, n("две тысячи")!!, eps)
+        assertEquals(1200.0, n("тысяча двести")!!, eps)
+        assertEquals(15.0, n("пятнадцать")!!, eps)
+        assertEquals(3.0, n("три четыре")!!, eps) // это два разных числа
+        assertNull(n("курица"))
+    }
+
+    @Test
+    fun `единицы массы, объёма, штук и порций`() {
+        val r = VoiceInputParser.parse("полтора литра воды, 1,5 кг картошки, полкило творога, 2 порции супа, 500 мл молока, двести грамм гречки")
+        val q = r.items.map { it.quantity }
+        assertEquals(ParsedQuantity.Volume(1500.0), q[0])
+        assertEquals(ParsedQuantity.Mass(1500.0), q[1])
+        assertEquals(ParsedQuantity.Mass(500.0), q[2])
+        assertEquals(ParsedQuantity.Count(2.0, CountKind.PORTION, "порции"), q[3])
+        assertEquals(ParsedQuantity.Volume(500.0), q[4])
+        assertEquals(ParsedQuantity.Mass(200.0), q[5])
+        assertEquals("гречки", r.items[5].name)
+    }
+
+    @Test
+    fun `количество после названия и без запятых`() {
+        val r = VoiceInputParser.parse("курица 200 г рис 150 г банан 2")
+        assertEquals(listOf("курица", "рис", "банан"), r.items.map { it.name })
+        assertEquals(ParsedQuantity.Mass(200.0), r.items[0].quantity)
+        assertEquals(ParsedQuantity.Mass(150.0), r.items[1].quantity)
+        assertEquals(ParsedQuantity.Count(2.0, CountKind.PIECE), r.items[2].quantity)
+    }
+
+    @Test
+    fun `если количество не прозвучало, оно не придумывается`() {
+        val r = VoiceInputParser.parse("яблоко и кофе с молоком")
+        assertEquals(2, r.items.size)
+        assertNull(r.items[0].quantity)
+        assertEquals("кофе с молоком", r.items[1].name)
+        assertNull(r.items[1].quantity)
+        assertTrue(r.items[0].notes.isNotEmpty())
+    }
+
+    @Test
+    fun `диапазон не превращается в число`() {
+        val r = VoiceInputParser.parse("200-300 г гречки")
+        assertEquals(1, r.items.size)
+        assertNull(r.items[0].quantity)
+        assertEquals("гречки", r.items[0].name)
+        assertTrue(r.items[0].notes.single().contains("200–300"))
+    }
+
+    @Test
+    fun `приём пищи и день распознаются`() {
+        val r = VoiceInputParser.parse("вчера на ужин съела 150 г лосося")
+        assertEquals(MealType.DINNER, r.mealHint)
+        assertEquals(-1, r.dayOffset)
+        assertEquals("лосося", r.items.single().name)
+    }
+
+    @Test
+    fun `бытовые меры и сокращения с точкой`() {
+        val r = VoiceInputParser.parse("стакан кефира, две столовые ложки масла, 100 г. сыра")
+        assertEquals(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "стакан"), r.items[0].quantity)
+        assertEquals(ParsedQuantity.Count(2.0, CountKind.HOUSEHOLD, "столовые ложки"), r.items[1].quantity)
+        assertEquals(ParsedQuantity.Mass(100.0), r.items[2].quantity)
+        assertEquals("сыра", r.items[2].name)
+    }
+
+    @Test
+    fun `разделение по «с» только перед количеством`() {
+        val r = VoiceInputParser.parse("гречка 200 г с 10 г масла")
+        assertEquals(listOf("гречка", "масла"), r.items.map { it.name })
+        assertEquals(ParsedQuantity.Mass(10.0), r.items[1].quantity)
+    }
+
+    private val apple = listOf(
+        ServingSize("1 medium (3\" dia)", 182.0, ServingKind.PIECE, "USDA"),
+        ServingSize("NLEA serving", 242.0, ServingKind.PORTION, "USDA"),
+    )
+
+    @Test
+    fun `штуки пересчитываются по справочному весу и с пояснением`() {
+        val r = QuantityResolver.resolve(ParsedQuantity.Count(2.0, CountKind.PIECE), AmountUnit.GRAM, apple)
+        r as ResolvedAmount.Resolved
+        assertEquals(364.0, r.amount, eps)
+        assertTrue(r.usesReferenceWeight)
+        assertTrue(r.explanation!!.contains("182"))
+        assertTrue(r.explanation!!.contains("USDA"))
+    }
+
+    @Test
+    fun `названный вес штуки важнее справочного`() {
+        val r = QuantityResolver.resolve(ParsedQuantity.Count(3.0, CountKind.PIECE, eachGrams = 100.0), AmountUnit.GRAM, apple)
+        r as ResolvedAmount.Resolved
+        assertEquals(300.0, r.amount, eps)
+        assertFalse(r.usesReferenceWeight)
+    }
+
+    @Test
+    fun `без справочного веса количество запрашивается`() {
+        assertTrue(QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.PIECE), AmountUnit.GRAM, emptyList()) is ResolvedAmount.NeedsInput)
+        assertTrue(QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "стакан"), AmountUnit.GRAM, apple) is ResolvedAmount.NeedsInput)
+        assertTrue(QuantityResolver.resolve(null, AmountUnit.GRAM, apple) is ResolvedAmount.NeedsInput)
+    }
+
+    @Test
+    fun `граммы и миллилитры не подменяют друг друга`() {
+        assertTrue(QuantityResolver.resolve(ParsedQuantity.Volume(1000.0), AmountUnit.GRAM, emptyList()) is ResolvedAmount.NeedsInput)
+        assertTrue(QuantityResolver.resolve(ParsedQuantity.Mass(200.0), AmountUnit.MILLILITER, emptyList()) is ResolvedAmount.NeedsInput)
+        val ml = QuantityResolver.resolve(ParsedQuantity.Volume(250.0), AmountUnit.MILLILITER, emptyList()) as ResolvedAmount.Resolved
+        assertEquals(250.0, ml.amount, eps)
+    }
+
+    @Test
+    fun `стеммер сводит формы слова к общей основе`() {
+        assertEquals("вагон", RussianStemmer.stem("вагонов"))
+        assertEquals("важн", RussianStemmer.stem("важная"))
+        assertEquals("яблок", RussianStemmer.stem("яблоки"))
+        assertEquals("яблок", RussianStemmer.stem("яблоко"))
+        assertEquals(RussianStemmer.stem("куриное"), RussianStemmer.stem("куриного"))
+        assertEquals(RussianStemmer.stem("гречка"), RussianStemmer.stem("гречки"))
+        assertEquals(RussianStemmer.stem("творог"), RussianStemmer.stem("творога"))
+        assertEquals("ход", RussianStemmer.stem("ходивший"))
+        assertEquals("красив", RussianStemmer.stem("красивейший"))
+        assertEquals("картофел", RussianStemmer.stem("картофель"))
+    }
+
+    @Test
+    fun `поиск находит продукт по другой форме слова`() {
+        val index = FoodSearch.buildIndex("Куриное филе отварное", "Chicken breast boiled", "Мой продукт")
+        assertTrue(FoodSearch.matches(index, FoodSearch.queryStems("куриного филе")))
+        assertTrue(FoodSearch.matches(index, FoodSearch.queryStems("филе")))
+        assertTrue(FoodSearch.matches(index, FoodSearch.queryStems("chicken")))
+        assertFalse(FoodSearch.matches(index, FoodSearch.queryStems("говядина")))
+        val potato = FoodSearch.buildIndex("Картофель отварной")
+        assertTrue(FoodSearch.matches(potato, FoodSearch.queryStems("картофелины")))
+    }
+
+    @Test
+    fun `русский запрос переводится для USDA`() {
+        assertEquals("chicken breast", FoodQueryTranslator.translate("куриного филе").englishQuery)
+        assertEquals("chicken breast boiled", FoodQueryTranslator.translate("Куриное филе отварное").englishQuery)
+        assertEquals("potatoes", FoodQueryTranslator.translate("картофелины").englishQuery)
+        assertEquals("apples", FoodQueryTranslator.translate("яблоко").englishQuery)
+        assertEquals("cream", FoodQueryTranslator.translate("сливки").englishQuery)
+        assertEquals("plums", FoodQueryTranslator.translate("слива").englishQuery)
+        assertEquals("cookies", FoodQueryTranslator.translate("печенье").englishQuery)
+        assertEquals("beef liver", FoodQueryTranslator.translate("печень").englishQuery)
+        assertEquals("cheese", FoodQueryTranslator.translate("сыр").englishQuery)
+        assertEquals("carrots raw", FoodQueryTranslator.translate("сырая морковь").englishQuery)
+        assertEquals("butter", FoodQueryTranslator.translate("сливочное масло").englishQuery)
+        assertEquals("oats", FoodQueryTranslator.translate("овсянка").englishQuery)
+        assertNull(FoodQueryTranslator.translate("кнедлики").englishQuery)
+        assertEquals("tea", FoodQueryTranslator.translate("чай").englishQuery)
+        assertNull(FoodQueryTranslator.translate("чайная").englishQuery)
+        assertEquals("greek yogurt", FoodQueryTranslator.translate("greek yogurt").englishQuery)
+    }
+}

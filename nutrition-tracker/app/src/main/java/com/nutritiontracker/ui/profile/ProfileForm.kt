@@ -48,12 +48,14 @@ import com.nutritiontracker.ui.components.formatInput
 import com.nutritiontracker.ui.components.parseDecimal
 import com.nutritiontracker.ui.theme.AppTheme
 import com.nutritiontracker.ui.theme.Dimens
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 data class ProfileForm(
@@ -179,13 +181,17 @@ class ProfileFormViewModel(private val container: AppContainer) : ViewModel() {
         _form.update { it.copy(saving = true) }
         viewModelScope.launch {
             val profile = f.toProfile()
-            container.profile.save(profile)
-            val weight = f.weightKg!!
-            val latest = container.body.observeLatestWeight().first()
-            if (latest == null || (f.existing != null && latest.weightKg != weight)) {
-                container.body.saveBody(
-                    com.nutritiontracker.data.BodyEntry(0, LocalDate.now(), weight, null, null, null, null, null, null, null),
-                )
+            // Появление профиля сразу уводит с экрана онбординга, поэтому сначала
+            // записывается вес, а сама запись не прерывается закрытием экрана.
+            withContext(NonCancellable) {
+                val weight = f.weightKg!!
+                val latest = container.body.observeLatestWeight().first()
+                if (latest == null || (f.existing != null && latest.weightKg != weight)) {
+                    container.body.saveBody(
+                        com.nutritiontracker.data.BodyEntry(0, LocalDate.now(), weight, null, null, null, null, null, null, null),
+                    )
+                }
+                container.profile.save(profile)
             }
             _form.update { it.copy(saving = false, existing = profile) }
             onDone()

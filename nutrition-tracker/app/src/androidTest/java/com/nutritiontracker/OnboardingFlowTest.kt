@@ -62,6 +62,8 @@ class OnboardingFlowTest {
         val container = (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as NutritionApp).container
         runBlocking {
             assertNotNull(container.profile.get())
+            val weights = container.database.weightDao().all()
+            check(weights.any { it.weightKg == 82.0 }) { "Первое взвешивание из онбординга не сохранилось: $weights" }
         }
     }
 }
@@ -79,6 +81,7 @@ class DataSurvivesReinstallTest {
             assertNotNull(container.profile.get())
             val water = container.database.waterDao().all().filter { it.epochDay == LocalDate.now().toEpochDay() }.sumOf { it.amountMl }
             check(water >= 250) { "Вода за сегодня пропала после переустановки: $water" }
+            check(container.database.weightDao().all().isNotEmpty()) { "Взвешивания пропали после переустановки" }
         }
     }
 }

@@ -166,10 +166,70 @@ class RemoteClientsTest {
         assertEquals(RemoteErrorKind.BAD_RESPONSE, r.error.kind)
     }
 
+    /** Ответ search-a-licious: те же записи продуктов, но в поле hits. */
+    private fun enqueueAsHits(name: String, extraHit: String? = null) {
+        val products = kotlinx.serialization.json.Json.parseToJsonElement(fixture(name))
+            .let { (it as kotlinx.serialization.json.JsonObject)["products"]!!.toString() }
+        val hits = if (extraHit == null) products else products.removeSuffix("]") + ",$extraHit]"
+        server.enqueue(MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json").setBody("{\"hits\":$hits}"))
+    }
+
     @Test
-    fun openFoodFactsSearchInRussian() = runTest {
+    fun openFoodFactsSearchUsesSearchServiceFirst() = runTest {
+        // Запись с неожиданным типом поля пропускается, остальные читаются.
+        enqueueAsHits("off_search_cgi.json", extraHit = "{\"code\":\"1\",\"product_name\":{\"ru\":\"x\"}}")
+        val foods = off().search("творог").ok()
+        val req = server.takeRequest()
+        assertEquals("/sal/search", req.requestUrl!!.encodedPath)
+        assertEquals("творог", req.requestUrl!!.queryParameter("q"))
+        assertEquals("NutritionTrackerTest/1.0", req.getHeader("User-Agent"))
+        assertEquals(1, server.requestCount)
+        val tvorog = foods.map { it.food }.first { it.externalId == "4600605029343" }
+        assertEquals(17.0, tvorog.nutrients[Nutrient.PROTEIN]!!, eps)
+        assertFalse(foods.any { it.food.externalId == "1" })
+    }
+
+    @Test
+    fun openFoodFactsFallsBackToClassicSearch() = runTest {
+        server.enqueue(MockResponse().setResponseCode(404).setBody("{}"))
         enqueue("off_search_cgi.json")
         val foods = off().search("творог").ok()
+        assertEquals("/sal/search", server.takeRequest().requestUrl!!.encodedPath)
+        val req = server.takeRequest()
+        assertEquals("творог", req.requestUrl!!.queryParameter("search_terms"))
+        assertTrue(foods.any { it.food.externalId == "4600605029343" })
+    }
+
+    @Test
+    fun serverErrorsAreRetriedButRateLimitIsNot() = runTest {
+        val http = RemoteJson.defaultOkHttp().newBuilder().apply {
+            interceptors().clear()
+            addInterceptor(RemoteJson.RetryInterceptor(listOf(5, 5)))
+        }.build()
+        val client = UsdaClient(http, { "" }, server.url("/fdc/v1/").toString())
+        server.enqueue(MockResponse().setResponseCode(503).setBody("busy"))
+        enqueue("usda_search_chicken.json")
+        assertTrue(client.search("chicken breast").ok().isNotEmpty())
+        assertEquals(2, server.requestCount)
+
+        server.enqueue(MockResponse().setResponseCode(429).setBody("{\"error\":{\"code\":\"OVER_RATE_LIMIT\"}}"))
+        val limited = client.search("apple") as RemoteResult.Failure
+        assertEquals(RemoteErrorKind.RATE_LIMITED, limited.error.kind)
+        assertEquals(3, server.requestCount)
+
+        repeat(3) { server.enqueue(MockResponse().setResponseCode(400).setBody("{\"error\":\"bad\"}")) }
+        val bad = client.search("rice") as RemoteResult.Failure
+        assertEquals(400, bad.error.httpCode)
+        assertTrue(bad.error.userMessage.contains("400"))
+        assertEquals(4, server.requestCount)
+    }
+
+    @Test
+    fun openFoodFactsSearchInRussian() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{\"hits\":[]}"))
+        enqueue("off_search_cgi.json")
+        val foods = off().search("творог").ok()
+        server.takeRequest()
         val req = server.takeRequest()
         assertEquals("творог", req.requestUrl!!.queryParameter("search_terms"))
         assertEquals("NutritionTrackerTest/1.0", req.getHeader("User-Agent"))
@@ -196,6 +256,7 @@ class RemoteClientsTest {
 
     @Test
     fun milkIsPer100MlAndEnergyConvertedFromKj() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{\"hits\":[]}"))
         enqueue("off_search_milk.json")
         val milk = off().search("молоко").ok().map { it.food }.first { it.externalId == "4607053473544" }
         assertEquals(AmountUnit.MILLILITER, milk.basis)

@@ -30,7 +30,10 @@ internal interface OffApi {
     suspend fun product(@Path("code") code: String, @Query("fields") fields: String): OffProductResponse
 }
 
-/** Новый поисковый сервис Open Food Facts (search-a-licious) — запасной вариант. */
+/**
+ * Поисковый сервис Open Food Facts (search-a-licious): быстрее классического
+ * поиска, лучше ранжирует и не ограничен 10 запросами в минуту.
+ */
 internal interface OffSearchApi {
     @GET("search")
     suspend fun search(
@@ -42,7 +45,7 @@ internal interface OffSearchApi {
 }
 
 @kotlinx.serialization.Serializable
-internal data class OffSearchHits(val hits: List<OffProduct> = emptyList())
+internal data class OffSearchHits(val hits: List<kotlinx.serialization.json.JsonObject> = emptyList())
 
 /**
  * Клиент Open Food Facts. Ключ не нужен; сервис просит указывать
@@ -70,18 +73,24 @@ class OpenFoodFactsClient(
     private val searchApi: OffSearchApi = retrofit(searchBaseUrl).create(OffSearchApi::class.java)
 
     /**
-     * Поиск по названию. Основной адрес — классический поиск Open Food Facts;
-     * если он не отвечает, запрос повторяется в новом поисковом сервисе.
+     * Поиск по названию. Сначала — поисковый сервис search-a-licious; если он
+     * не ответил или ничего не нашёл, запрос повторяется в классическом поиске.
+     * Неразборчивая запись пропускается, а не роняет весь ответ.
      */
     suspend fun search(query: String, pageSize: Int = 20): RemoteResult<List<RemoteFood>> {
         val primary = remoteCall(SOURCE) {
+            searchApi.search(query, pageSize, FIELDS).hits.mapNotNull { hit ->
+                runCatching { RemoteJson.json.decodeFromJsonElement(OffProduct.serializer(), hit) }.getOrNull()
+                    ?.let { p -> OffMapper.map(p)?.let { RemoteFood(it, true) } }
+            }
+        }
+        if (primary is RemoteResult.Success && primary.value.isNotEmpty()) return primary
+        if (primary is RemoteResult.Failure && primary.error.kind == RemoteErrorKind.NO_NETWORK) return primary
+        val fallback = remoteCall(SOURCE) {
             api.search(query, pageSize, FIELDS).products.mapNotNull { p -> OffMapper.map(p)?.let { RemoteFood(it, true) } }
         }
-        if (primary is RemoteResult.Success || (primary as RemoteResult.Failure).error.kind == RemoteErrorKind.NO_NETWORK) return primary
-        val fallback = remoteCall(SOURCE) {
-            searchApi.search(query, pageSize, FIELDS).hits.mapNotNull { p -> OffMapper.map(p)?.let { RemoteFood(it, true) } }
-        }
-        return if (fallback is RemoteResult.Success) fallback else primary
+        // Пустой, но успешный ответ лучше ошибки запасного адреса.
+        return if (fallback is RemoteResult.Failure && primary is RemoteResult.Success) primary else fallback
     }
 
     suspend fun product(code: String): RemoteResult<RemoteFood> = remoteCall(SOURCE) {

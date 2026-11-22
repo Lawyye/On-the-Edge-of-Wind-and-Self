@@ -72,7 +72,7 @@ object QuantityResolver {
             CountKind.HOUSEHOLD -> emptyList()
         }
         val serving = if (q.kind == CountKind.HOUSEHOLD) {
-            householdServing(q.unitWord, servings)
+            householdServing(q.unitWord, basis, servings)
         } else {
             wanted.firstNotNullOfOrNull { kind -> servings.firstOrNull { it.kind == kind } }
         }
@@ -104,18 +104,59 @@ object QuantityResolver {
      * Бытовая мера → справочная порция источника: «стакан», «кружка», «чашка» —
      * cup; «столовая ложка» — tbsp; «чайная ложка» — tsp. Просто «ложка» не
      * сопоставляется: неизвестно, столовая она или чайная.
+     *
+     * Если нужной меры в источнике нет, она выводится из другой меры того же
+     * продукта по точным соотношениям американских мер (1 cup = 16 tbsp,
+     * 1 tbsp = 3 tsp). Для продуктов в миллилитрах ложки — метрические 15 и 5 мл.
      */
-    private fun householdServing(unitWord: String?, servings: List<ServingSize>): ServingSize? {
+    private fun householdServing(unitWord: String?, basis: AmountUnit, servings: List<ServingSize>): ServingSize? {
         val w = unitWord?.lowercase() ?: return null
-        val keys = when {
-            w.contains("стол") && w.contains("лож") -> listOf("tbsp", "tablespoon")
-            w.contains("чайн") && w.contains("лож") -> listOf("tsp", "teaspoon")
-            w.startsWith("стакан") || w.startsWith("кружк") || w.startsWith("чашк") -> listOf("cup")
+        val measure = when {
+            w.contains("стол") && w.contains("лож") -> Measure.TBSP
+            w.contains("чайн") && w.contains("лож") -> Measure.TSP
+            w.startsWith("стакан") || w.startsWith("круж") || w.startsWith("чаш") -> Measure.CUP
             else -> return null
         }
-        return servings.firstOrNull { s ->
-            s.kind == ServingKind.HOUSEHOLD && keys.any { k -> Regex("\\b$k\\b").containsMatchIn(s.label.lowercase()) }
+        val one = "1 ${measure.keys.first()}"
+        perOne(measure, servings)?.let { (s, grams) ->
+            val label = if (leadingCount(s.label) == 1.0) s.label else "${s.label} → $one"
+            return ServingSize(label, grams, ServingKind.HOUSEHOLD, s.sourceNote)
         }
+        for (other in Measure.entries) {
+            if (other == measure) continue
+            val (s, perOther) = perOne(other, servings) ?: continue
+            val amount = perOther * measure.tsp / other.tsp
+            val ratio = if (other.tsp > measure.tsp) "÷ ${formatCount(other.tsp / measure.tsp)}" else "× ${formatCount(measure.tsp / other.tsp)}"
+            return ServingSize("1 ${other.keys.first()} $ratio = $one; из «${s.label}»", amount, ServingKind.HOUSEHOLD, s.sourceNote)
+        }
+        if (basis == AmountUnit.MILLILITER && measure != Measure.CUP) {
+            return ServingSize(one, measure.metricMl, ServingKind.HOUSEHOLD, "метрическая мера")
+        }
+        return null
+    }
+
+    /** Мера источника и её вес в пересчёте на одну единицу: «0.5 cup» 120 г → 240 г. */
+    private fun perOne(m: Measure, servings: List<ServingSize>): Pair<ServingSize, Double>? =
+        servings.firstNotNullOfOrNull { s ->
+            val lower = s.label.lowercase()
+            if (s.kind != ServingKind.HOUSEHOLD || m.keys.none { k -> Regex("\\b$k\\b").containsMatchIn(lower) }) return@firstNotNullOfOrNull null
+            val per = s.amount / leadingCount(s.label)
+            if (per.isFinite() && per > 0) s to per else null
+        }
+
+    /** Число в начале описания меры: «2 tbsp» → 2, «0.5 cup» → 0,5, «1/4 cup» → 0,25; без числа — 1. */
+    private fun leadingCount(label: String): Double {
+        val m = Regex("^\\s*(\\d+(?:[.,]\\d+)?)(?:\\s*/\\s*(\\d+))?").find(label) ?: return 1.0
+        val a = m.groupValues[1].replace(',', '.').toDoubleOrNull() ?: return 1.0
+        val d = m.groupValues[2].toDoubleOrNull()
+        val v = if (d != null && d > 0) a / d else a
+        return if (v.isFinite() && v > 0) v else 1.0
+    }
+
+    private enum class Measure(val keys: List<String>, val tsp: Double, val metricMl: Double) {
+        TSP(listOf("tsp", "teaspoon", "teaspoons"), 1.0, 5.0),
+        TBSP(listOf("tbsp", "tablespoon", "tablespoons"), 3.0, 15.0),
+        CUP(listOf("cup", "cups"), 48.0, 0.0),
     }
 
     private fun formatCount(v: Double): String =

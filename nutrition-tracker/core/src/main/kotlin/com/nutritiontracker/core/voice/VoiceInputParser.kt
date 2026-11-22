@@ -47,26 +47,30 @@ data class ParsedUtterance(
  * пользователя: если количество не прозвучало, оно остаётся пустым.
  */
 object VoiceInputParser {
-    private val gramUnits = setOf("г", "гр", "грамм", "грамма", "граммов", "граммы", "грам", "грамов", "граммах", "граммам")
-    private val kgUnits = setOf("кг", "килограмм", "килограмма", "килограммов", "килограммы", "кило")
-    private val mlUnits = setOf("мл", "миллилитр", "миллилитра", "миллилитров", "миллилитры")
-    private val literUnits = setOf("л", "литр", "литра", "литров", "литры", "литре")
-    private val pieceUnits = setOf(
-        "шт", "штук", "штука", "штуки", "штуку", "штучки", "штучек", "штучка",
-        "кусок", "куска", "куски", "кусков", "кусочек", "кусочка", "кусочков", "кусочки",
-        "ломтик", "ломтика", "ломтиков", "ломтики", "долька", "дольки", "долек", "дольку",
-    )
-    private val portionUnits = setOf("порция", "порции", "порций", "порцию")
-    private val packageUnits = setOf(
-        "пачка", "пачки", "пачку", "пачек", "упаковка", "упаковки", "упаковку", "упаковок",
-        "банка", "банки", "банку", "банок", "бутылка", "бутылки", "бутылку", "бутылок",
-    )
-    private val householdUnits = setOf(
-        "стакан", "стакана", "стаканов", "стаканчик", "стаканчика", "чашка", "чашки", "чашку", "чашек",
-        "кружка", "кружки", "кружку", "кружек", "ложка", "ложки", "ложку", "ложек",
-        "тарелка", "тарелки", "тарелку", "тарелок", "миска", "миски", "миску", "горсть", "горсти",
-    )
-    private val householdPrefixes = setOf("столовая", "столовые", "столовых", "столовую", "чайная", "чайные", "чайных", "чайную")
+    /** Единица измерения в любом падеже: «ложка», «ложки», «ложках», «чашек», «граммами». */
+    private enum class UnitKind { GRAM, KG, ML, LITER, PIECE, PORTION, PACKAGE, HOUSEHOLD }
+
+    private val unitPatterns: List<Pair<Regex, UnitKind>> = listOf(
+        "г|гр|грамм?(а|ов|ы|ах|ам|ами|ом|е)?" to UnitKind.GRAM,
+        "кг|кило|килограмм?(а|ов|ы|ах|ам|ами|ом|е)?" to UnitKind.KG,
+        "мл|мил?лилитр(а|ов|ы|ах|ам|ами|ом|е)?" to UnitKind.ML,
+        "л|литр(а|ов|ы|ах|ам|ами|ом|е)?" to UnitKind.LITER,
+        ("шт|штук(а|и|у|ой|ами|ах)?|штуч(ка|ки|ку|ек|кой|ках|ками)|" +
+            "кус(ок|ка|ки|ков|ку|ком|ках|ками)|кусоч(ек|ка|ки|ков|ку|ком|ках|ками)|" +
+            "ломтик(а|и|ов|ом|ах|ами)?|ломоть|ломт(я|и|ей|ем|ями)|доль(ка|ки|ку|кой|ках|ками)|долек") to UnitKind.PIECE,
+        "порци(я|и|й|ю|ей|ях|ями)" to UnitKind.PORTION,
+        ("пач(ка|ки|ку|ек|кой|ках|ками)|упаков(ка|ки|ку|ок|кой|ках|ками)|" +
+            "бан(ка|ки|ку|ок|кой|ках|ками)|бутыл(ка|ки|ку|ок|кой|ках|ками)|бутылоч(ка|ки|ку|ек)") to UnitKind.PACKAGE,
+        ("стакан(а|ов|ы|е|ом|ах|ами)?|стаканчик(а|и|ов|ом|ах)?|ча(шка|шки|шку|шек|шкой|шках|шками)|" +
+            "круж(ка|ки|ку|ек|кой|ках|ками)|лож(ка|ки|ку|ек|кой|ках|ками|ечка|ечки|ечку|ечек|ечкой)|" +
+            "тарел(ка|ки|ку|ок|кой|ках|ками)|мис(ка|ки|ку|ок|кой|ках|ками)|горст(ь|и|ей|ью|ями)") to UnitKind.HOUSEHOLD,
+    ).map { (re, kind) -> Regex(re) to kind }
+
+    private fun unitKind(token: String): UnitKind? = unitPatterns.firstOrNull { it.first.matches(token) }?.second
+
+    /** «столовая», «чайных» — только перед ложкой. */
+    private val spoonPrefix = Regex("столов(ая|ые|ых|ую|ой|ыми|ом)|чайн(ая|ые|ых|ую|ой|ыми|ом)|десертн(ая|ые|ых|ую|ой)")
+    private val spoon = Regex("лож(ка|ки|ку|ек|кой|ках|ками|ечка|ечки|ечку|ечек|ечкой)")
 
     private val fillers = setOf(
         "я", "мы", "съел", "съела", "съели", "поел", "поела", "поели", "покушал", "покушала", "скушал", "скушала",
@@ -209,26 +213,23 @@ object VoiceInputParser {
     private fun unitAt(tokens: List<String>, i: Int): Pair<String, Int>? {
         if (i >= tokens.size) return null
         val t = tokens[i]
-        if (t in householdPrefixes && i + 1 < tokens.size && tokens[i + 1] in householdUnits) {
-            return "${t} ${tokens[i + 1]}" to 2
+        if (spoonPrefix.matches(t) && i + 1 < tokens.size && spoon.matches(tokens[i + 1])) {
+            return "$t ${tokens[i + 1]}" to 2
         }
-        val known = t in gramUnits || t in kgUnits || t in mlUnits || t in literUnits ||
-            t in pieceUnits || t in portionUnits || t in packageUnits || t in householdUnits
-        return if (known) t to 1 else null
+        return if (unitKind(t) != null) t to 1 else null
     }
 
     private fun quantityFor(value: Double, unit: String?): ParsedQuantity {
-        val last = unit?.substringAfterLast(' ')
-        return when {
-            last == null -> ParsedQuantity.Count(value, CountKind.PIECE)
-            last in gramUnits -> ParsedQuantity.Mass(value)
-            last in kgUnits -> ParsedQuantity.Mass(value * 1000.0)
-            last in mlUnits -> ParsedQuantity.Volume(value)
-            last in literUnits -> ParsedQuantity.Volume(value * 1000.0)
-            last in pieceUnits -> ParsedQuantity.Count(value, CountKind.PIECE, unit)
-            last in portionUnits -> ParsedQuantity.Count(value, CountKind.PORTION, unit)
-            last in packageUnits -> ParsedQuantity.Count(value, CountKind.PACKAGE, unit)
-            else -> ParsedQuantity.Count(value, CountKind.HOUSEHOLD, unit)
+        val last = unit?.substringAfterLast(' ') ?: return ParsedQuantity.Count(value, CountKind.PIECE)
+        return when (unitKind(last)) {
+            UnitKind.GRAM -> ParsedQuantity.Mass(value)
+            UnitKind.KG -> ParsedQuantity.Mass(value * 1000.0)
+            UnitKind.ML -> ParsedQuantity.Volume(value)
+            UnitKind.LITER -> ParsedQuantity.Volume(value * 1000.0)
+            UnitKind.PIECE -> ParsedQuantity.Count(value, CountKind.PIECE, unit)
+            UnitKind.PORTION -> ParsedQuantity.Count(value, CountKind.PORTION, unit)
+            UnitKind.PACKAGE -> ParsedQuantity.Count(value, CountKind.PACKAGE, unit)
+            UnitKind.HOUSEHOLD, null -> ParsedQuantity.Count(value, CountKind.HOUSEHOLD, unit)
         }
     }
 
@@ -260,7 +261,7 @@ object VoiceInputParser {
         if (unit != null) {
             val u = unit.first.substringAfterLast(' ')
             return when {
-                u in gramUnits -> QuantityMatch(null, unit.second, "Не прозвучало, сколько граммов")
+                unitKind(u) == UnitKind.GRAM -> QuantityMatch(null, unit.second, "Не прозвучало, сколько граммов")
                 else -> QuantityMatch(quantityFor(1.0, unit.first), unit.second)
             }
         }

@@ -55,6 +55,8 @@ class OnboardingFlowTest {
         compose.onNodeWithText("Готово").performClick()
 
         waitForText("Сегодня")
+        // Ждём окончания загрузки главной: до этого в списке только скелетоны.
+        waitForText("Приёмы пищи")
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("+250"))
         compose.onNodeWithText("+250").performClick()
         waitForText("250 / 2000 мл")

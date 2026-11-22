@@ -90,7 +90,7 @@ class DataLayerTest {
     )
 
     @Test
-    fun unknownStaysUnknownAndZeroStaysZeroAfterStorage() = runBlocking {
+    fun unknownStaysUnknownAndZeroStaysZeroAfterStorage() = runBlocking<Unit> {
         val id = foods.createUserFood(chicken, listOf("курица"))
         val f = foods.get(id)!!
         assertEquals(0.0, f.nutrients[Nutrient.CARBS]!!, 0.0)
@@ -101,7 +101,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun diaryKeepsSnapshotWhenFoodChangesOrIsDeleted() = runBlocking {
+    fun diaryKeepsSnapshotWhenFoodChangesOrIsDeleted() = runBlocking<Unit> {
         val id = foods.createUserFood(chicken, emptyList())
         diary.add(foods.get(id)!!.toNewEntry(200.0), day, MealType.LUNCH)
         foods.updateUserFood(id, chicken.copy(nutrients = Nutrients.of(Nutrient.ENERGY to 999.0)), emptyList())
@@ -115,7 +115,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun editingEntryRecalculatesFromSnapshot() = runBlocking {
+    fun editingEntryRecalculatesFromSnapshot() = runBlocking<Unit> {
         val id = foods.createUserFood(chicken, emptyList())
         diary.add(foods.get(id)!!.toNewEntry(100.0), day, MealType.LUNCH)
         val e = diary.observeDay(day).first().single()
@@ -127,7 +127,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun addAllIsAllOrNothing() = runBlocking {
+    fun addAllIsAllOrNothing() = runBlocking<Unit> {
         val id = foods.createUserFood(chicken, emptyList())
         val good = foods.get(id)!!.toNewEntry(100.0)
         val bad = good.copy(amount = 0.0)
@@ -139,7 +139,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun recipeBecomesFoodPer100CookedAndKeepsIncompleteness() = runBlocking {
+    fun recipeBecomesFoodPer100CookedAndKeepsIncompleteness() = runBlocking<Unit> {
         val chickenId = foods.createUserFood(chicken, emptyList())
         val c = foods.get(chickenId)!!
         val draft = RecipeDraft(
@@ -167,7 +167,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun remoteFoodIsCachedOnceAndFoundOfflineByRussianQuery() = runBlocking {
+    fun remoteFoodIsCachedOnceAndFoundOfflineByRussianQuery() = runBlocking<Unit> {
         val remote = RemoteFood(
             FoodData(
                 name = "Apples, raw, with skin", nameEn = "Apples, raw, with skin", source = FoodSource.USDA_SR_LEGACY, externalId = "171688",
@@ -185,7 +185,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun weightEntriesAreOnePerDayAndMergeMeasurements() = runBlocking {
+    fun weightEntriesAreOnePerDayAndMergeMeasurements() = runBlocking<Unit> {
         body.saveBody(BodyEntry(0, day, 80.0, null, null, null, null, null, null, null))
         body.saveBody(BodyEntry(0, day, null, 85.0, null, null, null, null, null, null))
         val list = body.observeBody().first()
@@ -196,7 +196,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun dataSurvivesClosingAndReopeningTheDatabase() = runBlocking {
+    fun dataSurvivesClosingAndReopeningTheDatabase() = runBlocking<Unit> {
         val id = foods.createUserFood(chicken, emptyList())
         diary.add(foods.get(id)!!.toNewEntry(150.0), day, MealType.DINNER)
         body.addWater(day, 250)
@@ -209,7 +209,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun backupRoundTripRestoresEverything() = runBlocking {
+    fun backupRoundTripRestoresEverything() = runBlocking<Unit> {
         val settings = SettingsRepository(context)
         val backup = BackupRepository(context, db, settings, "test")
         val id = foods.createUserFood(chicken, listOf("курица"))
@@ -237,7 +237,7 @@ class DataLayerTest {
     }
 
     @Test
-    fun corruptedBackupDoesNotTouchData() = runBlocking {
+    fun corruptedBackupDoesNotTouchData() = runBlocking<Unit> {
         val settings = SettingsRepository(context)
         val backup = BackupRepository(context, db, settings, "test")
         val id = foods.createUserFood(chicken, emptyList())

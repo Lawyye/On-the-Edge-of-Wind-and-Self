@@ -121,18 +121,19 @@ class EnergyAndNormsTest {
     }
 
     @Test
-    fun `белок в граммах на кг желаемого веса, жиры долей, углеводы остатком`() {
-        // Пример пользователя: умеренный дефицит, вес 82 кг, желаемый 76 кг.
-        val ref = MacroCalculator.referenceWeight(82.0, 76.0, losingWeight = true)
-        assertEquals(76.0, ref, eps)
+    fun `белок в граммах на кг веса, жиры долей, углеводы остатком`() {
+        // Умеренный дефицит, вес 82 кг при росте 180 см (ИМТ 25,3) — белок от текущего веса.
+        val ref = MacroCalculator.referenceWeight(82.0, 76.0, 180.0, losingWeight = true)
+        assertEquals(82.0, ref, eps)
         val m = MacroCalculator.goals(2232.0, ref, MacroPlan(1.6, 30))
-        assertEquals(121.6, m.proteinG, 1e-9)
+        assertEquals(131.2, m.proteinG, 1e-9)
         assertEquals(2232.0 * 0.30 / 9.0, m.fatG, 1e-9)
-        assertEquals((2232.0 - 121.6 * 4 - 2232.0 * 0.30) / 4.0, m.carbsG, 1e-9)
+        assertEquals((2232.0 - 131.2 * 4 - 2232.0 * 0.30) / 4.0, m.carbsG, 1e-9)
         assertTrue(m.proteinG in 110.0..140.0)
         assertTrue(m.warnings.isEmpty())
-        // При поддержании веса опорный вес — текущий.
-        assertEquals(82.0, MacroCalculator.referenceWeight(82.0, 76.0, losingWeight = false), eps)
+        // При ожирении (ИМТ ≥ 30) и снижении веса — от желаемого веса.
+        assertEquals(85.0, MacroCalculator.referenceWeight(120.0, 85.0, 175.0, losingWeight = true), eps)
+        assertEquals(120.0, MacroCalculator.referenceWeight(120.0, 85.0, 175.0, losingWeight = false), eps)
     }
 
     @Test

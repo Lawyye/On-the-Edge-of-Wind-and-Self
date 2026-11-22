@@ -70,7 +70,8 @@ class FoodRepository(
         if (stems.isEmpty()) return emptyList()
         val scored = foodDao.searchCandidates()
             .mapNotNull { row ->
-                val s = FoodSearch.score(row.name, row.searchIndex, stems)
+                val penalty = if (row.source.startsWith("usda")) FoodSearch.USDA_EXTRA_WORD_PENALTY else FoodSearch.EXTRA_WORD_PENALTY
+                val s = FoodSearch.score(row.name, row.searchIndex, stems, penalty)
                 if (s <= 0) null else row to (s + usageBonus(row.useCount, row.source))
             }
             .sortedByDescending { it.second }
@@ -110,7 +111,7 @@ class FoodRepository(
         // Сначала то, что действительно совпадает с запросом: поиск Open Food Facts
         // не знает русской морфологии и возвращает много лишнего.
         val offRanked = offFoods.sortedByDescending { FoodSearch.relevance(query, it.food.name, it.food.brand, it.food.category, it.food.nameEn) }
-        val usdaRanked = if (usdaQuery == null) usdaFoods else usdaFoods.sortedByDescending { FoodSearch.relevance(usdaQuery, it.food.name, it.food.category) }
+        val usdaRanked = if (usdaQuery == null) usdaFoods else usdaFoods.sortedByDescending { FoodSearch.relevanceUsda(usdaQuery, it.food.name, it.food.category) }
         OnlineSearchResult(
             usda = usdaRanked,
             openFoodFacts = offRanked,

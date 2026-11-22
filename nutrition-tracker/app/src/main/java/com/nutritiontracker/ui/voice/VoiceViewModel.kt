@@ -97,44 +97,64 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
         _state.update { s -> s.copy(items = s.items.map { if (it.id == id) t(it) else it }) }
 
     /** Ищет продукт: сначала в локальной базе, затем, если есть сеть, в интернете. */
+    /**
+     * Оценка кандидата для автоматического выбора. Сохранённые и онлайн-варианты
+     * сравниваются на равных: прежний автоматический выбор не должен закрепляться
+     * сам собой. Плюс — продуктам, которые вы сами добавляли в дневник, своим
+     * продуктам и рецептам, базовым продуктам USDA (полный состав, без переработки).
+     */
+    private fun candidateScore(query: String, englishQuery: String?, data: com.nutritiontracker.core.model.FoodData, aliases: List<String>, useCount: Int): Double {
+        val base = if (data.source.isUsda) {
+            maxOf(
+                englishQuery?.let { FoodSearch.relevanceUsda(it, data.name, data.category) } ?: 0.0,
+                aliases.maxOfOrNull { a -> FoodSearch.relevance(query, a) } ?: 0.0,
+            )
+        } else {
+            FoodSearch.relevance(query, aliases.firstOrNull() ?: data.name, data.name, data.brand, data.category, data.nameEn)
+        }
+        if (base <= 0.0) return 0.0
+        var bonus = data.nutrients.known.size / 20.0
+        if (data.source == com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION || data.source == com.nutritiontracker.core.model.FoodSource.USDA_SR_LEGACY) bonus += 1.5
+        if (data.source == com.nutritiontracker.core.model.FoodSource.USER || data.source == com.nutritiontracker.core.model.FoodSource.RECIPE) bonus += 3.0
+        bonus += minOf(useCount, 5) * 0.4
+        return base + bonus
+    }
+
     fun findFood(id: Int, query: String) {
-        updateItem(id) { it.copy(searching = true, searchQuery = query, searchError = null) }
+        updateItem(id) { it.copy(searching = true, searchQuery = query, searchError = null, selected = null) }
         viewModelScope.launch {
-            // В локальном поиске все результаты совпадают с запросом (с учётом опечаток).
-            val local = c.foods.searchLocal(query, limit = 6).map { it.food }
-            updateItem(id) { it.copy(localCandidates = local) }
-            if (local.isNotEmpty()) {
-                select(id, local.first())
-            }
+            val englishQuery = com.nutritiontracker.core.text.FoodQueryTranslator.translate(query).englishQuery
+            val local = c.foods.searchLocal(query, limit = 8).map { it.food }
+            val localScored = local.map { f -> f to candidateScore(query, englishQuery, f.data, f.aliases, f.useCount) }
+                .sortedByDescending { it.second }
+            updateItem(id) { it.copy(localCandidates = localScored.map { p -> p.first }) }
             val settings = c.settings.current()
-            if (settings.onlineSearchEnabled && c.connectivity.online.value) {
-                val online = c.foods.searchOnline(query, settings)
-                // Результаты из интернета ранжируются по совпадению с запросом: Open Food Facts —
-                // с русским запросом, USDA — с переводом. При равенстве выше продукт с более полным составом.
-                val scored = online.openFoodFacts.map { r ->
-                    r to FoodSearch.relevance(query, r.food.name, r.food.brand, r.food.category, r.food.nameEn)
-                } + online.usda.map { r ->
-                    r to (online.usdaQuery?.let { q -> FoodSearch.relevance(q, r.food.name, r.food.category) } ?: 0.0)
-                }
-                val ranked = scored
-                    .map { (r, score) -> Triple(r, score, if (score > 0) score + r.food.nutrients.known.size / 20.0 else 0.0) }
-                    .sortedByDescending { it.third }
-                val remote = ranked.take(8).map { it.first }
-                val best = ranked.firstOrNull { it.second > 0 }?.first
-                updateItem(id) {
-                    it.copy(
-                        remoteCandidates = remote,
-                        searching = false,
-                        searchError = when {
-                            online.errors.isNotEmpty() -> online.errors.first().let { e -> "${e.source}: ${e.kind.messageRu}" }
-                            local.isEmpty() && best == null -> "Точного совпадения не нашлось — выберите продукт из вариантов или уточните название"
-                            else -> null
-                        },
-                    )
-                }
-                if (local.isEmpty() && best != null) selectRemote(id, best)
-            } else {
-                updateItem(id) { it.copy(searching = false, searchError = if (local.isEmpty()) "Нет интернета — поиск только по сохранённым продуктам" else null) }
+            val online = if (settings.onlineSearchEnabled && c.connectivity.online.value) c.foods.searchOnline(query, settings) else null
+            val cachedKeys = local.mapNotNull { f -> f.data.externalId?.let { f.source to it } }.toSet()
+            val remoteScored = online?.let { o ->
+                (o.openFoodFacts + o.usda)
+                    .filter { r -> r.food.externalId == null || (r.food.source to r.food.externalId) !in cachedKeys }
+                    .map { r -> r to candidateScore(query, o.usdaQuery, r.food, emptyList(), 0) }
+                    .sortedByDescending { it.second }
+            } ?: emptyList()
+            val bestLocal = localScored.firstOrNull { it.second > 0 }
+            val bestRemote = remoteScored.firstOrNull { it.second > 0 }
+            updateItem(id) {
+                it.copy(
+                    remoteCandidates = remoteScored.take(8).map { p -> p.first },
+                    searching = false,
+                    searchError = when {
+                        online == null && local.isEmpty() -> "Нет интернета — поиск только по сохранённым продуктам"
+                        online != null && online.errors.isNotEmpty() && bestLocal == null && bestRemote == null ->
+                            online.errors.first().let { e -> "${e.source}: ${e.kind.messageRu}" }
+                        bestLocal == null && bestRemote == null -> "Точного совпадения не нашлось — выберите продукт из вариантов или уточните название"
+                        else -> null
+                    },
+                )
+            }
+            when {
+                bestRemote != null && (bestLocal == null || bestRemote.second > bestLocal.second) -> selectRemote(id, bestRemote.first)
+                bestLocal != null -> select(id, bestLocal.first)
             }
         }
     }

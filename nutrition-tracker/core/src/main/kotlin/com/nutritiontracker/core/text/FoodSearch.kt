@@ -71,11 +71,20 @@ object FoodSearch {
         return d[a.length][b.length]
     }
 
+    /** Штраф за каждое слово названия, которого нет в запросе, — для русских названий продуктов. */
+    const val EXTRA_WORD_PENALTY = 0.8
+
+    /** Мягкий штраф для описаний USDA («Chicken, breast, boneless, skinless, raw»), где уточнения — норма. */
+    const val USDA_EXTRA_WORD_PENALTY = 0.15
+
     /**
-     * Оценка релевантности для сортировки (больше — лучше; 0 — не совпадает):
-     * точные совпадения слов, совпадение начала названия, короткие названия выше длинных.
+     * Оценка релевантности для сортировки (больше — лучше; 0 — не совпадает).
+     *
+     * В русских названиях главное слово обычно первое: «Ветчина из куриного
+     * филе» — это ветчина, а не филе. Поэтому первое слово названия должно
+     * совпадать с каким-то словом запроса, а каждое лишнее слово снижает оценку.
      */
-    fun score(name: String, index: String, stems: List<String>): Double {
+    fun score(name: String, index: String, stems: List<String>, extraWordPenalty: Double = EXTRA_WORD_PENALTY): Double {
         if (!matches(index, stems)) return 0.0
         val nameTokens = TextNormalizer.tokens(name).map { keyOf(it) }
         var score = 10.0
@@ -84,14 +93,23 @@ object FoodSearch {
             else if (nameTokens.any { it.startsWith(s) || s.startsWith(it) }) score += 1.5
             else if (nameTokens.any { wordMatches(it, s) }) score += 1.0
         }
-        if (nameTokens.isNotEmpty() && stems.isNotEmpty() && (nameTokens[0].startsWith(stems[0]) || stems[0].startsWith(nameTokens[0]))) {
-            score += 2.0
+        val head = nameTokens.firstOrNull { it !in stopWords && it.any(Char::isLetter) }
+        if (head != null && stems.any { s -> head.startsWith(s) || s.startsWith(head) || wordMatches(head, s) }) {
+            score += 3.0
         }
-        score -= (nameTokens.size.coerceAtMost(20)) * 0.15
-        return score
+        val extra = nameTokens.count { t ->
+            t.length >= 3 && t !in stopWords && t.any(Char::isLetter) &&
+                stems.none { s -> t.startsWith(s) || s.startsWith(t) || wordMatches(t, s) }
+        }
+        score -= extra.coerceAtMost(8) * extraWordPenalty
+        return score.coerceAtLeast(0.1)
     }
 
     /** Релевантность продукта запросу без сохранённого индекса (для результатов из интернета). */
     fun relevance(query: String, name: String, vararg other: String?): Double =
         score(name, buildIndex(name, *other), queryStems(query))
+
+    /** То же для английских описаний USDA. */
+    fun relevanceUsda(query: String, name: String, vararg other: String?): Double =
+        score(name, buildIndex(name, *other), queryStems(query), USDA_EXTRA_WORD_PENALTY)
 }

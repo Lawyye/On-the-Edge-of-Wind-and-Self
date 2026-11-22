@@ -49,7 +49,7 @@ object Targets {
             targetWeightKg = profile.targetWeightKg,
         )
         val losingWeight = profile.deficitMode != com.nutritiontracker.core.calc.DeficitMode.MAINTAIN && goal.deficitKcal > 0
-        val reference = MacroCalculator.referenceWeight(weight, profile.targetWeightKg, losingWeight)
+        val reference = MacroCalculator.referenceWeight(weight, profile.targetWeightKg, profile.heightCm, losingWeight)
         val macros = MacroCalculator.goals(goal.goalKcal, reference, profile.macroPlan)
         val base = DriNorms.withMacroPlan(DriNorms.forPerson(profile.sex, age, weight, goal.goalKcal), macros, profile.macroPlan, age)
         val norms = NormEvaluator.applyUserGoals(base, userGoals.map { UserNutrientGoal(it.nutrient, it.target, it.maximum) })

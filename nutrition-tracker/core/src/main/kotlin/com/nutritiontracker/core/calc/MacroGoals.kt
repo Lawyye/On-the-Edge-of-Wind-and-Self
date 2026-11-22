@@ -54,13 +54,18 @@ object MacroCalculator {
     const val KCAL_PER_G_CARBS = 4.0
     const val KCAL_PER_G_FAT = 9.0
 
+    /** ИМТ, начиная с которого белок считается от желаемого веса. */
+    const val OBESITY_BMI = 30.0
+
     /**
-     * Опорный вес для белка. При снижении веса — желаемый вес: иначе при
-     * большом исходном весе норма белка получается завышенной. При
-     * поддержании или наборе — текущий вес.
+     * Опорный вес для белка — текущий вес. Только при ожирении (ИМТ ≥ 30) и
+     * снижении веса берётся желаемый вес: иначе при большой массе жира норма
+     * белка получается завышенной.
      */
-    fun referenceWeight(currentKg: Double, targetKg: Double, losingWeight: Boolean): Double =
-        if (losingWeight && targetKg < currentKg) targetKg else currentKg
+    fun referenceWeight(currentKg: Double, targetKg: Double, heightCm: Double, losingWeight: Boolean): Double {
+        val bmi = EnergyCalculator.bmi(currentKg, heightCm)
+        return if (losingWeight && bmi >= OBESITY_BMI && targetKg < currentKg) targetKg else currentKg
+    }
 
     fun goals(calorieGoalKcal: Double, referenceWeightKg: Double, plan: MacroPlan): MacroGoals {
         require(calorieGoalKcal.isFinite() && calorieGoalKcal > 0) { "Калорийность должна быть больше нуля" }

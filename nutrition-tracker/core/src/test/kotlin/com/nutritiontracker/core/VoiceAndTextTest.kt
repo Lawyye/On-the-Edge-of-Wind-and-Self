@@ -211,6 +211,18 @@ class VoiceAndTextTest {
     }
 
     @Test
+    fun `филе выше, чем ветчина из филе, а сырое филе USDA проходит по переводу`() {
+        val q = "куриного филе"
+        val fillet = FoodSearch.relevance(q, "Филе куриное охлаждённое", "Петелинка")
+        val ham = FoodSearch.relevance(q, "Ветчина из куриного филе", "Мясницкий ряд")
+        val roll = FoodSearch.relevance(q, "Рулет куриный из филе с паприкой")
+        assertTrue("$fillet vs $ham", fillet > ham + 2)
+        assertTrue("$fillet vs $roll", fillet > roll + 2)
+        val usda = FoodSearch.relevanceUsda("chicken breast", "Chicken, breast, boneless, skinless, raw", "Poultry Products")
+        assertTrue("$usda vs $fillet", usda >= fillet)
+    }
+
+    @Test
     fun `релевантный продукт выше нерелевантного`() {
         val good = FoodSearch.relevance("куринного филе", "Филе куриное охлаждённое", "Петелинка")
         val bad = FoodSearch.relevance("куринного филе", "Картофель молодой", "Агрокомплекс")

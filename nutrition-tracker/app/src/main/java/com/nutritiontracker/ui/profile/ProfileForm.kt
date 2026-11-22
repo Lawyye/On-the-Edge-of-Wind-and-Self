@@ -380,7 +380,7 @@ fun ProfileForm.macroPreview(): MacroGoals? {
     val target = targetKg ?: return null
     val losing = deficitMode != com.nutritiontracker.core.calc.DeficitMode.MAINTAIN && goal.deficitKcal > 0
     return runCatching {
-        MacroCalculator.goals(goal.goalKcal, MacroCalculator.referenceWeight(weight, target, losing), macroPlan)
+        MacroCalculator.goals(goal.goalKcal, MacroCalculator.referenceWeight(weight, target, heightCm ?: return null, losing), macroPlan)
     }.getOrNull()
 }
 

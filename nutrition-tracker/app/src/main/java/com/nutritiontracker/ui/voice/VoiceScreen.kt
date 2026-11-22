@@ -219,6 +219,12 @@ private fun MicButton(listening: Boolean, level: Float, onClick: () -> Unit) {
     }
 }
 
+private fun kcal100(d: com.nutritiontracker.core.model.FoodData): String {
+    val kcal = d.nutrients[com.nutritiontracker.core.model.Nutrient.ENERGY]?.let { NutrientFormat.kcal(it) } ?: "?"
+    val p = d.nutrients[com.nutritiontracker.core.model.Nutrient.PROTEIN]?.let { NutrientFormat.amount(it) } ?: "?"
+    return "$kcal ккал, Б $p / 100 ${d.basis.symbol}"
+}
+
 private fun quantityText(q: ParsedQuantity?): String = when (q) {
     null -> "количество не прозвучало"
     is ParsedQuantity.Mass -> "${NutrientFormat.amount(q.grams)} г"
@@ -267,6 +273,8 @@ private fun VoiceItemCard(
         if (sel != null) {
             Text(sel.displayName, style = AppTheme.type.bodyStrong, color = c.textPrimary)
             Text(listOfNotNull(sel.data.brand, sourceShort(sel.source)).joinToString(" · "), style = AppTheme.type.caption, color = c.textSecondary)
+            // Ценность на 100 г — чтобы сразу было видно, если подобрался не тот продукт.
+            Text(com.nutritiontracker.ui.foods.shortNutrition(sel.data), style = AppTheme.type.caption, color = c.textPrimary)
             Spacer(Modifier.height(8.dp))
             AppTextField(
                 item.amountText, onAmount, "Количество", suffix = sel.basis.symbol, numeric = true,
@@ -292,9 +300,9 @@ private fun VoiceItemCard(
             Text("Другие варианты", style = AppTheme.type.label, color = c.textSecondary)
             Spacer(Modifier.height(6.dp))
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                others.forEach { f -> ChoiceChip(f.displayName.take(40), false, onClick = { onSelectLocal(f) }) }
+                others.forEach { f -> ChoiceChip("${f.displayName.take(36)} · ${kcal100(f.data)}", false, onClick = { onSelectLocal(f) }) }
                 item.remoteCandidates.filter { r -> sel == null || r.food.externalId != sel.data.externalId }.forEach { r ->
-                    ChoiceChip("${r.food.name.take(36)} · ${sourceShort(r.food.source)}", false, onClick = { onSelectRemote(r) })
+                    ChoiceChip("${r.food.name.take(32)} · ${kcal100(r.food)} · ${sourceShort(r.food.source)}", false, onClick = { onSelectRemote(r) })
                 }
             }
         }

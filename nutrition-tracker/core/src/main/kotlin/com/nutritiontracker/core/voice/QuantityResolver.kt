@@ -71,7 +71,11 @@ object QuantityResolver {
             CountKind.PACKAGE -> listOf(ServingKind.PACKAGE)
             CountKind.HOUSEHOLD -> emptyList()
         }
-        val serving = wanted.firstNotNullOfOrNull { kind -> servings.firstOrNull { it.kind == kind } }
+        val serving = if (q.kind == CountKind.HOUSEHOLD) {
+            householdServing(q.unitWord, servings)
+        } else {
+            wanted.firstNotNullOfOrNull { kind -> servings.firstOrNull { it.kind == kind } }
+        }
         if (serving == null) {
             val what = when (q.kind) {
                 CountKind.PIECE -> "одной штуки"
@@ -82,13 +86,36 @@ object QuantityResolver {
             return ResolvedAmount.NeedsInput("Нет справочного веса $what для этого продукта — укажите количество")
         }
         val unitSymbol = basis.symbol
+        val cupNote = if (q.kind == CountKind.HOUSEHOLD && Regex("\\bcup\\b").containsMatchIn(serving.label.lowercase())) {
+            "; американская чашка — 240 мл, ваш стакан может отличаться"
+        } else {
+            ""
+        }
         return ResolvedAmount.Resolved(
             amount = q.count * serving.amount,
             unit = basis,
-            explanation = "$countText × ${formatCount(serving.amount)} $unitSymbol (${serving.sourceNote}: ${serving.label})",
+            explanation = "$countText × ${formatCount(serving.amount)} $unitSymbol (${serving.sourceNote}: ${serving.label}$cupNote)",
             usesReferenceWeight = true,
             serving = serving,
         )
+    }
+
+    /**
+     * Бытовая мера → справочная порция источника: «стакан», «кружка», «чашка» —
+     * cup; «столовая ложка» — tbsp; «чайная ложка» — tsp. Просто «ложка» не
+     * сопоставляется: неизвестно, столовая она или чайная.
+     */
+    private fun householdServing(unitWord: String?, servings: List<ServingSize>): ServingSize? {
+        val w = unitWord?.lowercase() ?: return null
+        val keys = when {
+            w.contains("стол") && w.contains("лож") -> listOf("tbsp", "tablespoon")
+            w.contains("чайн") && w.contains("лож") -> listOf("tsp", "teaspoon")
+            w.startsWith("стакан") || w.startsWith("кружк") || w.startsWith("чашк") -> listOf("cup")
+            else -> return null
+        }
+        return servings.firstOrNull { s ->
+            s.kind == ServingKind.HOUSEHOLD && keys.any { k -> Regex("\\b$k\\b").containsMatchIn(s.label.lowercase()) }
+        }
     }
 
     private fun formatCount(v: Double): String =

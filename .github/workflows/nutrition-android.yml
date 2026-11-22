@@ -40,21 +40,37 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Отдельный release-ключ приложения: секреты NT_RELEASE_KEYSTORE_B64,
+      # NT_RELEASE_KEYSTORE_PASSWORD, NT_RELEASE_KEY_ALIAS, NT_RELEASE_KEY_PASSWORD.
+      # Пока их нет, используется общий ключ ANDROID_KEYSTORE_B64 со стандартным паролем.
       - name: Ключ подписи
         env:
-          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          OWN_B64: ${{ secrets.NT_RELEASE_KEYSTORE_B64 }}
+          OWN_STORE_PASSWORD: ${{ secrets.NT_RELEASE_KEYSTORE_PASSWORD }}
+          OWN_ALIAS: ${{ secrets.NT_RELEASE_KEY_ALIAS }}
+          OWN_KEY_PASSWORD: ${{ secrets.NT_RELEASE_KEY_PASSWORD }}
+          SHARED_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
-          if [ -n "$KEYSTORE_B64" ]; then
-            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/nt-release.keystore"
+          if [ -n "$OWN_B64" ] && [ -n "$OWN_STORE_PASSWORD" ] && [ -n "$OWN_ALIAS" ]; then
+            echo "$OWN_B64" | base64 -d > "$RUNNER_TEMP/nt-release.keystore"
+            {
+              echo "NT_KEYSTORE_FILE=$RUNNER_TEMP/nt-release.keystore"
+              echo "NT_KEYSTORE_PASSWORD=$OWN_STORE_PASSWORD"
+              echo "NT_KEY_ALIAS=$OWN_ALIAS"
+              echo "NT_KEY_PASSWORD=${OWN_KEY_PASSWORD:-$OWN_STORE_PASSWORD}"
+            } >> "$GITHUB_ENV"
+            echo "Подпись отдельным release-ключом приложения."
+          elif [ -n "$SHARED_B64" ]; then
+            echo "$SHARED_B64" | base64 -d > "$RUNNER_TEMP/nt-release.keystore"
             {
               echo "NT_KEYSTORE_FILE=$RUNNER_TEMP/nt-release.keystore"
               echo "NT_KEYSTORE_PASSWORD=android"
               echo "NT_KEY_ALIAS=androiddebugkey"
               echo "NT_KEY_PASSWORD=android"
             } >> "$GITHUB_ENV"
-            echo "Подпись постоянным ключом."
+            echo "::warning::Подпись общим ключом ANDROID_KEYSTORE_B64 со стандартным паролем. Заведите отдельный ключ (см. README, раздел «Подпись release»)."
           else
-            echo "::warning::Секрета ANDROID_KEYSTORE_B64 нет — release подписан временным ключом."
+            echo "::warning::Ключа подписи нет — release подписан временным ключом и поверх прежней версии не встанет."
           fi
 
       - name: Тесты расчётов и сетевых клиентов

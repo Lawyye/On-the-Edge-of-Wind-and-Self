@@ -90,6 +90,8 @@ fun VoiceScreen(route: VoiceRoute, onBack: () -> Unit, onSaved: () -> Unit) {
 
     DisposableEffect(Unit) { onDispose { controller.stop() } }
     LaunchedEffect(Unit) { vm.saved.collect { onSaved() } }
+    var saveError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) { vm.errors.collect { saveError = it } }
 
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) controller.start()
@@ -153,9 +155,14 @@ fun VoiceScreen(route: VoiceRoute, onBack: () -> Unit, onSaved: () -> Unit) {
                             systemDialogMissing = true
                         }
                     }) { Text("Системный диалог распознавания", color = c.accent, style = AppTheme.type.caption) }
+                    Text(
+                        "Речь распознаёт система Android. Если на телефоне нет офлайн-пакета русского языка, звук обрабатывается сервисом распознавания (обычно Google) в интернете. Приложение получает только текст и аудио не сохраняет.",
+                        style = AppTheme.type.label, color = c.textTertiary,
+                    )
                 }
             }
             speech.error?.let { item { InfoBanner(it, kind = BannerKind.WARNING) } }
+            saveError?.let { item { InfoBanner(it, kind = BannerKind.ERROR) } }
             if (systemDialogMissing) item { InfoBanner("На устройстве нет системного распознавания речи. Введите текст вручную.", kind = BannerKind.WARNING) }
             item {
                 Column {

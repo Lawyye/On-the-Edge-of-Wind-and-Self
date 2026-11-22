@@ -197,4 +197,63 @@ class VoiceAndTextTest {
         assertNull(FoodQueryTranslator.translate("чайная").englishQuery)
         assertEquals("greek yogurt", FoodQueryTranslator.translate("greek yogurt").englishQuery)
     }
+
+    @Test
+    fun `опечатки и удвоенные буквы не мешают поиску`() {
+        val index = FoodSearch.buildIndex("Куриное филе отварное")
+        assertTrue(FoodSearch.matches(index, FoodSearch.queryStems("куринного филе")))
+        assertTrue(FoodSearch.matches(index, FoodSearch.queryStems("куринное филле")))
+        // Короткие основы без нечёткого сравнения: «сливки» не находят «сливы».
+        assertFalse(FoodSearch.matches(FoodSearch.buildIndex("Сливы свежие"), FoodSearch.queryStems("сливки")))
+        // Одна опечатка в длинном слове.
+        assertTrue(FoodSearch.matches(FoodSearch.buildIndex("Картофель отварной"), FoodSearch.queryStems("картофль")))
+        assertEquals(1, FoodSearch.osaDistance("курни", "курин"))
+    }
+
+    @Test
+    fun `релевантный продукт выше нерелевантного`() {
+        val good = FoodSearch.relevance("куринного филе", "Филе куриное охлаждённое", "Петелинка")
+        val bad = FoodSearch.relevance("куринного филе", "Картофель молодой", "Агрокомплекс")
+        assertTrue(good > 0)
+        assertEquals(0.0, bad, 0.0)
+    }
+
+    @Test
+    fun `перевод для USDA понимает опечатки`() {
+        assertEquals("chicken breast", FoodQueryTranslator.translate("куринного филе").englishQuery)
+        assertEquals("pizza", FoodQueryTranslator.translate("пица").englishQuery)
+    }
+
+    @Test
+    fun `способ приготовления после количества не создаёт новую позицию`() {
+        val r = VoiceInputParser.parse("курица 200 г отварная, рис 150 г на пару")
+        assertEquals(listOf("курица отварная", "рис на пару"), r.items.map { it.name })
+        assertEquals(ParsedQuantity.Mass(150.0), r.items[1].quantity)
+    }
+
+    @Test
+    fun `приём пищи через двоеточие`() {
+        val r = VoiceInputParser.parse("завтрак: овсянка 50 г, кофе 200 мл")
+        assertEquals(MealType.BREAKFAST, r.mealHint)
+        assertEquals(listOf("овсянка", "кофе"), r.items.map { it.name })
+    }
+
+    @Test
+    fun `стакан и ложки сопоставляются со справочными порциями USDA`() {
+        val servings = listOf(
+            ServingSize("1 cup", 245.0, ServingKind.HOUSEHOLD, "USDA"),
+            ServingSize("1 tbsp", 15.3, ServingKind.HOUSEHOLD, "USDA"),
+        )
+        val glass = QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "стакан"), AmountUnit.GRAM, servings) as ResolvedAmount.Resolved
+        assertEquals(245.0, glass.amount, eps)
+        assertTrue(glass.explanation!!.contains("240 мл"))
+        val spoons = QuantityResolver.resolve(ParsedQuantity.Count(2.0, CountKind.HOUSEHOLD, "столовые ложки"), AmountUnit.GRAM, servings) as ResolvedAmount.Resolved
+        assertEquals(30.6, spoons.amount, eps)
+        // «Ложка» без уточнения неоднозначна.
+        assertTrue(QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "ложка"), AmountUnit.GRAM, servings) is ResolvedAmount.NeedsInput)
+        // Полстакана.
+        val half = VoiceInputParser.parse("полстакана кефира").items.single().quantity
+        val r = QuantityResolver.resolve(half, AmountUnit.GRAM, servings) as ResolvedAmount.Resolved
+        assertEquals(122.5, r.amount, eps)
+    }
 }

@@ -39,8 +39,8 @@ object DiaryCsvExporter {
             val cells = mutableListOf(
                 r.date.toString(),
                 r.meal.titleRu,
-                r.foodName,
-                r.brand ?: "",
+                neutralizeFormula(r.foodName),
+                neutralizeFormula(r.brand ?: ""),
                 number(r.amount),
                 r.unit.symbol,
             )
@@ -54,6 +54,18 @@ object DiaryCsvExporter {
     /** Число с десятичной запятой, до 4 знаков после неё, без лишних нулей. */
     fun number(v: Double): String =
         BigDecimal.valueOf(v).setScale(4, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString().replace('.', ',')
+
+    /**
+     * Защита от CSV-инъекции: названия продуктов приходят в том числе из
+     * Open Food Facts, которую может редактировать кто угодно. Ячейка,
+     * начинающаяся с «=», «+», «-», «@», табуляции или перевода строки,
+     * в Excel и Google Таблицах выполнилась бы как формула, поэтому перед ней
+     * ставится апостроф — значение показывается как обычный текст.
+     */
+    fun neutralizeFormula(s: String): String =
+        if (s.isNotEmpty() && s[0] in FORMULA_STARTS) "'$s" else s
+
+    private val FORMULA_STARTS = setOf('=', '+', '-', '@', '\t', '\r', '\n')
 
     private fun escape(s: String): String =
         if (s.contains(';') || s.contains('"') || s.contains('\n') || s.contains('\r')) {

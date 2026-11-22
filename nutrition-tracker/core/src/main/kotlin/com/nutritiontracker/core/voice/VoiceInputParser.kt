@@ -86,7 +86,22 @@ object VoiceInputParser {
         listOf("поужинал") to MealType.DINNER, listOf("поужинала") to MealType.DINNER,
         listOf("на", "перекус") to MealType.SNACK, listOf("перекусил") to MealType.SNACK,
         listOf("перекусила") to MealType.SNACK, listOf("перекус") to MealType.SNACK,
+        // «Завтрак: овсянка 50 г» — одиночное слово тоже задаёт приём пищи.
+        listOf("завтрак") to MealType.BREAKFAST, listOf("обед") to MealType.LUNCH,
+        listOf("ужин") to MealType.DINNER, listOf("перекусы") to MealType.SNACK,
     )
+
+    /**
+     * Уточнения после количества относятся к предыдущему продукту, а не
+     * начинают новый: «курица 200 г отварная», «рис 150 г варёный».
+     */
+    private val modifierPrefixes = listOf(
+        "отварн", "варен", "жарен", "тушен", "запечен", "копчен", "вялен", "сушен", "свеж",
+        "обезжир", "нежирн", "маложир", "домашн", "гриль", "консервир", "маринован", "солен",
+    )
+    private val modifierWords = setOf("на_пару", "сырой", "сырая", "сырое", "сырые", "сырых", "сырую", "сырого", "сырым")
+
+    private fun isModifier(token: String): Boolean = token in modifierWords || modifierPrefixes.any { token.startsWith(it) }
 
     fun parse(text: String): ParsedUtterance {
         var normalized = text.lowercase().replace('ё', 'е')
@@ -99,6 +114,9 @@ object VoiceInputParser {
         // «200г» → «200 г»
         normalized = normalized.replace(Regex("(\\d)([а-я])"), "$1 $2")
         normalized = normalized.replace("пол-", "пол ")
+        // «на пару» — способ приготовления, а не «пара» как число 2.
+        normalized = normalized.replace(Regex("(^|\\s)на\\s+пару(?![\\p{L}])"), "$1на_пару")
+        normalized = normalized.replace(':', ',')
 
         val allTokens = normalized.split(Regex("[^\\p{L}\\p{N}._]+")).filter { it.isNotBlank() }
         val (mealHint, dayOffset) = detectHints(allTokens)
@@ -313,7 +331,7 @@ object VoiceInputParser {
                 continue
             }
             // После «банан 2» новое слово — уже следующий продукт.
-            if (cur.hadQuantityToken && cur.quantityAfterName && t !in edgeWords) {
+            if (cur.hadQuantityToken && cur.quantityAfterName && t !in edgeWords && !isModifier(t)) {
                 items += cur.build()
                 cur = Builder()
             }
@@ -322,6 +340,6 @@ object VoiceInputParser {
             i++
         }
         if (!cur.isEmpty) items += cur.build()
-        return items
+        return items.map { it.copy(name = it.name.replace("на_пару", "на пару")) }
     }
 }

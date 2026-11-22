@@ -71,6 +71,10 @@ fun HomeScreen(
     val s by vm.state.collectAsStateWithLifecycle()
     val c = AppTheme.colors
     var waterDialog by remember { mutableStateOf(false) }
+    val snackbar = remember { androidx.compose.material3.SnackbarHostState() }
+    androidx.compose.runtime.LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
+
+    Box(Modifier.fillMaxSize()) {
 
     LazyColumn(
         Modifier.fillMaxSize().background(c.background).statusBarsPadding(),
@@ -104,6 +108,9 @@ fun HomeScreen(
         item { WeightCard(s, onOpenProgress) }
         item { GoalStatusCard(s) }
         item { Spacer(Modifier.height(8.dp)) }
+    }
+
+    androidx.compose.material3.SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
 
     if (waterDialog) {
@@ -272,6 +279,9 @@ private fun WeightCard(s: HomeState, onOpen: () -> Unit) {
                     if (r > 0) "До цели ${NutrientFormat.kg(r)} кг" else "Цель достигнута",
                     style = AppTheme.type.caption, color = if (r > 0) c.textSecondary else c.success,
                 )
+                s.goalForecast?.takeIf { r > 0 }?.let { d ->
+                    Text("При текущем темпе — примерно к ${Dates.full(d)}", style = AppTheme.type.caption, color = c.accent)
+                }
             }
         } else {
             Text("Записывайте вес, чтобы видеть тенденцию.", style = AppTheme.type.caption, color = c.textSecondary)

@@ -39,6 +39,8 @@ data class HomeState(
     val summary: DaySummary = DaySummary.of(LocalDate.now(), emptyList()),
     val waterMl: Int = 0,
     val weight: WeightSummary? = null,
+    /** Прогноз даты достижения желаемого веса при текущем темпе. */
+    val goalForecast: LocalDate? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -65,10 +67,22 @@ class HomeViewModel(private val c: AppContainer) : ViewModel() {
             summary = summary,
             waterMl = water,
             weight = if (weights.isEmpty()) null else WeightTrend.summary(weights, profile?.startWeightKg, profile?.targetWeightKg, day),
+            goalForecast = profile?.let { WeightTrend.forecastGoalDate(weights, it.targetWeightKg, day) },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeState())
 
+    private val _messages = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 2)
+    val messages: kotlinx.coroutines.flow.SharedFlow<String> = _messages
+
     fun addWater(ml: Int) {
-        viewModelScope.launch { runCatching { c.body.addWater(state.value.today, ml) } }
+        viewModelScope.launch {
+            try {
+                c.body.addWater(state.value.today, ml)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _messages.emit("Не удалось добавить воду: ${e.message ?: e.javaClass.simpleName}")
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ enum class NormKind(val titleRu: String, val shortRu: String) {
     AI("Адекватный уровень потребления (AI)", "AI"),
     RDA_PER_KG("Рекомендуемая норма (RDA) на кг массы тела", "RDA"),
     ENERGY_SHARE("Доля от калорийности", "% ккал"),
+    PLAN("Ваш план питания", "план"),
     USER("Ваша цель", "своя"),
 }
 
@@ -243,4 +244,38 @@ object DriNorms {
     }
 
     private fun fmt(v: Double): String = Math.round(v).toString()
+
+    /**
+     * Цели по белкам, жирам и углеводам — из плана питания, чтобы на главной,
+     * в анализе и в нормах была одна и та же цифра. Справочные минимумы
+     * NASEM (RDA белка 0,8 г/кг, RDA углеводов 130 г) показываются в пояснении.
+     */
+    fun withMacroPlan(
+        norms: Map<Nutrient, NutrientNorm>,
+        goals: com.nutritiontracker.core.calc.MacroGoals,
+        plan: com.nutritiontracker.core.calc.MacroPlan,
+        ageYears: Int,
+    ): Map<Nutrient, NutrientNorm> {
+        val result = LinkedHashMap(norms)
+        val rdaPerKg = if (LifeStage.forAge(ageYears) == LifeStage.Y14_18) 0.85 else 0.8
+        val perKg = plan.proteinGPerKg.toString().replace('.', ',')
+        val ref = fmt(goals.referenceWeightKg)
+        result[Nutrient.PROTEIN] = NutrientNorm(
+            Nutrient.PROTEIN, goals.proteinG, NormKind.PLAN, null, null,
+            "План: $perKg г/кг × $ref кг",
+            "Минимум NASEM (RDA) — ${rdaPerKg.toString().replace('.', ',')} г/кг, это ${fmt(rdaPerKg * goals.referenceWeightKg)} г для здорового человека без дефицита. " +
+                "При снижении веса для сохранения мышечной массы обычно рекомендуют 1,2–1,6 г/кг. Опорный вес при снижении веса — желаемый.",
+        )
+        result[Nutrient.FAT] = NutrientNorm(
+            Nutrient.FAT, goals.fatG, NormKind.PLAN, null, null,
+            "План: ${plan.fatPercent}% калорийности",
+            "Допустимый диапазон NASEM (AMDR) — 20–35% калорийности.",
+        )
+        result[Nutrient.CARBS] = NutrientNorm(
+            Nutrient.CARBS, goals.carbsG, NormKind.PLAN, null, null,
+            "План: оставшиеся калории",
+            "Минимум NASEM (RDA) — 130 г в сутки; допустимый диапазон AMDR — 45–65% калорийности.",
+        )
+        return result
+    }
 }

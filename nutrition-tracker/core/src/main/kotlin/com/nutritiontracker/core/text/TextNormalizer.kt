@@ -12,6 +12,18 @@ object TextNormalizer {
 
     fun tokens(text: String): List<String> = normalize(text).split(' ').filter { it.isNotEmpty() }
 
+    /**
+     * Схлопывает повторяющиеся буквы: «куринного» → «куриного», «грамм» → «грам».
+     * Только для сопоставления при поиске, не для показа.
+     */
+    fun squeeze(token: String): String {
+        val sb = StringBuilder(token.length)
+        for (ch in token) {
+            if (sb.isEmpty() || sb[sb.length - 1] != ch || !ch.isLetter()) sb.append(ch)
+        }
+        return sb.toString()
+    }
+
     fun isCyrillic(token: String): Boolean = token.any { it in 'а'..'я' }
 
     fun isLatin(token: String): Boolean = token.any { it in 'a'..'z' }

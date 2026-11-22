@@ -80,11 +80,21 @@ object OffMapper {
         else -> null
     }?.trim()?.takeIf { it.isNotEmpty() }
 
+    private val volumeUnits = mapOf("ml" to 1.0, "мл" to 1.0, "cl" to 10.0, "dl" to 100.0, "l" to 1000.0, "л" to 1000.0)
+    private val massUnits = mapOf("g" to 1.0, "г" to 1.0, "kg" to 1000.0, "кг" to 1000.0)
+
     fun basisOf(p: OffProduct): AmountUnit {
         val per = p.nutritionDataPer?.lowercase()?.replace(" ", "")
         val qUnit = p.productQuantityUnit?.lowercase()?.trim()
         val sUnit = p.servingQuantityUnit?.lowercase()?.trim()
-        return if (per == "100ml" || qUnit == "ml" || (qUnit == null && sUnit == "ml")) AmountUnit.MILLILITER else AmountUnit.GRAM
+        val liquid = per == "100ml" || qUnit in volumeUnits || (qUnit == null && sUnit in volumeUnits)
+        return if (liquid) AmountUnit.MILLILITER else AmountUnit.GRAM
+    }
+
+    /** Количество в единице основы: «1,5 l» → 1500 мл. null — единица не совпадает с основой. */
+    private fun toBasis(value: Double, unit: String, basis: AmountUnit): Double? = when (basis) {
+        AmountUnit.GRAM -> massUnits[unit]?.let { value * it }
+        AmountUnit.MILLILITER -> volumeUnits[unit]?.let { value * it }
     }
 
     fun map(p: OffProduct): FoodData? {
@@ -97,12 +107,23 @@ object OffMapper {
         val lessThan = mutableListOf<Nutrient>()
 
         val kcal = number(n["energy-kcal_100g"])
-        val kj = number(n["energy-kj_100g"]) ?: number(n["energy_100g"])
+        val kjExplicit = number(n["energy-kj_100g"])
+        // Поле «energy» обычно в кДж, но единицу сообщает «energy_unit».
+        val energyGeneric = number(n["energy_100g"])
+        val energyUnit = (n["energy_unit"] as? JsonPrimitive)?.contentOrNull?.lowercase()?.trim()
         when {
             kcal != null && kcal >= 0 -> values[Nutrient.ENERGY] = kcal
-            kj != null && kj >= 0 -> {
-                values[Nutrient.ENERGY] = UnitConversion.toCanonical(Nutrient.ENERGY, kj, SourceUnit.KJ)!!
+            kjExplicit != null && kjExplicit >= 0 -> {
+                values[Nutrient.ENERGY] = UnitConversion.toCanonical(Nutrient.ENERGY, kjExplicit, SourceUnit.KJ)!!
                 notes += "Энергия пересчитана из кДж (1 ккал = 4,184 кДж)"
+            }
+            energyGeneric != null && energyGeneric >= 0 && energyUnit == "kcal" -> {
+                values[Nutrient.ENERGY] = energyGeneric
+                notes += "Энергия взята из общего поля Open Food Facts (указано в ккал)"
+            }
+            energyGeneric != null && energyGeneric >= 0 -> {
+                values[Nutrient.ENERGY] = UnitConversion.toCanonical(Nutrient.ENERGY, energyGeneric, SourceUnit.KJ)!!
+                notes += "Энергия пересчитана из кДж (1 ккал = 4,184 кДж); единица в источнике указана не явно — сверьте с этикеткой"
             }
         }
         for ((nutrient, names) in keys) {
@@ -124,9 +145,9 @@ object OffMapper {
         if (basis == AmountUnit.MILLILITER) notes += "Пищевая ценность указана на 100 мл"
 
         val servings = mutableListOf<ServingSize>()
-        val servingQty = number(p.servingQuantity)
         val servingUnit = p.servingQuantityUnit?.lowercase()?.trim() ?: if (basis == AmountUnit.MILLILITER) "ml" else "g"
-        if (servingQty != null && servingQty > 0 && unitMatches(servingUnit, basis)) {
+        val servingQty = number(p.servingQuantity)?.let { toBasis(it, servingUnit, basis) }
+        if (servingQty != null && servingQty > 0) {
             servings += ServingSize(
                 label = p.servingSize?.trim()?.takeIf { it.isNotEmpty() }?.let { "Порция: $it" } ?: "Порция по этикетке",
                 amount = servingQty,
@@ -134,9 +155,9 @@ object OffMapper {
                 sourceNote = "Open Food Facts, этикетка",
             )
         }
-        val packQty = number(p.productQuantity)
         val packUnit = p.productQuantityUnit?.lowercase()?.trim() ?: if (basis == AmountUnit.MILLILITER) "ml" else "g"
-        if (packQty != null && packQty > 0 && unitMatches(packUnit, basis)) {
+        val packQty = number(p.productQuantity)?.let { toBasis(it, packUnit, basis) }
+        if (packQty != null && packQty > 0) {
             servings += ServingSize(
                 label = p.quantity?.trim()?.takeIf { it.isNotEmpty() }?.let { "Упаковка: $it" } ?: "Упаковка",
                 amount = packQty,
@@ -161,8 +182,4 @@ object OffMapper {
         )
     }
 
-    private fun unitMatches(unit: String, basis: AmountUnit): Boolean = when (basis) {
-        AmountUnit.GRAM -> unit == "g" || unit == "г"
-        AmountUnit.MILLILITER -> unit == "ml" || unit == "мл"
-    }
 }

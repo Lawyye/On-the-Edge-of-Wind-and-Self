@@ -5,7 +5,7 @@ import com.nutritiontracker.core.calc.AdaptiveTdee
 import com.nutritiontracker.core.calc.AdaptiveTdeeResult
 import com.nutritiontracker.core.calc.DayIntake
 import com.nutritiontracker.core.calc.DeficitMode
-import com.nutritiontracker.core.calc.MacroSplit
+import com.nutritiontracker.core.calc.MacroPlan
 import com.nutritiontracker.core.calc.NutrientMath
 import com.nutritiontracker.core.calc.Sex
 import com.nutritiontracker.core.calc.WeightPoint
@@ -28,7 +28,7 @@ data class Profile(
     val deficitMode: DeficitMode,
     val customDeficitKcal: Double?,
     val manualGoalKcal: Double?,
-    val macroSplit: MacroSplit,
+    val macroPlan: MacroPlan,
     val waterGoalMl: Int,
     val adaptiveEnabled: Boolean,
     val appliedAdaptiveTdee: Double?,
@@ -46,7 +46,10 @@ fun ProfileEntity.toProfile(): Profile = Profile(
     deficitMode = DeficitMode.fromKey(deficitMode) ?: DeficitMode.SMALL,
     customDeficitKcal = customDeficitKcal,
     manualGoalKcal = manualGoalKcal,
-    macroSplit = MacroSplit(proteinPercent, fatPercent, carbsPercent),
+    macroPlan = MacroPlan(
+        proteinGPerKg = proteinGPerKg.coerceIn(MacroPlan.MIN_PROTEIN_G_PER_KG, MacroPlan.MAX_PROTEIN_G_PER_KG),
+        fatPercent = fatPercent.coerceIn(MacroPlan.FAT_PERCENT_RANGE.first, MacroPlan.FAT_PERCENT_RANGE.last),
+    ),
     waterGoalMl = waterGoalMl,
     adaptiveEnabled = adaptiveEnabled,
     appliedAdaptiveTdee = appliedAdaptiveTdee,
@@ -80,9 +83,11 @@ class ProfileRepository(
                 deficitMode = p.deficitMode.key,
                 customDeficitKcal = p.customDeficitKcal,
                 manualGoalKcal = p.manualGoalKcal,
-                proteinPercent = p.macroSplit.proteinPercent,
-                fatPercent = p.macroSplit.fatPercent,
-                carbsPercent = p.macroSplit.carbsPercent,
+                // Доли белка и углеводов устарели (с версии 2 белок в г/кг), хранятся для совместимости.
+                proteinPercent = existing?.proteinPercent ?: 25,
+                fatPercent = p.macroPlan.fatPercent,
+                carbsPercent = existing?.carbsPercent ?: 45,
+                proteinGPerKg = p.macroPlan.proteinGPerKg,
                 waterGoalMl = p.waterGoalMl,
                 adaptiveEnabled = p.adaptiveEnabled,
                 appliedAdaptiveTdee = if (p.adaptiveEnabled) p.appliedAdaptiveTdee else null,

@@ -107,9 +107,13 @@ class FoodRepository(
             is RemoteResult.Failure -> { errors += r.error; emptyList() }
             null -> emptyList()
         }
+        // Сначала то, что действительно совпадает с запросом: поиск Open Food Facts
+        // не знает русской морфологии и возвращает много лишнего.
+        val offRanked = offFoods.sortedByDescending { FoodSearch.relevance(query, it.food.name, it.food.brand, it.food.category, it.food.nameEn) }
+        val usdaRanked = if (usdaQuery == null) usdaFoods else usdaFoods.sortedByDescending { FoodSearch.relevance(usdaQuery, it.food.name, it.food.category) }
         OnlineSearchResult(
-            usda = usdaFoods,
-            openFoodFacts = offFoods,
+            usda = usdaRanked,
+            openFoodFacts = offRanked,
             errors = errors,
             usdaQuery = usdaQuery,
             usdaSkippedNoTranslation = settings.usdaEnabled && usdaQuery == null,

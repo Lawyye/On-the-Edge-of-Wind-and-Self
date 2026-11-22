@@ -222,4 +222,21 @@ class RemoteClientsTest {
         val r2 = off().product("0000000000000") as RemoteResult.Failure
         assertEquals(RemoteErrorKind.NOT_FOUND, r2.error.kind)
     }
+
+    @Test
+    fun offLitersAreMillilitersAndEnergyUnitIsRespected() {
+        val p = com.nutritiontracker.remote.off.OffProduct(
+            code = "1", productName = "Вода минеральная",
+            productQuantity = kotlinx.serialization.json.JsonPrimitive(1.5), productQuantityUnit = "l",
+            nutriments = kotlinx.serialization.json.buildJsonObject {
+                put("energy_100g", kotlinx.serialization.json.JsonPrimitive(0))
+                put("energy_unit", kotlinx.serialization.json.JsonPrimitive("kcal"))
+            },
+        )
+        val f = com.nutritiontracker.remote.off.OffMapper.map(p)!!
+        assertEquals(AmountUnit.MILLILITER, f.basis)
+        assertEquals(1500.0, f.servings.single { it.kind == ServingKind.PACKAGE }.amount, eps)
+        assertEquals(0.0, f.nutrients[Nutrient.ENERGY]!!, 0.0)
+        assertTrue(f.dataNotes.any { it.contains("ккал") })
+    }
 }

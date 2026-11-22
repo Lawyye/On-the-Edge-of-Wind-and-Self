@@ -35,7 +35,9 @@ class ConnectivityMonitor(context: Context) {
 
     private fun currentlyOnline(): Boolean = try {
         val caps = cm.getNetworkCapabilities(cm.activeNetwork)
-        caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        // VALIDATED: сеть действительно выходит в интернет (не страница авторизации Wi-Fi в кафе).
+        caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     } catch (_: SecurityException) {
         true
     }

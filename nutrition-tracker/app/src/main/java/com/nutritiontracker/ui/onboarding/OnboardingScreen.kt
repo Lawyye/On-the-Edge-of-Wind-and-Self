@@ -50,6 +50,7 @@ import com.nutritiontracker.ui.profile.DeficitSelector
 import com.nutritiontracker.ui.profile.GoalPreview
 import com.nutritiontracker.ui.profile.ProfileFormViewModel
 import com.nutritiontracker.ui.profile.SexSelector
+import com.nutritiontracker.ui.profile.macroPreview
 import com.nutritiontracker.ui.theme.AppTheme
 import com.nutritiontracker.ui.theme.Dimens
 
@@ -115,6 +116,15 @@ fun OnboardingScreen(onDone: () -> Unit, onRestore: () -> Unit) {
                         StepTitle("Темп снижения веса", "Цель по калориям можно изменить в любой момент в профиле.")
                         DeficitSelector(f, vm::edit)
                         GoalPreview(f.preview())
+                        f.macroPreview()?.let { m ->
+                            Text(
+                                "Белки ${com.nutritiontracker.core.format.NutrientFormat.amount(m.proteinG)} г · " +
+                                    "жиры ${com.nutritiontracker.core.format.NutrientFormat.amount(m.fatG)} г · " +
+                                    "углеводы ${com.nutritiontracker.core.format.NutrientFormat.amount(m.carbsG)} г. " +
+                                    "Белок — ${com.nutritiontracker.core.format.NutrientFormat.number(f.proteinGPerKg, 1)} г на кг желаемого веса; меняется в профиле.",
+                                style = AppTheme.type.caption, color = c.textSecondary,
+                            )
+                        }
                     }
                 }
                 Spacer(Modifier.height(8.dp))

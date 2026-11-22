@@ -22,7 +22,8 @@ data class BackupFile(
 ) {
     companion object {
         const val FORMAT = "nutrition-tracker-backup"
-        const val SCHEMA_VERSION = 1
+        /** 2 — белок в г/кг ([ProfileDto.proteinGPerKg]). Копии версии 1 читаются. */
+        const val SCHEMA_VERSION = 2
     }
 }
 
@@ -54,8 +55,10 @@ data class ProfileDto(
     val deficitMode: String,
     val customDeficitKcal: Double? = null,
     val manualGoalKcal: Double? = null,
+    /** Устарело с версии 2: белок задаётся в г/кг. Хранится для совместимости. */
     val proteinPercent: Int,
     val fatPercent: Int,
+    /** Устарело с версии 2: углеводы — остаток калорийности. */
     val carbsPercent: Int,
     val waterGoalMl: Int,
     val adaptiveEnabled: Boolean,
@@ -63,6 +66,7 @@ data class ProfileDto(
     val adaptiveUpdatedEpochDay: Long? = null,
     val createdAt: Long,
     val updatedAt: Long,
+    val proteinGPerKg: Double = 1.6,
 )
 
 @Serializable

@@ -29,6 +29,9 @@ import com.nutritiontracker.remote.RemoteJson
 import com.nutritiontracker.remote.off.OpenFoodFactsClient
 import com.nutritiontracker.remote.usda.UsdaClient
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -245,5 +248,46 @@ class DataLayerTest {
         val tampered = backup.exportJson().replace("\"amount\": 100.0", "\"amount\": 1000.0")
         assertTrue(backup.read(tampered) is BackupReadResult.Invalid)
         assertEquals(1, diary.observeDay(day).first().size)
+    }
+
+    /**
+     * Миграция 1 → 2 на настоящей схеме версии 1 (app/schemas): база создаётся
+     * так же, как её создавала первая версия приложения, затем открывается текущей.
+     */
+    @Test
+    fun migrationFromVersion1KeepsProfileAndAddsProteinPerKg() = runBlocking<Unit> {
+        val name = "migration-v1.db"
+        context.deleteDatabase(name)
+        val schemaFile = File("schemas/com.nutritiontracker.data.db.AppDatabase/1.json")
+        assertTrue("Нет схемы версии 1: ${schemaFile.absolutePath}", schemaFile.exists())
+        val schema = kotlinx.serialization.json.Json.parseToJsonElement(schemaFile.readText()).jsonObject.getValue("database").jsonObject
+        val file = context.getDatabasePath(name)
+        file.parentFile?.mkdirs()
+        val raw = android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(file, null)
+        schema.getValue("entities").jsonArray.forEach { e ->
+            val o = e.jsonObject
+            val table = o.getValue("tableName").jsonPrimitive.content
+            raw.execSQL(o.getValue("createSql").jsonPrimitive.content.replace("\${TABLE_NAME}", table))
+            o["indices"]?.jsonArray?.forEach { ix -> raw.execSQL(ix.jsonObject.getValue("createSql").jsonPrimitive.content.replace("\${TABLE_NAME}", table)) }
+        }
+        schema.getValue("setupQueries").jsonArray.forEach { raw.execSQL(it.jsonPrimitive.content) }
+        raw.execSQL(
+            "INSERT INTO profile (id, sex, birthEpochDay, heightCm, startWeightKg, targetWeightKg, activityLevel, deficitMode, " +
+                "customDeficitKcal, manualGoalKcal, proteinPercent, fatPercent, carbsPercent, waterGoalMl, adaptiveEnabled, " +
+                "appliedAdaptiveTdee, adaptiveUpdatedEpochDay, createdAt, updatedAt) VALUES " +
+                "(1, 'male', ${LocalDate.of(1995, 3, 1).toEpochDay()}, 180.0, 82.0, 76.0, 'moderate', 'moderate', NULL, NULL, 25, 30, 45, 2000, 0, NULL, NULL, 1, 1)",
+        )
+        raw.execSQL("INSERT INTO water_entries (epochDay, amountMl, createdAt) VALUES (${day.toEpochDay()}, 300, 1)")
+        raw.version = 1
+        raw.close()
+
+        val migrated = AppDatabase.create(context, name)
+        val p = migrated.profileDao().get()!!
+        assertEquals(1.6, p.proteinGPerKg, eps)
+        assertEquals(82.0, p.startWeightKg, eps)
+        assertEquals(30, p.fatPercent)
+        assertEquals(300, migrated.waterDao().all().single().amountMl)
+        migrated.close()
+        context.deleteDatabase(name)
     }
 }

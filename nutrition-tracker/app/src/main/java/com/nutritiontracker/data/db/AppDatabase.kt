@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
  * Локальная база. При изменении схемы версия увеличивается и добавляется
@@ -43,11 +44,18 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun templateDao(): TemplateDao
 
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
         const val NAME = "nutrition.db"
 
-        /** Миграции между версиями схемы. Для версии 1 их пока нет. */
-        val MIGRATIONS: Array<Migration> = emptyArray()
+        /** 1 → 2: белок задаётся в г/кг (по умолчанию 1,6). Данные профиля сохраняются. */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE profile ADD COLUMN proteinGPerKg REAL NOT NULL DEFAULT 1.6")
+            }
+        }
+
+        /** Миграции между версиями схемы. Разрушающая миграция не используется никогда. */
+        val MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2)
 
         fun create(context: Context, name: String? = NAME): AppDatabase {
             val builder = if (name == null) {

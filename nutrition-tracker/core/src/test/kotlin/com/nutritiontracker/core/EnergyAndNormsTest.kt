@@ -9,7 +9,7 @@ import com.nutritiontracker.core.calc.EnergyCalculator
 import com.nutritiontracker.core.calc.EnergyProfile
 import com.nutritiontracker.core.calc.GoalWarning
 import com.nutritiontracker.core.calc.MacroCalculator
-import com.nutritiontracker.core.calc.MacroSplit
+import com.nutritiontracker.core.calc.MacroPlan
 import com.nutritiontracker.core.calc.NutrientTotal
 import com.nutritiontracker.core.calc.Sex
 import com.nutritiontracker.core.calc.WeightPoint
@@ -121,13 +121,51 @@ class EnergyAndNormsTest {
     }
 
     @Test
-    fun `БЖУ по калорийности и долям`() {
-        val m = MacroCalculator.goals(2000.0, MacroSplit(25, 30, 45))
-        assertEquals(125.0, m.proteinG, eps)
-        assertEquals(2000.0 * 0.30 / 9.0, m.fatG, eps)
-        assertEquals(225.0, m.carbsG, eps)
-        assertThrows(IllegalArgumentException::class.java) { MacroCalculator.goals(2000.0, MacroSplit(30, 30, 30)) }
-        assertTrue(MacroSplit(40, 15, 45).outsideAmdr().size == 2)
+    fun `белок в граммах на кг желаемого веса, жиры долей, углеводы остатком`() {
+        // Пример пользователя: умеренный дефицит, вес 82 кг, желаемый 76 кг.
+        val ref = MacroCalculator.referenceWeight(82.0, 76.0, losingWeight = true)
+        assertEquals(76.0, ref, eps)
+        val m = MacroCalculator.goals(2232.0, ref, MacroPlan(1.6, 30))
+        assertEquals(121.6, m.proteinG, 1e-9)
+        assertEquals(2232.0 * 0.30 / 9.0, m.fatG, 1e-9)
+        assertEquals((2232.0 - 121.6 * 4 - 2232.0 * 0.30) / 4.0, m.carbsG, 1e-9)
+        assertTrue(m.proteinG in 110.0..140.0)
+        assertTrue(m.warnings.isEmpty())
+        // При поддержании веса опорный вес — текущий.
+        assertEquals(82.0, MacroCalculator.referenceWeight(82.0, 76.0, losingWeight = false), eps)
+    }
+
+    @Test
+    fun `слишком мало калорий для белка и жиров даёт предупреждение, а не отрицательные углеводы`() {
+        val m = MacroCalculator.goals(900.0, 90.0, MacroPlan(2.2, 40))
+        assertEquals(0.0, m.carbsG, 0.0)
+        assertTrue(m.warnings.any { it.contains("ничего не остаётся") })
+        val low = MacroCalculator.goals(1400.0, 80.0, MacroPlan(1.6, 35))
+        assertTrue(low.warnings.any { it.contains("130 г") })
+        assertThrows(IllegalArgumentException::class.java) { MacroCalculator.goals(2000.0, 80.0, MacroPlan(3.0, 30)) }
+        assertThrows(IllegalArgumentException::class.java) { MacroCalculator.goals(2000.0, 80.0, MacroPlan(1.6, 10)) }
+    }
+
+    @Test
+    fun `в нормах белок, жиры и углеводы берутся из плана, а RDA — справка`() {
+        val goals = MacroCalculator.goals(2232.0, 76.0, MacroPlan.DEFAULT)
+        val norms = DriNorms.withMacroPlan(DriNorms.forPerson(Sex.MALE, 30, 82.0, 2232.0), goals, MacroPlan.DEFAULT, 30)
+        assertEquals(goals.proteinG, norms.getValue(Nutrient.PROTEIN).target!!, eps)
+        assertTrue(norms.getValue(Nutrient.PROTEIN).noteRu!!.contains("0,8"))
+        assertEquals(goals.fatG, norms.getValue(Nutrient.FAT).target!!, eps)
+        assertEquals(goals.carbsG, norms.getValue(Nutrient.CARBS).target!!, eps)
+    }
+
+    @Test
+    fun `прогноз даты цели по тенденции веса`() {
+        val pts = (0..20).map { WeightPoint(today.minusDays(20L - it), 85.0 - it * 0.1) }
+        // Тренд −0,1 кг/сут; среднее за 7 дней ≈ 83,3 → до 80 кг ≈ 33 дня.
+        val d = WeightTrend.forecastGoalDate(pts, 80.0, today)!!
+        assertTrue(d.toString(), !d.isBefore(today.plusDays(32)) && !d.isAfter(today.plusDays(34)))
+        // Вес растёт, а цель ниже — прогноза нет.
+        val up = (0..20).map { WeightPoint(today.minusDays(20L - it), 80.0 + it * 0.1) }
+        assertNull(WeightTrend.forecastGoalDate(up, 75.0, today))
+        assertNull(WeightTrend.forecastGoalDate(pts.take(3), 80.0, today))
     }
 
     @Test

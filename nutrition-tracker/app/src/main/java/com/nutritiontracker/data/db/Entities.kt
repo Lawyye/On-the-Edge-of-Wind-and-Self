@@ -33,6 +33,9 @@ data class ProfileEntity(
     val adaptiveUpdatedEpochDay: Long?,
     val createdAt: Long,
     val updatedAt: Long,
+    /** Белок, г на кг опорного веса. Добавлено в версии 2 схемы. */
+    @ColumnInfo(defaultValue = "1.6")
+    val proteinGPerKg: Double = 1.6,
 )
 
 @Entity(

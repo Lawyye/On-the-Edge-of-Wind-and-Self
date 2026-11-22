@@ -35,7 +35,9 @@ import com.nutritiontracker.core.calc.DeficitMode
 import com.nutritiontracker.core.calc.EnergyCalculator
 import com.nutritiontracker.core.calc.EnergyProfile
 import com.nutritiontracker.core.calc.GoalWarning
-import com.nutritiontracker.core.calc.MacroSplit
+import com.nutritiontracker.core.calc.MacroCalculator
+import com.nutritiontracker.core.calc.MacroGoals
+import com.nutritiontracker.core.calc.MacroPlan
 import com.nutritiontracker.core.calc.Sex
 import com.nutritiontracker.core.format.NutrientFormat
 import com.nutritiontracker.data.Profile
@@ -68,9 +70,8 @@ data class ProfileForm(
     val deficitMode: DeficitMode = DeficitMode.SMALL,
     val customDeficit: String = "500",
     val manualGoal: String = "",
-    val proteinPercent: Int = MacroSplit.DEFAULT.proteinPercent,
-    val fatPercent: Int = MacroSplit.DEFAULT.fatPercent,
-    val carbsPercent: Int = MacroSplit.DEFAULT.carbsPercent,
+    val proteinGPerKg: Double = MacroPlan.DEFAULT_PROTEIN_G_PER_KG,
+    val fatPercent: Int = MacroPlan.DEFAULT_FAT_PERCENT,
     val waterGoal: String = "2000",
     val adaptiveEnabled: Boolean = false,
     val existing: Profile? = null,
@@ -87,7 +88,7 @@ data class ProfileForm(
     val targetError: String? get() = targetKg?.let { if (it !in 30.0..300.0) "Вес от 30 до 300 кг" else null }
     val ageError: String? get() = age?.let { if (it < EnergyCalculator.MIN_AGE) "Приложение рассчитано на взрослых (от 18 лет)" else if (it > 100) "Проверьте дату рождения" else null }
     val waterError: String? get() = parseDecimal(waterGoal)?.let { if (it !in 0.0..10000.0) "От 0 до 10 000 мл" else null }
-    val macroSum get() = proteinPercent + fatPercent + carbsPercent
+    val macroPlan: MacroPlan get() = MacroPlan(proteinGPerKg, fatPercent)
 
     val customDeficitError: String? get() = if (deficitMode == DeficitMode.CUSTOM_DEFICIT) {
         when (val d = parseDecimal(customDeficit)) {
@@ -109,7 +110,7 @@ data class ProfileForm(
             targetKg != null && targetError == null && activity != null
 
     val valid: Boolean
-        get() = bodyValid && customDeficitError == null && manualGoalError == null && macroSum == 100 && waterError == null
+        get() = bodyValid && customDeficitError == null && manualGoalError == null && waterError == null
 
     /** Предварительный расчёт цели; null, пока данных не хватает. */
     fun preview(): CalorieGoal? {
@@ -137,7 +138,7 @@ data class ProfileForm(
         deficitMode = deficitMode,
         customDeficitKcal = parseDecimal(customDeficit),
         manualGoalKcal = parseDecimal(manualGoal),
-        macroSplit = MacroSplit(proteinPercent, fatPercent, carbsPercent),
+        macroPlan = macroPlan,
         waterGoalMl = parseDecimal(waterGoal)?.toInt() ?: 2000,
         adaptiveEnabled = adaptiveEnabled,
         appliedAdaptiveTdee = existing?.appliedAdaptiveTdee,
@@ -162,7 +163,7 @@ class ProfileFormViewModel(private val container: AppContainer) : ViewModel() {
                     weight = formatInput(latestWeight ?: p.startWeightKg), target = formatInput(p.targetWeightKg),
                     activity = p.activity, deficitMode = p.deficitMode,
                     customDeficit = formatInput(p.customDeficitKcal ?: 500.0), manualGoal = formatInput(p.manualGoalKcal),
-                    proteinPercent = p.macroSplit.proteinPercent, fatPercent = p.macroSplit.fatPercent, carbsPercent = p.macroSplit.carbsPercent,
+                    proteinGPerKg = p.macroPlan.proteinGPerKg, fatPercent = p.macroPlan.fatPercent,
                     waterGoal = p.waterGoalMl.toString(), adaptiveEnabled = p.adaptiveEnabled, existing = p, loaded = true,
                 )
             }
@@ -372,22 +373,61 @@ private fun PreviewLine(label: String, value: String) {
     }
 }
 
+/** Граммы БЖУ по текущим данным формы; null — данных для расчёта не хватает. */
+fun ProfileForm.macroPreview(): MacroGoals? {
+    val goal = preview() ?: return null
+    val weight = weightKg ?: return null
+    val target = targetKg ?: return null
+    val losing = deficitMode != com.nutritiontracker.core.calc.DeficitMode.MAINTAIN && goal.deficitKcal > 0
+    return runCatching {
+        MacroCalculator.goals(goal.goalKcal, MacroCalculator.referenceWeight(weight, target, losing), macroPlan)
+    }.getOrNull()
+}
+
 @Composable
-fun MacroSplitEditor(f: ProfileForm, onChange: ((ProfileForm) -> ProfileForm) -> Unit) {
+fun MacroPlanEditor(f: ProfileForm, onChange: ((ProfileForm) -> ProfileForm) -> Unit) {
     val c = AppTheme.colors
+    val m = f.macroPreview()
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        MacroStepper("Белки", f.proteinPercent, MacroSplit.PROTEIN_AMDR, c.protein) { v -> onChange { it.copy(proteinPercent = v) } }
-        MacroStepper("Жиры", f.fatPercent, MacroSplit.FAT_AMDR, c.fat) { v -> onChange { it.copy(fatPercent = v) } }
-        MacroStepper("Углеводы", f.carbsPercent, MacroSplit.CARBS_AMDR, c.carbs) { v -> onChange { it.copy(carbsPercent = v) } }
-        val sum = f.macroSum
-        if (sum != 100) InfoBanner("Сумма долей — $sum%, должна быть ровно 100%.", kind = BannerKind.ERROR)
-        val outside = MacroSplit(f.proteinPercent, f.fatPercent, f.carbsPercent).outsideAmdr()
-        if (outside.isNotEmpty()) InfoBanner(outside.joinToString(". ") + ". Диапазоны AMDR NASEM для взрослых.", kind = BannerKind.WARNING)
+        Stepper(
+            label = "Белки",
+            value = "${NutrientFormat.number(f.proteinGPerKg, 1)} г/кг",
+            hint = m?.let { "${NutrientFormat.amount(it.proteinG)} г · от ${NutrientFormat.kg(it.referenceWeightKg)} кг" + if (it.referenceWeightKg != f.weightKg) " (желаемый вес)" else "" }
+                ?: "При снижении веса обычно 1,2–1,6 г/кг",
+            color = c.protein,
+            onMinus = { onChange { it.copy(proteinGPerKg = (Math.round((it.proteinGPerKg - 0.1) * 10) / 10.0).coerceAtLeast(MacroPlan.MIN_PROTEIN_G_PER_KG)) } },
+            onPlus = { onChange { it.copy(proteinGPerKg = (Math.round((it.proteinGPerKg + 0.1) * 10) / 10.0).coerceAtMost(MacroPlan.MAX_PROTEIN_G_PER_KG)) } },
+        )
+        Stepper(
+            label = "Жиры",
+            value = "${f.fatPercent}%",
+            hint = m?.let { "${NutrientFormat.amount(it.fatG)} г · допустимо 20–35% калорийности" } ?: "Допустимо 20–35% калорийности",
+            color = c.fat,
+            onMinus = { onChange { it.copy(fatPercent = (it.fatPercent - 5).coerceAtLeast(MacroPlan.FAT_PERCENT_RANGE.first)) } },
+            onPlus = { onChange { it.copy(fatPercent = (it.fatPercent + 5).coerceAtMost(MacroPlan.FAT_PERCENT_RANGE.last)) } },
+        )
+        Row(
+            Modifier.fillMaxWidth().background(c.surface, RoundedCornerShape(Dimens.radiusControl)).padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            com.nutritiontracker.ui.components.Dot(c.carbs)
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Углеводы", style = AppTheme.type.body, color = c.textPrimary)
+                Text("Оставшиеся калории", style = AppTheme.type.caption, color = c.textSecondary)
+            }
+            Text(m?.let { "${NutrientFormat.amount(it.carbsG)} г" } ?: "—", style = AppTheme.type.number, color = c.textPrimary)
+        }
+        m?.warnings?.forEach { InfoBanner(it, kind = BannerKind.WARNING) }
+        InfoBanner(
+            "Минимум белка по NASEM (RDA) — 0,8 г/кг для здорового человека без дефицита. При снижении веса для сохранения мышц " +
+                "обычно рекомендуют 1,2–1,6 г/кг; приложение считает от желаемого веса, чтобы при большом весе норма не завышалась.",
+        )
     }
 }
 
 @Composable
-private fun MacroStepper(label: String, value: Int, range: IntRange, color: androidx.compose.ui.graphics.Color, onValue: (Int) -> Unit) {
+private fun Stepper(label: String, value: String, hint: String, color: androidx.compose.ui.graphics.Color, onMinus: () -> Unit, onPlus: () -> Unit) {
     val c = AppTheme.colors
     Row(
         Modifier.fillMaxWidth().background(c.surface, RoundedCornerShape(Dimens.radiusControl)).padding(horizontal = 14.dp, vertical = 6.dp),
@@ -397,11 +437,11 @@ private fun MacroStepper(label: String, value: Int, range: IntRange, color: andr
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Text(label, style = AppTheme.type.body, color = c.textPrimary)
-            Text("Допустимо ${range.first}–${range.last}%", style = AppTheme.type.caption, color = c.textSecondary)
+            Text(hint, style = AppTheme.type.caption, color = c.textSecondary)
         }
-        TextButton(onClick = { if (value > 0) onValue(value - 5) }) { Text("−", style = AppTheme.type.title, color = c.textPrimary) }
-        Text("$value%", style = AppTheme.type.number, color = c.textPrimary)
-        TextButton(onClick = { if (value < 100) onValue(value + 5) }) { Text("+", style = AppTheme.type.title, color = c.textPrimary) }
+        TextButton(onClick = onMinus) { Text("−", style = AppTheme.type.title, color = c.textPrimary) }
+        Text(value, style = AppTheme.type.number, color = c.textPrimary)
+        TextButton(onClick = onPlus) { Text("+", style = AppTheme.type.title, color = c.textPrimary) }
     }
 }
 

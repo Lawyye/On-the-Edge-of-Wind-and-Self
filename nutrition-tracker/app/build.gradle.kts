@@ -41,8 +41,10 @@ android {
         applicationId = "com.nutritiontracker.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        // Номер версии растёт с каждой сборкой CI: Android ставит обновление поверх,
+        // только если versionCode не меньше установленного.
+        versionCode = 100 + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 0)
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

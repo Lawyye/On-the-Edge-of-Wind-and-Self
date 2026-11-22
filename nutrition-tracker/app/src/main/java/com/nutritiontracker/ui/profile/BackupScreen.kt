@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.AlertDialog
@@ -28,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +38,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.nutritiontracker.AppContainer
+import com.nutritiontracker.core.backup.BackupCodec
+import com.nutritiontracker.core.backup.BackupCrypto
 import com.nutritiontracker.core.backup.BackupReadResult
 import com.nutritiontracker.ui.Dates
 import com.nutritiontracker.ui.appViewModel
@@ -74,13 +78,20 @@ class BackupViewModel(private val c: AppContainer) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) { _safetyCopies.value = c.backup.safetyCopies() }
     }
 
+    /** Зашифрованная копия, ожидающая пароля. */
+    private val _encrypted = MutableStateFlow<String?>(null)
+    val encrypted = _encrypted.asStateFlow()
+
     private fun io(work: suspend () -> Unit) {
         if (_busy.value) return
         _busy.value = true
         viewModelScope.launch {
             try {
                 work()
-            } catch (e: Exception) {
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                // В том числе OutOfMemoryError и StackOverflowError от испорченного файла.
                 _messages.emit("Ошибка: ${e.message ?: e.javaClass.simpleName}")
             } finally {
                 _busy.value = false
@@ -88,11 +99,39 @@ class BackupViewModel(private val c: AppContainer) : ViewModel() {
         }
     }
 
-    fun exportJson(uri: Uri, write: (Uri, String) -> Unit) = io {
-        val text = c.backup.exportJson()
+    /** Сохраняет копию; если задан пароль — зашифрованную (AES-256-GCM). */
+    fun exportJson(uri: Uri, password: CharArray?, write: (Uri, String) -> Unit) = io {
+        val plain = c.backup.exportJson()
+        val text = if (password != null && password.isNotEmpty()) {
+            withContext(Dispatchers.Default) { BackupCrypto.encrypt(plain, password) }
+        } else {
+            plain
+        }
+        password?.fill(' ')
         withContext(Dispatchers.IO) { write(uri, text) }
-        _messages.emit("Резервная копия сохранена")
+        _messages.emit(if (password != null) "Зашифрованная копия сохранена" else "Резервная копия сохранена")
     }
+
+    fun decryptPending(password: CharArray) {
+        val text = _encrypted.value ?: return
+        io {
+            val r = withContext(Dispatchers.Default) { BackupCrypto.decrypt(text, password) }
+            password.fill(' ')
+            when (r) {
+                is BackupCrypto.DecryptResult.Ok -> {
+                    _encrypted.value = null
+                    _pending.value = c.backup.read(r.text)
+                }
+                BackupCrypto.DecryptResult.WrongPassword -> _messages.emit("Неверный пароль или файл изменён")
+                is BackupCrypto.DecryptResult.Invalid -> {
+                    _encrypted.value = null
+                    _pending.value = BackupReadResult.Invalid(listOf(r.reason))
+                }
+            }
+        }
+    }
+
+    fun dismissEncrypted() { _encrypted.value = null }
 
     fun exportCsv(uri: Uri, days: Long?, write: (Uri, String) -> Unit) = io {
         val to = LocalDate.now()
@@ -103,7 +142,11 @@ class BackupViewModel(private val c: AppContainer) : ViewModel() {
 
     fun readForImport(read: suspend () -> String) = io {
         val text = withContext(Dispatchers.IO) { read() }
-        _pending.value = c.backup.read(text)
+        if (BackupCrypto.isEncrypted(text)) {
+            _encrypted.value = text
+        } else {
+            _pending.value = withContext(Dispatchers.Default) { c.backup.read(text) }
+        }
     }
 
     fun confirmImport() {
@@ -129,7 +172,14 @@ fun BackupScreen(onBack: () -> Unit) {
     val pending by vm.pending.collectAsStateWithLifecycle()
     val copies by vm.safetyCopies.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    var csvDays by remember { mutableStateOf<Long?>(null) }
+    // rememberSaveable: выбор периода переживает поворот экрана и пересоздание процесса,
+    // пока открыт системный выбор файла.
+    var csvDays by rememberSaveable { mutableStateOf<Long?>(null) }
+    val encryptedPending by vm.encrypted.collectAsStateWithLifecycle()
+    var exportPassword by remember { mutableStateOf("") }
+    var exportPasswordRepeat by remember { mutableStateOf("") }
+    var askExportPassword by remember { mutableStateOf(false) }
+    var pendingExportPassword by remember { mutableStateOf<CharArray?>(null) }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
 
     val write: (Uri, String) -> Unit = { uri, text ->
@@ -137,7 +187,9 @@ fun BackupScreen(onBack: () -> Unit) {
         out.use { it.write(text.toByteArray(Charsets.UTF_8)) }
     }
     val jsonLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        uri?.let { vm.exportJson(it, write) }
+        val pw = pendingExportPassword
+        pendingExportPassword = null
+        uri?.let { vm.exportJson(it, pw, write) }
     }
     val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
         uri?.let { vm.exportCsv(it, csvDays, write) }
@@ -145,11 +197,22 @@ fun BackupScreen(onBack: () -> Unit) {
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { u ->
             vm.readForImport {
+                // Размер проверяется до чтения, а само чтение ограничено: огромный файл не исчерпает память.
+                val declared = context.contentResolver.query(u, arrayOf(android.provider.OpenableColumns.SIZE), null, null, null)?.use { cur ->
+                    if (cur.moveToFirst() && !cur.isNull(0)) cur.getLong(0) else null
+                }
+                require(declared == null || declared <= BackupCodec.MAX_FILE_BYTES) { "Файл слишком большой для резервной копии" }
                 val input = context.contentResolver.openInputStream(u) ?: error("Не удалось открыть файл")
                 input.use { s ->
-                    val bytes = s.readBytes()
-                    require(bytes.size <= 64 * 1024 * 1024) { "Файл слишком большой" }
-                    String(bytes, Charsets.UTF_8)
+                    val out = java.io.ByteArrayOutputStream()
+                    val buf = ByteArray(64 * 1024)
+                    while (true) {
+                        val n = s.read(buf)
+                        if (n < 0) break
+                        out.write(buf, 0, n)
+                        require(out.size() <= BackupCodec.MAX_FILE_BYTES) { "Файл слишком большой для резервной копии" }
+                    }
+                    String(out.toByteArray(), Charsets.UTF_8)
                 }
             }
         }
@@ -168,7 +231,13 @@ fun BackupScreen(onBack: () -> Unit) {
                     style = AppTheme.type.caption, color = c.textSecondary,
                 )
                 Spacer(Modifier.height(10.dp))
-                PrimaryButton("Сохранить копию", onClick = { jsonLauncher.launch("racion-backup-$today.json") }, enabled = !busy, icon = Icons.Outlined.Download, modifier = Modifier.fillMaxWidth())
+                PrimaryButton("Сохранить копию", onClick = { pendingExportPassword = null; jsonLauncher.launch("racion-backup-$today.json") }, enabled = !busy, icon = Icons.Outlined.Download, modifier = Modifier.fillMaxWidth())
+                Spacer(Modifier.height(8.dp))
+                SecondaryButton("Сохранить с паролем", onClick = { askExportPassword = true }, enabled = !busy, icon = Icons.Outlined.Lock, modifier = Modifier.fillMaxWidth())
+                Text(
+                    "С паролем копия шифруется (AES-256). Пароль нигде не хранится: если его забыть, восстановить копию будет невозможно.",
+                    style = AppTheme.type.caption, color = c.textTertiary, modifier = Modifier.padding(top = 6.dp),
+                )
             }
             AppCard {
                 Text("Дневник в CSV", style = AppTheme.type.section, color = c.textPrimary)
@@ -203,9 +272,54 @@ fun BackupScreen(onBack: () -> Unit) {
                     }
                 }
             }
-            InfoBanner("Файлы копий не шифруются. Храните их там, куда нет доступа у посторонних.")
+            InfoBanner("Копии без пароля не шифруются: в них ваш вес, обхваты и дневник. Храните такие файлы там, куда нет доступа у посторонних, или сохраняйте с паролем.")
             Spacer(Modifier.height(12.dp))
         }
+    }
+
+    if (askExportPassword) {
+        val tooShort = exportPassword.length < BackupCrypto.MIN_PASSWORD_LENGTH
+        val mismatch = exportPassword != exportPasswordRepeat
+        AlertDialog(
+            onDismissRequest = { askExportPassword = false },
+            containerColor = c.surface,
+            title = { Text("Пароль для копии", style = AppTheme.type.section, color = c.textPrimary) },
+            text = {
+                Column {
+                    com.nutritiontracker.ui.components.AppTextField(
+                        exportPassword, { exportPassword = it }, "Пароль", password = true,
+                        error = if (exportPassword.isNotEmpty() && tooShort) "Не короче ${BackupCrypto.MIN_PASSWORD_LENGTH} символов" else null,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    com.nutritiontracker.ui.components.AppTextField(
+                        exportPasswordRepeat, { exportPasswordRepeat = it }, "Повторите пароль", password = true,
+                        error = if (exportPasswordRepeat.isNotEmpty() && mismatch) "Пароли не совпадают" else null,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingExportPassword = exportPassword.toCharArray()
+                    exportPassword = ""
+                    exportPasswordRepeat = ""
+                    askExportPassword = false
+                    jsonLauncher.launch("racion-backup-$today.enc.json")
+                }, enabled = !tooShort && !mismatch) { Text("Выбрать файл", color = c.accent) }
+            },
+            dismissButton = { TextButton(onClick = { askExportPassword = false }) { Text("Отмена", color = c.textSecondary) } },
+        )
+    }
+
+    if (encryptedPending != null) {
+        var pw by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = vm::dismissEncrypted,
+            containerColor = c.surface,
+            title = { Text("Копия зашифрована", style = AppTheme.type.section, color = c.textPrimary) },
+            text = { com.nutritiontracker.ui.components.AppTextField(pw, { pw = it }, "Пароль", password = true) },
+            confirmButton = { TextButton(onClick = { vm.decryptPending(pw.toCharArray()); pw = "" }, enabled = pw.isNotEmpty() && !busy) { Text("Открыть", color = c.accent) } },
+            dismissButton = { TextButton(onClick = vm::dismissEncrypted) { Text("Отмена", color = c.textSecondary) } },
+        )
     }
 
     when (val p = pending) {

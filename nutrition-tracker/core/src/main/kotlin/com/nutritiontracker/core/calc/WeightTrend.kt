@@ -3,6 +3,7 @@ package com.nutritiontracker.core.calc
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
+import kotlin.math.sign
 
 data class WeightPoint(val date: LocalDate, val weightKg: Double)
 
@@ -63,6 +64,25 @@ object WeightTrend {
             den += (xs[i] - mx) * (xs[i] - mx)
         }
         return if (den == 0.0) null else num / den
+    }
+
+    /**
+     * Прогноз даты достижения цели при текущем темпе: наклон регрессии по
+     * взвешиваниям за последние [windowDays] дней. null — данных мало
+     * (меньше 4 взвешиваний на отрезке от 7 дней), вес не движется к цели
+     * или прогноз дальше двух лет.
+     */
+    fun forecastGoalDate(points: List<WeightPoint>, targetKg: Double, today: LocalDate, windowDays: Long = 28): LocalDate? {
+        val recent = daily(points).filter { !it.date.isBefore(today.minusDays(windowDays - 1)) && !it.date.isAfter(today) }
+        if (recent.size < 4 || ChronoUnit.DAYS.between(recent.first().date, recent.last().date) < 7) return null
+        val slope = slopeKgPerDay(recent) ?: return null
+        val current = trailingAverage(recent, today) ?: return null
+        val remaining = targetKg - current
+        if (abs(remaining) < 0.05) return today
+        if (slope == 0.0 || sign(slope) != sign(remaining)) return null
+        val days = remaining / slope
+        if (days > 730) return null
+        return today.plusDays(kotlin.math.ceil(days).toLong())
     }
 
     fun summary(

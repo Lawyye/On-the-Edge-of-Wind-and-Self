@@ -77,6 +77,7 @@ data class ProgressState(
     val entries: List<BodyEntry> = emptyList(),
     val profile: Profile? = null,
     val summary: WeightSummary? = null,
+    val forecast: LocalDate? = null,
 )
 
 class ProgressViewModel(private val c: AppContainer) : ViewModel() {
@@ -89,6 +90,7 @@ class ProgressViewModel(private val c: AppContainer) : ViewModel() {
             entries = entries.sortedByDescending { it.date },
             profile = profile,
             summary = if (weights.isEmpty()) null else WeightTrend.summary(weights, profile?.startWeightKg, profile?.targetWeightKg, LocalDate.now()),
+            forecast = profile?.let { WeightTrend.forecastGoalDate(weights, it.targetWeightKg, LocalDate.now()) },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProgressState())
 
@@ -144,7 +146,7 @@ fun ProgressScreen(onBack: () -> Unit) {
                     )
                 }
             }
-            s.summary?.let { sum -> item { SummaryCard(sum, s.profile) } }
+            s.summary?.let { sum -> item { SummaryCard(sum, s.profile, s.forecast) } }
             if (weights.size >= 2) {
                 item {
                     AppCard {
@@ -208,7 +210,7 @@ private fun measurementsText(e: BodyEntry): String = listOfNotNull(
 ).joinToString(" · ").let { if (it.isEmpty()) it else "$it см" }
 
 @Composable
-private fun SummaryCard(sum: WeightSummary, profile: Profile?) {
+private fun SummaryCard(sum: WeightSummary, profile: Profile?, forecast: LocalDate?) {
     val c = AppTheme.colors
     AppCard {
         Row {
@@ -229,6 +231,13 @@ private fun SummaryCard(sum: WeightSummary, profile: Profile?) {
             )
             Spacer(Modifier.height(6.dp))
             ProgressBar(p?.toFloat()?.coerceAtLeast(0f), c.success)
+            forecast?.let { d ->
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "При текущем темпе цель — примерно к ${Dates.full(d)}. Прогноз по тенденции за 4 недели, не обещание.",
+                    style = AppTheme.type.caption, color = c.accent,
+                )
+            }
         }
         Spacer(Modifier.height(10.dp))
         Text(

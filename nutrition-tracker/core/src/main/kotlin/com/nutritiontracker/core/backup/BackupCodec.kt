@@ -2,6 +2,7 @@ package com.nutritiontracker.core.backup
 
 import com.nutritiontracker.core.calc.ActivityLevel
 import com.nutritiontracker.core.calc.DeficitMode
+import com.nutritiontracker.core.calc.MacroPlan
 import com.nutritiontracker.core.calc.Sex
 import com.nutritiontracker.core.model.AmountUnit
 import com.nutritiontracker.core.model.FoodSource
@@ -10,6 +11,8 @@ import com.nutritiontracker.core.model.Nutrient
 import com.nutritiontracker.core.model.ServingKind
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonObject
 import java.security.MessageDigest
 
 data class BackupSummary(
@@ -53,14 +56,35 @@ object BackupCodec {
         return prettyJson.encodeToString(BackupFile.serializer(), file)
     }
 
-    fun checksum(payload: BackupPayload): String {
-        val canonical = json.encodeToString(BackupPayload.serializer(), payload)
-        val digest = MessageDigest.getInstance("SHA-256").digest(canonical.toByteArray(Charsets.UTF_8))
-        return digest.joinToString("") { "%02x".format(it) }
+    fun checksum(payload: BackupPayload): String =
+        sha256(json.encodeToString(BackupPayload.serializer(), payload))
+
+    /**
+     * Контрольная сумма по самому JSON поля payload из файла, а не по
+     * перекодированной модели: так копии старых версий проверяются честно,
+     * даже если в модели с тех пор появились новые поля со значениями по умолчанию.
+     */
+    private fun checksumOfRawPayload(payload: JsonElement): String =
+        sha256(json.encodeToString(JsonElement.serializer(), payload))
+
+    private fun sha256(text: String): String =
+        MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+
+    /** Ограничение размера файла копии: защищает от исчерпания памяти. */
+    const val MAX_FILE_BYTES = 64L * 1024 * 1024
+
+    fun read(text: String): BackupReadResult = try {
+        readUnsafe(text)
+    } catch (e: StackOverflowError) {
+        BackupReadResult.Invalid(listOf("Структура файла слишком глубоко вложена — это не резервная копия приложения."))
+    } catch (e: OutOfMemoryError) {
+        BackupReadResult.Invalid(listOf("Файл слишком большой для разбора."))
     }
 
-    fun read(text: String): BackupReadResult {
+    private fun readUnsafe(text: String): BackupReadResult {
         if (text.isBlank()) return BackupReadResult.Invalid(listOf("Файл пустой."))
+        if (text.length > MAX_FILE_BYTES) return BackupReadResult.Invalid(listOf("Файл слишком большой."))
+        if (BackupCrypto.isEncrypted(text)) return BackupReadResult.Invalid(listOf("Копия зашифрована — нужен пароль."))
         val header = try {
             headerJson.decodeFromString(Header.serializer(), text)
         } catch (e: SerializationException) {
@@ -83,7 +107,14 @@ object BackupCodec {
         } catch (e: IllegalArgumentException) {
             return BackupReadResult.Invalid(listOf("Структура файла повреждена: ${e.message?.take(200)}"))
         }
-        if (!file.payloadSha256.equals(checksum(file.payload), ignoreCase = true)) {
+        val rawPayload = try {
+            json.parseToJsonElement(text).jsonObject["payload"]
+        } catch (e: SerializationException) {
+            null
+        } catch (e: IllegalArgumentException) {
+            null
+        } ?: return BackupReadResult.Invalid(listOf("В файле нет данных."))
+        if (!file.payloadSha256.equals(checksumOfRawPayload(rawPayload), ignoreCase = true)) {
             return BackupReadResult.Invalid(listOf("Контрольная сумма не совпадает: файл повреждён или изменён вручную."))
         }
         val errors = validate(file.payload)
@@ -109,6 +140,7 @@ object BackupCodec {
     }
 
     private const val MIN_DAY = 0L // 1970-01-01
+    private val BIRTH_MIN_DAY = java.time.LocalDate.of(1900, 1, 1).toEpochDay()
     private const val MAX_DAY = 84_000L // ≈ 2199 год
 
     fun validate(p: BackupPayload): List<String> {
@@ -143,7 +175,19 @@ object BackupCodec {
             if (pr.heightCm !in 100.0..250.0) err("Профиль: недопустимый рост ${pr.heightCm}")
             if (pr.startWeightKg !in 20.0..400.0) err("Профиль: недопустимый начальный вес")
             if (pr.targetWeightKg !in 20.0..400.0) err("Профиль: недопустимый желаемый вес")
-            if (pr.proteinPercent + pr.fatPercent + pr.carbsPercent != 100) err("Профиль: сумма долей БЖУ не равна 100%")
+            // Дата рождения: от 1900 года до возраста 18 лет на момент проверки.
+            val latestBirth = java.time.LocalDate.now().minusYears(18).toEpochDay()
+            if (pr.birthEpochDay !in BIRTH_MIN_DAY..latestBirth) err("Профиль: недопустимая дата рождения")
+            pr.customDeficitKcal?.let { if (!it.isFinite() || it !in 0.0..2000.0) err("Профиль: дефицит должен быть от 0 до 2000 ккал") }
+            pr.manualGoalKcal?.let { if (!it.isFinite() || it !in 500.0..6000.0) err("Профиль: калорийность должна быть от 500 до 6000 ккал") }
+            if (pr.deficitMode == DeficitMode.CUSTOM_DEFICIT.key && pr.customDeficitKcal == null) err("Профиль: не указан дефицит")
+            if (pr.deficitMode == DeficitMode.MANUAL_GOAL.key && pr.manualGoalKcal == null) err("Профиль: не указана калорийность")
+            if (pr.fatPercent !in MacroPlan.FAT_PERCENT_RANGE) err("Профиль: доля жиров должна быть от 20 до 40%")
+            if (pr.proteinPercent !in 0..100 || pr.carbsPercent !in 0..100) err("Профиль: недопустимые доли БЖУ")
+            if (!pr.proteinGPerKg.isFinite() || pr.proteinGPerKg !in MacroPlan.MIN_PROTEIN_G_PER_KG..MacroPlan.MAX_PROTEIN_G_PER_KG) {
+                err("Профиль: белок должен быть от 0,8 до 2,2 г/кг")
+            }
+            pr.appliedAdaptiveTdee?.let { if (!it.isFinite() || it !in 1000.0..6000.0) err("Профиль: недопустимая оценка расхода") }
             if (pr.waterGoalMl !in 0..10_000) err("Профиль: недопустимая цель по воде")
         }
 
@@ -204,6 +248,9 @@ object BackupCodec {
         for (wt in p.weights) {
             val w = "Запись веса #${wt.id}"
             checkDay(w, wt.epochDay)
+            if (listOf(wt.weightKg, wt.waistCm, wt.hipsCm, wt.chestCm, wt.neckCm, wt.armCm, wt.thighCm).all { it == null }) {
+                err("$w: пустая запись без веса и измерений")
+            }
             wt.weightKg?.let { if (it !in 20.0..400.0) err("$w: недопустимый вес $it") }
             listOf(wt.waistCm, wt.hipsCm, wt.chestCm, wt.neckCm, wt.armCm, wt.thighCm).filterNotNull().forEach {
                 if (it !in 5.0..300.0) err("$w: недопустимый обхват $it")

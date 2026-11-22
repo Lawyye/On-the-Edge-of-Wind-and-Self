@@ -56,6 +56,7 @@ class BackupRepository(
                         p.sex, p.birthEpochDay, p.heightCm, p.startWeightKg, p.targetWeightKg, p.activityLevel, p.deficitMode,
                         p.customDeficitKcal, p.manualGoalKcal, p.proteinPercent, p.fatPercent, p.carbsPercent, p.waterGoalMl,
                         p.adaptiveEnabled, p.appliedAdaptiveTdee, p.adaptiveUpdatedEpochDay, p.createdAt, p.updatedAt,
+                        proteinGPerKg = p.proteinGPerKg,
                     )
                 },
                 foods = db.foodDao().all().map { f ->
@@ -150,6 +151,7 @@ class BackupRepository(
                         1, d.sex, d.birthEpochDay, d.heightCm, d.startWeightKg, d.targetWeightKg, d.activityLevel, d.deficitMode,
                         d.customDeficitKcal, d.manualGoalKcal, d.proteinPercent, d.fatPercent, d.carbsPercent, d.waterGoalMl,
                         d.adaptiveEnabled, d.appliedAdaptiveTdee, d.adaptiveUpdatedEpochDay, d.createdAt, d.updatedAt,
+                        proteinGPerKg = d.proteinGPerKg,
                     ),
                 )
             }

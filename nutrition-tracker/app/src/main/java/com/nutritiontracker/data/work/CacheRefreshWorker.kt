@@ -26,6 +26,9 @@ class CacheRefreshWorker(context: Context, params: WorkerParameters) : Coroutine
         return try {
             container.foods.refreshStale(MAX_AGE_MILLIS)
             Result.success()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            // Отмена (например, пропала сеть) — не ошибка: WorkManager перезапустит работу сам.
+            throw e
         } catch (e: Exception) {
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }

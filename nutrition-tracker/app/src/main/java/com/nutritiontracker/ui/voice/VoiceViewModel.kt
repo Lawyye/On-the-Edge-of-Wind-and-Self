@@ -11,6 +11,7 @@ import com.nutritiontracker.core.voice.ParsedQuantity
 import com.nutritiontracker.core.voice.QuantityResolver
 import com.nutritiontracker.core.voice.ResolvedAmount
 import com.nutritiontracker.core.voice.VoiceInputParser
+import com.nutritiontracker.core.text.FoodSearch
 import com.nutritiontracker.data.FoodItem
 import com.nutritiontracker.data.toNewEntry
 import com.nutritiontracker.remote.RemoteFood
@@ -62,6 +63,8 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
     val state: StateFlow<VoiceState> = _state.asStateFlow()
     private val _saved = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val saved = _saved.asSharedFlow()
+    private val _errors = MutableSharedFlow<String>(extraBufferCapacity = 2)
+    val errors = _errors.asSharedFlow()
     private var nextId = 0
 
     fun setText(t: String) = _state.update { it.copy(text = t) }
@@ -97,6 +100,7 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
     fun findFood(id: Int, query: String) {
         updateItem(id) { it.copy(searching = true, searchQuery = query, searchError = null) }
         viewModelScope.launch {
+            // В локальном поиске все результаты совпадают с запросом (с учётом опечаток).
             val local = c.foods.searchLocal(query, limit = 6).map { it.food }
             updateItem(id) { it.copy(localCandidates = local) }
             if (local.isNotEmpty()) {
@@ -105,15 +109,30 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
             val settings = c.settings.current()
             if (settings.onlineSearchEnabled && c.connectivity.online.value) {
                 val online = c.foods.searchOnline(query, settings)
-                val remote = (online.openFoodFacts.take(4) + online.usda.take(4))
+                // Результаты из интернета ранжируются по совпадению с запросом: Open Food Facts —
+                // с русским запросом, USDA — с переводом. При равенстве выше продукт с более полным составом.
+                val scored = online.openFoodFacts.map { r ->
+                    r to FoodSearch.relevance(query, r.food.name, r.food.brand, r.food.category, r.food.nameEn)
+                } + online.usda.map { r ->
+                    r to (online.usdaQuery?.let { q -> FoodSearch.relevance(q, r.food.name, r.food.category) } ?: 0.0)
+                }
+                val ranked = scored
+                    .map { (r, score) -> Triple(r, score, if (score > 0) score + r.food.nutrients.known.size / 20.0 else 0.0) }
+                    .sortedByDescending { it.third }
+                val remote = ranked.take(8).map { it.first }
+                val best = ranked.firstOrNull { it.second > 0 }?.first
                 updateItem(id) {
                     it.copy(
                         remoteCandidates = remote,
                         searching = false,
-                        searchError = online.errors.firstOrNull()?.let { e -> "${e.source}: ${e.kind.messageRu}" },
+                        searchError = when {
+                            online.errors.isNotEmpty() -> online.errors.first().let { e -> "${e.source}: ${e.kind.messageRu}" }
+                            local.isEmpty() && best == null -> "Точного совпадения не нашлось — выберите продукт из вариантов или уточните название"
+                            else -> null
+                        },
                     )
                 }
-                if (local.isEmpty() && remote.isNotEmpty()) selectRemote(id, remote.first())
+                if (local.isEmpty() && best != null) selectRemote(id, best)
             } else {
                 updateItem(id) { it.copy(searching = false, searchError = if (local.isEmpty()) "Нет интернета — поиск только по сохранённым продуктам" else null) }
             }
@@ -164,8 +183,11 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
             try {
                 c.diary.addAll(entries, s.date, s.meal)
                 _saved.emit(entries.size)
-            } catch (e: IllegalArgumentException) {
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
                 _state.update { it.copy(saving = false) }
+                _errors.emit("Не удалось сохранить: ${e.message ?: e.javaClass.simpleName}")
             }
         }
     }

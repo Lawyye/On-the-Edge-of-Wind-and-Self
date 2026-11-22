@@ -52,8 +52,9 @@ class BodyRepository(
         val now = clock()
         val existing = weightDao.forDay(e.date.toEpochDay())
         val target = if (e.id != 0L) e.id else existing?.id ?: 0L
-        // Новая запись на дату, где запись уже есть, дополняет её, а не стирает другие измерения.
-        val base = if (e.id == 0L) existing else null
+        // Запись на дату, где уже есть другая запись (новая или перенесённая), дополняет её,
+        // а не стирает другие измерения того дня.
+        val base = if (existing != null && existing.id != e.id) existing else null
         val entity = WeightEntryEntity(
             id = target,
             epochDay = e.date.toEpochDay(),
@@ -71,7 +72,7 @@ class BodyRepository(
         if (target == 0L) {
             weightDao.insert(entity)
         } else {
-            // При переносе записи на дату, где уже есть другая, та заменяется.
+            // При переносе на занятую дату измерения уже объединены в одну запись; вторая удаляется.
             if (existing != null && existing.id != target) weightDao.delete(existing.id)
             weightDao.update(entity)
         }

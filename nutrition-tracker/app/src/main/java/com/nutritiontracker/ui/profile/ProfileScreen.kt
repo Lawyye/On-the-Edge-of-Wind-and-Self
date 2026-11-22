@@ -197,12 +197,14 @@ private fun EnergyCard(p: Profile, t: DailyTargets) {
         Line("Дефицит", "${NutrientFormat.kcal(g.deficitKcal)} ккал/сут")
         Line("Цель", "${NutrientFormat.kcal(g.goalKcal)} ккал/сут")
         Line("Ожидаемый темп", "${NutrientFormat.number(g.expectedWeeklyChangeKg, 2)} кг/нед (≈)")
-        Line("БЖУ", "${NutrientFormat.amount(t.macros.proteinG)} / ${NutrientFormat.amount(t.macros.fatG)} / ${NutrientFormat.amount(t.macros.carbsG)} г")
-        val warnings = g.warnings.filter { it != GoalWarning.ESTIMATE_ONLY }
+        Line("Белки", "${NutrientFormat.amount(t.macros.proteinG)} г (${NutrientFormat.number(p.macroPlan.proteinGPerKg, 1)} г/кг × ${NutrientFormat.kg(t.macros.referenceWeightKg)} кг)")
+        Line("Жиры", "${NutrientFormat.amount(t.macros.fatG)} г (${p.macroPlan.fatPercent}%)")
+        Line("Углеводы", "${NutrientFormat.amount(t.macros.carbsG)} г (остаток)")
+        val warnings = g.warnings.filter { it != GoalWarning.ESTIMATE_ONLY }.map { it.messageRu } + t.macros.warnings
         if (warnings.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                warnings.forEach { InfoBanner(it.messageRu, kind = BannerKind.WARNING) }
+                warnings.forEach { InfoBanner(it, kind = BannerKind.WARNING) }
             }
         }
     }
@@ -290,8 +292,8 @@ fun ProfileEditScreen(onBack: () -> Unit) {
             ActivitySelector(f.activity) { a -> vm.edit { it.copy(activity = a) } }
             SectionHeader("Калорийность")
             DeficitSelector(f, vm::edit)
-            SectionHeader("Распределение БЖУ")
-            MacroSplitEditor(f, vm::edit)
+            SectionHeader("Белки, жиры, углеводы")
+            MacroPlanEditor(f, vm::edit)
             SectionHeader("Вода")
             WaterGoalField(f, vm::edit)
             SectionHeader("Расчёт")

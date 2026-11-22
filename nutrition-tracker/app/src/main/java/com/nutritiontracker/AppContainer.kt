@@ -17,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.Cache
 import java.io.File
 
 /** Ручное внедрение зависимостей: один экземпляр каждого репозитория на приложение. */
@@ -36,9 +35,13 @@ class AppContainer(context: Context, database: AppDatabase? = null) {
         appScope.launch { settings.settings.collect { usdaKey = it.usdaApiKey } }
     }
 
-    private val okHttp = RemoteJson.defaultOkHttp().newBuilder()
-        .cache(Cache(File(app.cacheDir, "http"), 10L * 1024 * 1024))
-        .build()
+    // Без дискового HTTP-кэша: в нём оставались бы адреса запросов с ключом USDA и поисковыми словами.
+    private val okHttp = RemoteJson.defaultOkHttp()
+
+    init {
+        // Удаляем кэш, оставшийся от предыдущих версий.
+        appScope.launch(Dispatchers.IO) { File(app.cacheDir, "http").deleteRecursively() }
+    }
 
     private val usda = UsdaClient(okHttp, { usdaKey.ifBlank { BuildConfig.USDA_DEV_KEY } })
     private val off = OpenFoodFactsClient(okHttp, "NutritionTracker/${BuildConfig.VERSION_NAME} (Android; personal use)")

@@ -48,8 +48,10 @@ object Targets {
             adaptiveTdeeKcal = if (profile.adaptiveEnabled) profile.appliedAdaptiveTdee else null,
             targetWeightKg = profile.targetWeightKg,
         )
-        val macros = MacroCalculator.goals(goal.goalKcal, profile.macroSplit)
-        val base = DriNorms.forPerson(profile.sex, age, weight, goal.goalKcal)
+        val losingWeight = profile.deficitMode != com.nutritiontracker.core.calc.DeficitMode.MAINTAIN && goal.deficitKcal > 0
+        val reference = MacroCalculator.referenceWeight(weight, profile.targetWeightKg, losingWeight)
+        val macros = MacroCalculator.goals(goal.goalKcal, reference, profile.macroPlan)
+        val base = DriNorms.withMacroPlan(DriNorms.forPerson(profile.sex, age, weight, goal.goalKcal), macros, profile.macroPlan, age)
         val norms = NormEvaluator.applyUserGoals(base, userGoals.map { UserNutrientGoal(it.nutrient, it.target, it.maximum) })
         return DailyTargets(goal, macros, norms, profile.waterGoalMl, weight, age)
     }

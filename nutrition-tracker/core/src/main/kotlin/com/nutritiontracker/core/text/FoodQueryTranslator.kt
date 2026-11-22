@@ -240,9 +240,12 @@ object FoodQueryTranslator {
     )
 
     private fun rootMatches(root: String, token: String): Boolean {
-        if (!token.startsWith(root)) return false
+        // Удвоенные буквы схлопываются с обеих сторон: «куринного», «пица», «моцарелла».
+        val r = TextNormalizer.squeeze(root)
+        val t = TextNormalizer.squeeze(token)
+        if (!t.startsWith(r)) return false
         // Короткие корни («лук», «рис», «сыр») допускают только окончания, а не любые слова.
-        return root.length >= 4 || token.length <= root.length + 2
+        return r.length >= 4 || t.length <= r.length + 2
     }
 
     private data class Match(val entry: Entry, val tokenIndexes: List<Int>, val weight: Int)

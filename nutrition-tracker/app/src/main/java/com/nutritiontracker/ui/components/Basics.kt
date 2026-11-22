@@ -379,6 +379,7 @@ fun AppTextField(
     imeAction: ImeAction = ImeAction.Next,
     onDone: (() -> Unit)? = null,
     placeholder: String? = null,
+    password: Boolean = false,
 ) {
     val c = AppTheme.colors
     OutlinedTextField(
@@ -397,9 +398,14 @@ fun AppTextField(
         supportingText = (error ?: supporting)?.let { { Text(it, color = if (error != null) c.error else c.textSecondary) } },
         singleLine = singleLine,
         keyboardOptions = KeyboardOptions(
-            keyboardType = if (numeric) KeyboardType.Decimal else KeyboardType.Text,
+            keyboardType = when {
+                password -> KeyboardType.Password
+                numeric -> KeyboardType.Decimal
+                else -> KeyboardType.Text
+            },
             imeAction = imeAction,
         ),
+        visualTransformation = if (password) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
         keyboardActions = KeyboardActions(onDone = { onDone?.invoke() }),
         shape = RoundedCornerShape(Dimens.radiusControl),
         colors = OutlinedTextFieldDefaults.colors(

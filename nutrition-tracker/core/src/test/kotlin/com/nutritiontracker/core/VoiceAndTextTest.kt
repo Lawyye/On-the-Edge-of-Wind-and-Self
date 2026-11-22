@@ -181,7 +181,7 @@ class VoiceAndTextTest {
     @Test
     fun `русский запрос переводится для USDA`() {
         assertEquals("chicken breast", FoodQueryTranslator.translate("куриного филе").englishQuery)
-        assertEquals("chicken breast boiled", FoodQueryTranslator.translate("Куриное филе отварное").englishQuery)
+        assertEquals("chicken breast cooked", FoodQueryTranslator.translate("Куриное филе отварное").englishQuery)
         assertEquals("potatoes", FoodQueryTranslator.translate("картофелины").englishQuery)
         assertEquals("apples", FoodQueryTranslator.translate("яблоко").englishQuery)
         assertEquals("cream", FoodQueryTranslator.translate("сливки").englishQuery)
@@ -319,7 +319,16 @@ class VoiceAndTextTest {
         assertEquals("Творог", FoodQueryTranslator.translate("творога").russianName)
         assertEquals("Куриное филе", FoodQueryTranslator.translate("куриного филе").russianName)
         assertEquals("Спагетти", FoodQueryTranslator.translate("спагетти").russianName)
-        assertEquals("spaghetti", FoodQueryTranslator.translate("спагетти").englishQuery)
+        assertEquals("pasta", FoodQueryTranslator.translate("спагетти").englishQuery)
+        // Сухие или варёные — спросить; с уточнением — не спрашивать.
+        val pasta = FoodQueryTranslator.translate("спагетти")
+        assertEquals(listOf("Спагетти сухие", "Спагетти варёные"), pasta.clarifications)
+        assertEquals("pasta dry", FoodQueryTranslator.translate("Спагетти сухие").englishQuery)
+        assertEquals("pasta cooked", FoodQueryTranslator.translate("Спагетти варёные").englishQuery)
+        assertTrue(FoodQueryTranslator.translate("Спагетти варёные").clarifications.isEmpty())
+        assertEquals(listOf("Гречка сухая", "Гречка варёная"), FoodQueryTranslator.translate("гречки").clarifications)
+        assertEquals("rice cooked", FoodQueryTranslator.translate("отварной рис").englishQuery)
+        assertTrue(FoodQueryTranslator.translate("творог").clarifications.isEmpty())
         val oil = FoodQueryTranslator.translate("масла")
         assertNull(oil.englishQuery)
         assertTrue(oil.clarifications.contains("Сливочное масло"))
@@ -339,8 +348,14 @@ class VoiceAndTextTest {
             val en = FoodQueryTranslator.translate(query).englishQuery
             return names.maxBy { FoodSearch.autoPickScore(query, en, usda(it)) }
         }
-        assertEquals("Spaghetti, cooked", best("спагетти", listOf("Spaghetti sauce", "Spaghetti sauce with meat", "DENNY'S, spaghetti and meatballs", "Spaghetti, cooked")))
-        assertEquals("Rice, white, long-grain, regular, cooked", best("рис", listOf("Dirty rice", "Rice dressing", "Crackers, rice", "Rice paper", "Rice, white, long-grain, regular, cooked")))
+        val pastaNames = listOf("Spaghetti sauce", "Spaghetti, spinach, dry", "Pasta, dry, enriched", "Pasta, cooked, enriched, without added salt", "Pasta with tomato sauce")
+        assertEquals("Pasta, cooked, enriched, without added salt", best("спагетти варёные", pastaNames))
+        assertEquals("Pasta, dry, enriched", best("спагетти сухие", pastaNames))
+        val riceNames = listOf("Rice crackers", "Dirty rice", "Rice dressing", "Rice paper", "Rice, white, long-grain, regular, raw, enriched", "Rice, white, long-grain, regular, enriched, cooked")
+        assertEquals("Rice, white, long-grain, regular, enriched, cooked", best("рис варёный", riceNames))
+        assertEquals("Rice, white, long-grain, regular, raw, enriched", best("рис сухой", riceNames))
+        assertTrue(best("рис", riceNames).startsWith("Rice, white"))
+        assertEquals("Chicken, breast, boneless, skinless, cooked, braised", best("отварное куриное филе", listOf("Chicken, breast, boneless, skinless, raw", "Chicken, breast, boneless, skinless, cooked, braised")))
         assertEquals("Cheese, cottage, lowfat, 2% milkfat", best("творог", listOf("Cheese, cottage, with fruit", "Cheese, cottage, with vegetables", "Cheese, cottage, lowfat, 2% milkfat")))
         assertEquals(
             "Chicken, broilers or fryers, breast, meat only, cooked, roasted",

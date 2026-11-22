@@ -30,7 +30,7 @@ class LiveApiProbeTest {
         assumeTrue("NT_LIVE_API=1 не задан", enabled)
         val usda = UsdaClient(http, { "" })
         val off = OpenFoodFactsClient(http, UA)
-        for (query in listOf("спагетти", "творог", "рис", "куриное филе", "сливочное масло", "гречка", "овсянка")) {
+        for (query in listOf("спагетти сухие", "спагетти варёные", "рис сухой", "рис варёный", "творог", "куриное филе", "гречка варёная", "овсянка сухая")) {
             val english = FoodQueryTranslator.translate(query).englishQuery
             val u = english?.let { usda.search(it) }
             val o = off.search(query)

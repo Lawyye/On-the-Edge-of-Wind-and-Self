@@ -130,7 +130,8 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
                     remoteCandidates = remoteScored.take(8).map { p -> p.first },
                     searching = false,
                     searchError = when {
-                        translation.clarifications.isNotEmpty() -> "Уточните, какой именно продукт: «${query}» бывает разным"
+                        translation.clarifications.isNotEmpty() && !(bestLocal?.first?.useCount?.let { it > 0 } ?: false) ->
+                            translation.clarifyQuestion ?: "Уточните, какой именно продукт"
                         online == null && local.isEmpty() -> "Нет интернета — поиск только по сохранённым продуктам"
                         online != null && online.errors.isNotEmpty() && bestLocal == null && bestRemote == null ->
                             online.errors.first().userMessage
@@ -140,8 +141,9 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
                 )
             }
             when {
-                // Неоднозначное слово: не выбираем за пользователя.
-                translation.clarifications.isNotEmpty() -> {}
+                // Неоднозначное слово: не выбираем за пользователя — кроме продукта,
+                // который он сам уже выбирал раньше по такому запросу.
+                translation.clarifications.isNotEmpty() -> bestLocal?.takeIf { it.first.useCount > 0 }?.let { select(id, it.first) }
                 bestRemote != null && (bestLocal == null || bestRemote.second > bestLocal.second) -> selectRemote(id, bestRemote.first)
                 bestLocal != null -> select(id, bestLocal.first)
             }

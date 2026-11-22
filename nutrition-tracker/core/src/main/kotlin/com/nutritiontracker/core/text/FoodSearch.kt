@@ -122,10 +122,41 @@ object FoodSearch {
      * продукта другое блюдо («sauce», «dressing», «crackers»), — снижают
      * заметно: на «spaghetti» нужны спагетти, а не соус для них.
      */
-    fun relevanceUsda(query: String, name: String, vararg other: String?): Double =
-        score(name, buildIndex(name, *other), queryStems(query), USDA_DISH_WORD_PENALTY, usdaDescriptors, USDA_DESCRIPTOR_PENALTY)
+    fun relevanceUsda(query: String, name: String, vararg other: String?): Double {
+        val stems = queryStems(query)
+        // Способ приготовления не обязателен для совпадения: «rice cooked» находит
+        // «Rice, white, long-grain, regular, cooked», «chicken boiled» — «Chicken, stewed».
+        val optional = stems.filter { it in usdaStateWords }
+        val required = (stems - optional.toSet()).ifEmpty { stems }
+        val index = buildIndex(name, *other)
+        val base = score(name, index, required, USDA_DISH_WORD_PENALTY, usdaDescriptors + optional.toSet(), USDA_DESCRIPTOR_PENALTY)
+        if (base <= 0.1 && !matches(index, required)) return 0.0
+        val tokens = TextNormalizer.tokens(name).map { keyOf(it) }.toSet()
+        var bonus = 0.0
+        for (s in optional) {
+            val group = stateGroups.firstOrNull { s in it }
+            val opposite = stateGroups.firstOrNull { group != null && it !== group }
+            bonus += when {
+                s in tokens -> 3.0
+                group != null && tokens.any { it in group } -> 2.0
+                else -> 0.0
+            }
+            // «Рис варёный» не должен подобрать сухой рис, и наоборот.
+            if (opposite != null && tokens.any { it in opposite } && tokens.none { it in group!! }) bonus -= 4.0
+        }
+        return (base + bonus).coerceAtLeast(0.1)
+    }
 
-    const val USDA_DISH_WORD_PENALTY = 1.2
+    /** Сухой (сырой) и готовый продукт: калорийность на 100 г отличается в 2–3 раза. */
+    private val stateGroups: List<Set<String>> = listOf(
+        setOf("raw", "dry", "uncooked", "unprepared"),
+        setOf("cooked", "boiled", "stewed", "steamed", "simmered", "braised", "poached", "prepared"),
+    ).map { g -> g.map { keyOf(it) }.toSet() }
+
+    private val usdaStateWords: Set<String> = stateGroups.flatten().toSet() +
+        listOf("fried", "baked", "roasted", "grilled", "broiled", "dried", "canned", "smoked", "nonfat", "low", "fat", "whole").map { keyOf(it) }
+
+    const val USDA_DISH_WORD_PENALTY = 3.0
     const val USDA_DESCRIPTOR_PENALTY = 0.1
 
     /** Слова описаний USDA, которые уточняют продукт (состояние, обработку, сорт), но не меняют его. */

@@ -24,13 +24,15 @@ object FoodQueryTranslator {
          * варианты для уточнения. Пусто — запрос однозначен.
          */
         val clarifications: List<String> = emptyList(),
+        /** Вопрос к вариантам [clarifications]. */
+        val clarifyQuestion: String? = null,
     ) {
         val englishQuery: String? get() = englishQueries.firstOrNull()
     }
 
-    private class Entry(val english: String, val alternatives: List<List<String>>, val isModifier: Boolean)
+    private class Entry(val english: String, val alternatives: List<List<String>>, val isModifier: Boolean, val ru: String? = null)
 
-    private fun food(en: String, vararg alts: String) = Entry(en, alts.map { it.split(' ') }, false)
+    private fun food(en: String, vararg alts: String, ru: String? = null) = Entry(en, alts.map { it.split(' ') }, false, ru)
     private fun mod(en: String, vararg alts: String) = Entry(en, alts.map { it.split(' ') }, true)
 
     private val entries: List<Entry> = listOf(
@@ -93,7 +95,8 @@ object FoodQueryTranslator {
         food("rice", "рис", "рисов"),
         food("buckwheat groats", "греч"),
         food("oats", "овсян", "овес", "овса", "геркулес"),
-        food("spaghetti", "спагет"),
+        // В USDA спагетти — это «Pasta» (сухие: «Pasta, dry», готовые: «Pasta, cooked»).
+        food("pasta", "спагет", ru = "Спагетти"),
         food("pasta", "макарон", "паста", "пасты", "пасту"),
         food("noodles", "лапш"),
         food("bread rye", "ржан хлеб", "хлеб ржан", "черн хлеб", "хлеб черн", "бородин"),
@@ -233,7 +236,9 @@ object FoodQueryTranslator {
         food("cocoa", "какао"),
         food("protein powder whey", "протеин", "сывороточ"),
         // Способы приготовления и состояние
-        mod("boiled", "варен", "отварн", "отвар"),
+        // В названиях USDA готовый продукт — «cooked», сухой — «dry» или «raw».
+        mod("cooked", "варен", "отварн", "отвар", "готов"),
+        mod("dry", "сух"),
         mod("fried", "жарен"),
         mod("baked", "запечен"),
         mod("stewed", "тушен"),
@@ -303,7 +308,6 @@ object FoodQueryTranslator {
         "rice" to "Рис",
         "buckwheat groats" to "Гречка",
         "oats" to "Овсянка",
-        "spaghetti" to "Спагетти",
         "pasta" to "Макароны",
         "noodles" to "Лапша",
         "bread rye" to "Ржаной хлеб",
@@ -447,6 +451,24 @@ object FoodQueryTranslator {
 
     fun russianName(english: String): String? = russianNames[english]
 
+    /**
+     * Продукты, которые взвешивают и сухими, и готовыми: без уточнения не
+     * понятно, какой вес назван. Значение — род для формы прилагательного.
+     */
+    private val cookable: Map<String, Char> = mapOf(
+        "rice" to 'm', "buckwheat groats" to 'f', "oats" to 'f', "pasta" to 'p', "noodles" to 'f', "bulgur" to 'm',
+        "quinoa" to 'f', "couscous" to 'm', "millet" to 'n', "barley pearled" to 'f', "semolina" to 'f',
+        "lentils" to 'f', "chickpeas" to 'm', "beans" to 'f', "peas" to 'm',
+    )
+    private val stateModifiers = setOf("cooked", "dry", "raw", "fried", "baked", "stewed", "grilled", "canned", "smoked")
+
+    private fun stateOptions(ru: String, gender: Char): List<String> = when (gender) {
+        'f' -> listOf("$ru сухая", "$ru варёная")
+        'n' -> listOf("$ru сухое", "$ru варёное")
+        'p' -> listOf("$ru сухие", "$ru варёные")
+        else -> listOf("$ru сухой", "$ru варёный")
+    }
+
     private fun rootMatches(root: String, token: String): Boolean {
         // Удвоенные буквы схлопываются с обеих сторон: «куринного», «пица», «моцарелла».
         val r = TextNormalizer.squeeze(root)
@@ -491,15 +513,25 @@ object FoodQueryTranslator {
         val mods = chosen.filter { it.entry.isModifier }.sortedBy { it.tokenIndexes.min() }
         if (foods.isEmpty()) {
             val options = ambiguous.firstOrNull { (root, _) -> tokens.any { rootMatches(root, it) } }?.second.orEmpty()
-            return Result(emptyList(), emptyList(), tokens, clarifications = options)
+            return Result(
+                emptyList(), emptyList(), tokens,
+                clarifications = options,
+                clarifyQuestion = if (options.isEmpty()) null else "Какое именно? Калорийность разная",
+            )
         }
+        val mainEntry = foods.first().entry
+        val mainRu = mainEntry.ru ?: russianNames[mainEntry.english]
+        val gender = cookable[mainEntry.english]
+        val stateChoice = if (gender != null && mainRu != null && mods.none { it.entry.english in stateModifiers }) stateOptions(mainRu, gender) else emptyList()
         val main = (listOf(foods.first().entry.english) + mods.map { it.entry.english }).distinct().joinToString(" ")
         val others = foods.drop(1).map { it.entry.english }
         return Result(
             englishQueries = (listOf(main) + others).distinct(),
             translatedTokens = taken.sorted().map { tokens[it] },
             untranslatedTokens = tokens.indices.filter { it !in taken }.map { tokens[it] },
-            russianName = russianNames[foods.first().entry.english],
+            russianName = mainRu,
+            clarifications = stateChoice,
+            clarifyQuestion = if (stateChoice.isEmpty()) null else "Вес сухого продукта или готового? Калорийность отличается в 2–3 раза",
         )
     }
 }

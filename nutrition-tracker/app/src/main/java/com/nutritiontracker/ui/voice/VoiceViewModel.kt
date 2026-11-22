@@ -166,7 +166,15 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
                 c.foods.ensureDetails(f.id)
                 f = c.foods.get(f.id) ?: f
             }
-            val resolved = QuantityResolver.resolve(item.parsed.quantity, f.basis, f.data.servings)
+            // У товара без бытовых мер ложка берётся из справочных порций USDA для этого продукта.
+            val reference = if (f.basis == com.nutritiontracker.core.model.AmountUnit.GRAM) {
+                com.nutritiontracker.core.voice.HouseholdReference.servingsFor(
+                    com.nutritiontracker.core.text.FoodQueryTranslator.translate(item.searchQuery).englishQuery,
+                )
+            } else {
+                emptyList()
+            }
+            val resolved = QuantityResolver.resolve(item.parsed.quantity, f.basis, f.data.servings + reference)
             updateItem(id) {
                 when (resolved) {
                     is ResolvedAmount.Resolved -> it.copy(selected = f, amountText = formatInput(resolved.amount), explanation = resolved.explanation, needs = null)

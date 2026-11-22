@@ -420,4 +420,17 @@ class VoiceAndTextTest {
         val right = FoodSearch.autoPickScore(q, en, usda("Chicken, breast, boneless, skinless, raw", com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION))
         assertTrue("$stale vs $right", right > stale)
     }
+
+    @Test
+    fun `ложка масла у товара без мер берётся из справочных порций`() {
+        val ref = com.nutritiontracker.core.voice.HouseholdReference.servingsFor(FoodQueryTranslator.translate("Подсолнечное масло").englishQuery)
+        val r = QuantityResolver.resolve(ParsedQuantity.Count(2.0, CountKind.HOUSEHOLD, "чайных ложках"), AmountUnit.GRAM, emptyList<ServingSize>() + ref) as ResolvedAmount.Resolved
+        assertEquals(9.0, r.amount, eps)
+        assertTrue(r.explanation!!.contains("справочно"))
+        // Свои меры продукта важнее справочных.
+        val own = listOf(ServingSize("1 tsp", 5.0, ServingKind.HOUSEHOLD, "USDA"))
+        val r2 = QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "чайная ложка"), AmountUnit.GRAM, own + ref) as ResolvedAmount.Resolved
+        assertEquals(5.0, r2.amount, eps)
+        assertTrue(com.nutritiontracker.core.voice.HouseholdReference.servingsFor("rice white").isEmpty())
+    }
 }

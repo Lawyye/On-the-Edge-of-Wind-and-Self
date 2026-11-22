@@ -53,18 +53,18 @@ class BodyRepository(
         val existing = weightDao.forDay(e.date.toEpochDay())
         val target = if (e.id != 0L) e.id else existing?.id ?: 0L
         // Новая запись на дату, где запись уже есть, дополняет её, а не стирает другие измерения.
-        val merge = e.id == 0L && existing != null
+        val base = if (e.id == 0L) existing else null
         val entity = WeightEntryEntity(
             id = target,
             epochDay = e.date.toEpochDay(),
-            weightKg = e.weightKg ?: if (merge) existing?.weightKg else null,
-            waistCm = e.waistCm ?: if (merge) existing?.waistCm else null,
-            hipsCm = e.hipsCm ?: if (merge) existing?.hipsCm else null,
-            chestCm = e.chestCm ?: if (merge) existing?.chestCm else null,
-            neckCm = e.neckCm ?: if (merge) existing?.neckCm else null,
-            armCm = e.armCm ?: if (merge) existing?.armCm else null,
-            thighCm = e.thighCm ?: if (merge) existing?.thighCm else null,
-            note = e.note?.trim()?.takeIf { it.isNotEmpty() } ?: if (merge) existing?.note else null,
+            weightKg = e.weightKg ?: base?.weightKg,
+            waistCm = e.waistCm ?: base?.waistCm,
+            hipsCm = e.hipsCm ?: base?.hipsCm,
+            chestCm = e.chestCm ?: base?.chestCm,
+            neckCm = e.neckCm ?: base?.neckCm,
+            armCm = e.armCm ?: base?.armCm,
+            thighCm = e.thighCm ?: base?.thighCm,
+            note = e.note?.trim()?.takeIf { it.isNotEmpty() } ?: base?.note,
             createdAt = existing?.createdAt ?: now,
             updatedAt = now,
         )

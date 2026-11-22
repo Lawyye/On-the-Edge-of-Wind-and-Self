@@ -100,3 +100,79 @@ jobs:
             nutrition-tracker/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
           if-no-files-found: error
           retention-days: 14
+
+  emulator:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nutrition-apks
+          path: apks
+
+      - name: KVM для эмулятора
+        working-directory: .
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          find apks -name '*.apk' -exec ls -la {} \;
+
+      - name: Проверка на эмуляторе
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash nutrition-tracker/ci/emulator-check.sh "$GITHUB_WORKSPACE/apks" "$RUNNER_TEMP/shots"
+
+      - name: Снимки экранов
+        if: always()
+        working-directory: .
+        run: |
+          for f in "$RUNNER_TEMP"/shots/*.png; do
+            [ -f "$f" ] || continue
+            name=$(basename "$f")
+            if command -v convert >/dev/null; then convert "$f" -resize 50% "$f"; fi
+            echo "=====BEGIN $name"; base64 -w 100 "$f"; echo "=====END $name"
+          done
+
+  publish:
+    needs: [build, emulator]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: nutrition-apks
+          path: apks
+
+      - name: Выложить APK отдельной ссылкой
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp apks/release/app-release.apk racion-release.apk
+          cat > notes.md <<'NOTES'
+          Рацион — личный трекер питания. Release-сборка, проверенная в CI:
+          юнит-тесты расчётов, тесты базы данных, онбординг на эмуляторе,
+          переустановка поверх с сохранением данных, запуск release и случайные нажатия.
+
+          Android спросит разрешение на установку из неизвестного источника —
+          так он реагирует на любой APK не из Play Market. Обновления ставятся
+          поверх, данные сохраняются (подпись постоянным ключом).
+          NOTES
+          sed -i 's/^          //' notes.md
+          gh release delete nutrition-apk --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create nutrition-apk racion-release.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "Рацион — свежая сборка" \
+            --notes-file notes.md
+          echo "Ссылка: $(gh release view nutrition-apk --repo "$GITHUB_REPOSITORY" --json url --jq .url)"

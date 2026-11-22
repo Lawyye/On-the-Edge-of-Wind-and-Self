@@ -41,6 +41,7 @@ object BackupCodec {
         ignoreUnknownKeys = false
     }
     private val prettyJson = Json(json) { prettyPrint = true }
+    private val headerJson = Json { ignoreUnknownKeys = true }
 
     fun encode(payload: BackupPayload, appVersion: String, exportedAt: Long): String {
         val file = BackupFile(
@@ -61,7 +62,7 @@ object BackupCodec {
     fun read(text: String): BackupReadResult {
         if (text.isBlank()) return BackupReadResult.Invalid(listOf("Файл пустой."))
         val header = try {
-            Json { ignoreUnknownKeys = true }.decodeFromString(Header.serializer(), text)
+            headerJson.decodeFromString(Header.serializer(), text)
         } catch (e: SerializationException) {
             return BackupReadResult.Invalid(listOf("Это не резервная копия приложения: файл не является корректным JSON нужной структуры."))
         } catch (e: IllegalArgumentException) {

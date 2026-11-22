@@ -360,7 +360,7 @@ fun AppTopBar(title: String, onBack: (() -> Unit)? = null, actions: @Composable 
             }
         },
         actions = actions,
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = c.background, scrolledContainerColor = c.background),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = c.background, scrolledContainerColor = c.background),
     )
 }
 

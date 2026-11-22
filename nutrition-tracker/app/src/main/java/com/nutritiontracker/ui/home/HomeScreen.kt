@@ -239,7 +239,7 @@ private fun WaterDialog(onDismiss: () -> Unit, onAdd: (Int) -> Unit) {
         containerColor = c.surface,
         title = { Text("Сколько воды?", style = AppTheme.type.section, color = c.textPrimary) },
         text = { AppTextField(text, { text = it }, "Объём", suffix = "мл", numeric = true, error = if (text.isNotEmpty() && !valid) "От 1 до 5000 мл" else null) },
-        confirmButton = { TextButton(onClick = { if (valid) onAdd(v!!) }, enabled = valid) { Text("Добавить", color = if (valid) c.accent else c.textTertiary) } },
+        confirmButton = { TextButton(onClick = { if (v != null && valid) onAdd(v) }, enabled = valid) { Text("Добавить", color = if (valid) c.accent else c.textTertiary) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Отмена", color = c.textSecondary) } },
     )
 }

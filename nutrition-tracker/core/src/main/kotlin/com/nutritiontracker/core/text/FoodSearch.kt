@@ -84,7 +84,14 @@ object FoodSearch {
      * филе» — это ветчина, а не филе. Поэтому первое слово названия должно
      * совпадать с каким-то словом запроса, а каждое лишнее слово снижает оценку.
      */
-    fun score(name: String, index: String, stems: List<String>, extraWordPenalty: Double = EXTRA_WORD_PENALTY): Double {
+    fun score(
+        name: String,
+        index: String,
+        stems: List<String>,
+        extraWordPenalty: Double = EXTRA_WORD_PENALTY,
+        mildWords: Set<String> = emptySet(),
+        mildPenalty: Double = extraWordPenalty,
+    ): Double {
         if (!matches(index, stems)) return 0.0
         val nameTokens = TextNormalizer.tokens(name).map { keyOf(it) }
         var score = 10.0
@@ -97,11 +104,11 @@ object FoodSearch {
         if (head != null && stems.any { s -> head.startsWith(s) || s.startsWith(head) || wordMatches(head, s) }) {
             score += 3.0
         }
-        val extra = nameTokens.count { t ->
+        val extra = nameTokens.filter { t ->
             t.length >= 3 && t !in stopWords && t.any(Char::isLetter) &&
                 stems.none { s -> t.startsWith(s) || s.startsWith(t) || wordMatches(t, s) }
-        }
-        score -= extra.coerceAtMost(8) * extraWordPenalty
+        }.take(8)
+        score -= extra.sumOf { t -> if (t in mildWords) mildPenalty else extraWordPenalty }
         return score.coerceAtLeast(0.1)
     }
 
@@ -109,7 +116,59 @@ object FoodSearch {
     fun relevance(query: String, name: String, vararg other: String?): Double =
         score(name, buildIndex(name, *other), queryStems(query))
 
-    /** То же для английских описаний USDA. */
+    /**
+     * То же для английских описаний USDA. Слова состояния и обработки («raw»,
+     * «cooked», «lowfat») почти не снижают оценку, а слова, которые делают из
+     * продукта другое блюдо («sauce», «dressing», «crackers»), — снижают
+     * заметно: на «spaghetti» нужны спагетти, а не соус для них.
+     */
     fun relevanceUsda(query: String, name: String, vararg other: String?): Double =
-        score(name, buildIndex(name, *other), queryStems(query), USDA_EXTRA_WORD_PENALTY)
+        score(name, buildIndex(name, *other), queryStems(query), USDA_DISH_WORD_PENALTY, usdaDescriptors, USDA_DESCRIPTOR_PENALTY)
+
+    const val USDA_DISH_WORD_PENALTY = 1.2
+    const val USDA_DESCRIPTOR_PENALTY = 0.1
+
+    /** Слова описаний USDA, которые уточняют продукт (состояние, обработку, сорт), но не меняют его. */
+    private val usdaDescriptors: Set<String> = (
+        "raw cooked boiled roasted baked broiled grilled braised stewed steamed simmered poached fried pan dry dried " +
+            "enriched unenriched fortified regular plain white brown wild whole grain long medium short instant quick " +
+            "rolled old fashioned flakes groats pearled hulled kernels mature seeds sprouted " +
+            "without salt added unsalted salted skin skinless boneless bone meat only lean fat lowfat nonfat milkfat " +
+            "reduced creamed uncreamed curd small large fresh frozen canned drained solids liquid prepared unprepared " +
+            "nfs ns made from water fluid grade grades choice select trimmed separable all commercial includes " +
+            "broilers broiler fryers fryer roasting not eaten ripe peeled unpeeled flesh yellow red green golden " +
+            "sweet extra virgin light dark cultured vitamin added dairy cow mixed pieces sliced chopped florets " +
+            "uncooked thawed ready serve heated stick sticks whipped"
+        ).split(' ').filter { it.isNotBlank() }.map { keyOf(it) }.toSet()
+
+    /**
+     * Оценка кандидата для автоматического выбора в голосовом вводе.
+     * Сохранённые и онлайн-варианты сравниваются на равных. Плюс — полноте
+     * состава, базовым продуктам USDA (Foundation, SR Legacy), своим продуктам
+     * и рецептам, продуктам, которые уже добавлялись в дневник. Продукт без
+     * калорийности сам не выбирается.
+     */
+    fun autoPickScore(
+        query: String,
+        englishQuery: String?,
+        data: com.nutritiontracker.core.model.FoodData,
+        aliases: List<String> = emptyList(),
+        useCount: Int = 0,
+    ): Double {
+        val base = if (data.source.isUsda) {
+            maxOf(
+                englishQuery?.let { relevanceUsda(it, data.name, data.category) } ?: 0.0,
+                aliases.maxOfOrNull { a -> relevance(query, a) } ?: 0.0,
+            )
+        } else {
+            relevance(query, aliases.firstOrNull() ?: data.name, data.name, data.brand, data.category, data.nameEn)
+        }
+        if (base <= 0.0 || !data.nutrients.isKnown(com.nutritiontracker.core.model.Nutrient.ENERGY)) return 0.0
+        var bonus = data.nutrients.known.size / 20.0
+        val src = data.source
+        if (src == com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION || src == com.nutritiontracker.core.model.FoodSource.USDA_SR_LEGACY) bonus += 1.5
+        if (src == com.nutritiontracker.core.model.FoodSource.USER || src == com.nutritiontracker.core.model.FoodSource.RECIPE) bonus += 3.0
+        bonus += minOf(useCount, 5) * 0.4
+        return base + bonus
+    }
 }

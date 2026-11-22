@@ -98,31 +98,11 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
     private fun updateItem(id: Int, t: (VoiceItem) -> VoiceItem) =
         _state.update { s -> s.copy(items = s.items.map { if (it.id == id) t(it) else it }) }
 
-    /** Ищет продукт: сначала в локальной базе, затем, если есть сеть, в интернете. */
-    /**
-     * Оценка кандидата для автоматического выбора. Сохранённые и онлайн-варианты
-     * сравниваются на равных: прежний автоматический выбор не должен закрепляться
-     * сам собой. Плюс — продуктам, которые вы сами добавляли в дневник, своим
-     * продуктам и рецептам, базовым продуктам USDA (полный состав, без переработки).
-     */
-    private fun candidateScore(query: String, englishQuery: String?, data: com.nutritiontracker.core.model.FoodData, aliases: List<String>, useCount: Int): Double {
-        val base = if (data.source.isUsda) {
-            maxOf(
-                englishQuery?.let { FoodSearch.relevanceUsda(it, data.name, data.category) } ?: 0.0,
-                aliases.maxOfOrNull { a -> FoodSearch.relevance(query, a) } ?: 0.0,
-            )
-        } else {
-            FoodSearch.relevance(query, aliases.firstOrNull() ?: data.name, data.name, data.brand, data.category, data.nameEn)
-        }
-        // Без калорийности продукт не выбирается сам — только вручную.
-        if (base <= 0.0 || !data.nutrients.isKnown(Nutrient.ENERGY)) return 0.0
-        var bonus = data.nutrients.known.size / 20.0
-        if (data.source == com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION || data.source == com.nutritiontracker.core.model.FoodSource.USDA_SR_LEGACY) bonus += 1.5
-        if (data.source == com.nutritiontracker.core.model.FoodSource.USER || data.source == com.nutritiontracker.core.model.FoodSource.RECIPE) bonus += 3.0
-        bonus += minOf(useCount, 5) * 0.4
-        return base + bonus
-    }
+    /** Оценка кандидата для автоматического выбора — общая с проверками в CI. */
+    private fun candidateScore(query: String, englishQuery: String?, data: com.nutritiontracker.core.model.FoodData, aliases: List<String>, useCount: Int): Double =
+        FoodSearch.autoPickScore(query, englishQuery, data, aliases, useCount)
 
+    /** Ищет продукт: сначала в локальной базе, затем, если есть сеть, в интернете. */
     fun findFood(id: Int, query: String) {
         val translation = com.nutritiontracker.core.text.FoodQueryTranslator.translate(query)
         updateItem(id) {

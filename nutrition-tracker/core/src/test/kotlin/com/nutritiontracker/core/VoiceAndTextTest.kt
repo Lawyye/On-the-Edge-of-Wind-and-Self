@@ -327,4 +327,27 @@ class VoiceAndTextTest {
         assertEquals("olive oil", FoodQueryTranslator.translate("оливкового масла").englishQuery)
         assertTrue(FoodQueryTranslator.translate("маслины").clarifications.isEmpty())
     }
+
+    @Test
+    fun `на spaghetti выбираются спагетти а не соус`() {
+        fun usda(name: String, source: com.nutritiontracker.core.model.FoodSource = com.nutritiontracker.core.model.FoodSource.USDA_SURVEY) =
+            com.nutritiontracker.core.model.FoodData(
+                name = name, source = source, externalId = name,
+                nutrients = com.nutritiontracker.core.model.Nutrients.of(com.nutritiontracker.core.model.Nutrient.ENERGY to 150.0),
+            )
+        fun best(query: String, names: List<String>): String {
+            val en = FoodQueryTranslator.translate(query).englishQuery
+            return names.maxBy { FoodSearch.autoPickScore(query, en, usda(it)) }
+        }
+        assertEquals("Spaghetti, cooked", best("спагетти", listOf("Spaghetti sauce", "Spaghetti sauce with meat", "DENNY'S, spaghetti and meatballs", "Spaghetti, cooked")))
+        assertEquals("Rice, white, long-grain, regular, cooked", best("рис", listOf("Dirty rice", "Rice dressing", "Crackers, rice", "Rice paper", "Rice, white, long-grain, regular, cooked")))
+        assertEquals("Cheese, cottage, lowfat, 2% milkfat", best("творог", listOf("Cheese, cottage, with fruit", "Cheese, cottage, with vegetables", "Cheese, cottage, lowfat, 2% milkfat")))
+        assertEquals(
+            "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+            best("куриное филе", listOf("Lunchmeat, chicken breast, sliced", "Chicken breast tenders, breaded, uncooked", "Chicken, broilers or fryers, breast, meat only, cooked, roasted")),
+        )
+        // Без калорийности — не выбирается автоматически.
+        val noEnergy = com.nutritiontracker.core.model.FoodData(name = "Творог", source = com.nutritiontracker.core.model.FoodSource.OPEN_FOOD_FACTS, externalId = "1", nutrients = com.nutritiontracker.core.model.Nutrients.of(com.nutritiontracker.core.model.Nutrient.PROTEIN to 17.0))
+        assertEquals(0.0, FoodSearch.autoPickScore("творог", "cottage cheese", noEnergy), 0.0)
+    }
 }

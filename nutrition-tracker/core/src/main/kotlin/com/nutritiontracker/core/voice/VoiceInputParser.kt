@@ -284,9 +284,34 @@ object VoiceInputParser {
 
         val isEmpty get() = nameTokens.isEmpty() && !hadQuantityToken
         val hasName get() = nameTokens.any { it !in edgeWords }
+
+        /**
+         * Отделяет последний продукт словаря, если в названии их несколько:
+         * «масла творог» → остаётся «масла», возвращается «творог».
+         */
+        fun takeLastFood(): List<String> {
+            val starts = com.nutritiontracker.core.text.FoodQueryTranslator.foodStarts(nameTokens)
+            val split = starts.lastOrNull()?.takeIf { starts.size >= 2 && it > 0 } ?: return emptyList()
+            val moved = nameTokens.subList(split, nameTokens.size).toList()
+            repeat(moved.size) { nameTokens.removeAt(nameTokens.lastIndex) }
+            if (sourceTokens.takeLast(moved.size) == moved) repeat(moved.size) { sourceTokens.removeAt(sourceTokens.lastIndex) }
+            return moved
+        }
     }
 
     private val edgeWords = setOf("с", "со", "из", "в", "на", "и", "а", "по")
+
+    /** Есть ли после позиции [from] название продукта до следующего количества. */
+    private fun nameFollows(tokens: List<String>, from: Int): Boolean {
+        var k = from
+        while (k < tokens.size) {
+            val t = tokens[k]
+            if (quantityAt(tokens, k) != null) return false
+            if (t !in edgeWords && !isModifier(t)) return true
+            k++
+        }
+        return false
+    }
 
     private fun parseSegment(tokens: List<String>): List<ParsedFoodItem> {
         val items = mutableListOf<ParsedFoodItem>()
@@ -314,8 +339,13 @@ object VoiceInputParser {
             val match = quantityAt(tokens, i)
             if (match != null) {
                 if (cur.hadQuantityToken && cur.hasName) {
+                    // «2 ложки масла творог 180 г»: у «180 г» после себя названия нет,
+                    // значит, оно относится к последнему продукту перед ним.
+                    val moved = if (!cur.quantityAfterName && !nameFollows(tokens, i + match.consumed)) cur.takeLastFood() else emptyList()
                     items += cur.build()
                     cur = Builder()
+                    cur.nameTokens += moved
+                    cur.sourceTokens += moved
                 }
                 val existing = cur.quantity
                 val incoming = match.quantity

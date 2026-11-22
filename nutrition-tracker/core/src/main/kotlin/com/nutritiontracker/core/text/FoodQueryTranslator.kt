@@ -493,14 +493,8 @@ object FoodQueryTranslator {
 
     private data class Match(val entry: Entry, val tokenIndexes: List<Int>, val weight: Int)
 
-    fun translate(query: String): Result {
-        val tokens = TextNormalizer.tokens(query)
-        if (tokens.isEmpty()) return Result(emptyList(), emptyList(), emptyList())
-        if (tokens.all { !TextNormalizer.isCyrillic(it) }) {
-            // Запрос уже латиницей — передаём как есть.
-            return Result(listOf(tokens.joinToString(" ")), tokens, emptyList())
-        }
-
+    /** Жадно берёт самые специфичные совпадения словаря, не используя слово дважды. */
+    private fun chooseMatches(tokens: List<String>): List<Match> {
         val candidates = mutableListOf<Match>()
         for (entry in entries) {
             for (alt in entry.alternatives) {
@@ -514,7 +508,6 @@ object FoodQueryTranslator {
                 if (ok) candidates += Match(entry, used, alt.sumOf { it.length } + (alt.size - 1) * 10)
             }
         }
-        // Жадно берём самые специфичные совпадения, не используя слово дважды.
         val taken = mutableSetOf<Int>()
         val chosen = mutableListOf<Match>()
         for (m in candidates.sortedByDescending { it.weight }) {
@@ -522,6 +515,34 @@ object FoodQueryTranslator {
             chosen += m
             taken += m.tokenIndexes
         }
+        return chosen
+    }
+
+    /**
+     * Позиции, с которых в списке слов начинаются разные продукты словаря
+     * (включая неоднозначные вроде «масла»): «масла творог» → [0, 1],
+     * «куриного филе» → [0]. Нужно разбору фразы, чтобы разделить два
+     * продукта, названных подряд.
+     */
+    fun foodStarts(words: List<String>): List<Int> {
+        val tokens = words.map { TextNormalizer.normalize(it) }
+        val chosen = chooseMatches(tokens)
+        val taken = chosen.flatMap { it.tokenIndexes }.toSet()
+        val starts = chosen.filter { !it.entry.isModifier }.map { it.tokenIndexes.min() } +
+            tokens.indices.filter { i -> i !in taken && ambiguous.any { (root, _) -> rootMatches(root, tokens[i]) } }
+        return starts.distinct().sorted()
+    }
+
+    fun translate(query: String): Result {
+        val tokens = TextNormalizer.tokens(query)
+        if (tokens.isEmpty()) return Result(emptyList(), emptyList(), emptyList())
+        if (tokens.all { !TextNormalizer.isCyrillic(it) }) {
+            // Запрос уже латиницей — передаём как есть.
+            return Result(listOf(tokens.joinToString(" ")), tokens, emptyList())
+        }
+
+        val chosen = chooseMatches(tokens)
+        val taken = chosen.flatMap { it.tokenIndexes }.toSet()
         val foods = chosen.filter { !it.entry.isModifier }.sortedBy { it.tokenIndexes.min() }
         val mods = chosen.filter { it.entry.isModifier }.sortedBy { it.tokenIndexes.min() }
         if (foods.isEmpty()) {

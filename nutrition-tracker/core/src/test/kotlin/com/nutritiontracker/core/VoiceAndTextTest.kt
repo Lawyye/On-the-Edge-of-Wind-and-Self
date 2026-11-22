@@ -378,4 +378,46 @@ class VoiceAndTextTest {
         val noEnergy = com.nutritiontracker.core.model.FoodData(name = "Творог", source = com.nutritiontracker.core.model.FoodSource.OPEN_FOOD_FACTS, externalId = "1", nutrients = com.nutritiontracker.core.model.Nutrients.of(com.nutritiontracker.core.model.Nutrient.PROTEIN to 17.0))
         assertEquals(0.0, FoodSearch.autoPickScore("творог", "cottage cheese", noEnergy), 0.0)
     }
+
+    @Test
+    fun `два продукта подряд разделяются по последнему количеству`() {
+        val r = VoiceInputParser.parse("200 г куриного филе на двух чайных ложках масла творог 180 г и 110 г спагетти")
+        assertEquals(listOf("куриного филе", "масла", "творог", "спагетти"), r.items.map { it.name })
+        assertEquals(ParsedQuantity.Mass(200.0), r.items[0].quantity)
+        assertEquals(CountKind.HOUSEHOLD, (r.items[1].quantity as ParsedQuantity.Count).kind)
+        assertEquals(ParsedQuantity.Mass(180.0), r.items[2].quantity)
+        assertEquals(ParsedQuantity.Mass(110.0), r.items[3].quantity)
+
+        val milk = VoiceInputParser.parse("150 г гречки с молоком 200 мл")
+        assertEquals(listOf("гречки", "молоком"), milk.items.map { it.name })
+        assertEquals(ParsedQuantity.Volume(200.0), milk.items[1].quantity)
+        // Название после количества — обычный случай, ничего не переносится.
+        val two = VoiceInputParser.parse("200 г куриного филе 100 г риса")
+        assertEquals(listOf("куриного филе", "риса"), two.items.map { it.name })
+        // Один продукт из двух слов не разрывается.
+        val one = VoiceInputParser.parse("2 ложки сливочного масла 100 г")
+        assertEquals("сливочного масла", one.items.first().name)
+    }
+
+    @Test
+    fun `русское название подходит только самому продукту USDA`() {
+        assertTrue(FoodSearch.usdaFits("chicken breast", "Chicken, breast, boneless, skinless, raw"))
+        assertTrue(FoodSearch.usdaFits("chicken breast", "Chicken, broilers or fryers, breast, meat only, cooked, roasted"))
+        assertTrue(FoodSearch.usdaFits("cottage cheese", "Cheese, cottage, NFS"))
+        assertTrue(FoodSearch.usdaFits("pasta dry", "Pasta, dry, enriched"))
+        assertFalse(FoodSearch.usdaFits("chicken breast", "Lunchmeat, chicken breast, sliced"))
+        assertFalse(FoodSearch.usdaFits("chicken breast", "Chicken breast tenders, breaded, uncooked"))
+        assertFalse(FoodSearch.usdaFits("cottage cheese", "Cheese, cottage, with vegetables"))
+
+        // Старое ошибочное русское название и частые записи не перебивают подходящий продукт.
+        fun usda(name: String, source: com.nutritiontracker.core.model.FoodSource) = com.nutritiontracker.core.model.FoodData(
+            name = name, source = source, externalId = name,
+            nutrients = com.nutritiontracker.core.model.Nutrients.of(com.nutritiontracker.core.model.Nutrient.ENERGY to 110.0),
+        )
+        val q = "куриного филе"
+        val en = FoodQueryTranslator.translate(q).englishQuery
+        val stale = FoodSearch.autoPickScore(q, en, usda("Lunchmeat, chicken breast, sliced", com.nutritiontracker.core.model.FoodSource.USDA_SR_LEGACY), listOf("Куринное филе"), useCount = 5)
+        val right = FoodSearch.autoPickScore(q, en, usda("Chicken, breast, boneless, skinless, raw", com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION))
+        assertTrue("$stale vs $right", right > stale)
+    }
 }

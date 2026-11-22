@@ -207,6 +207,36 @@ class DataLayerTest {
     }
 
     @Test
+    fun wrongRussianNamesFromOldVersionsAreCleaned() = runBlocking<Unit> {
+        val lunchmeat = RemoteFood(
+            FoodData(
+                name = "Lunchmeat, chicken breast, sliced", source = FoodSource.USDA_SR_LEGACY, externalId = "1001",
+                nutrients = Nutrients.of(Nutrient.ENERGY to 100.0, Nutrient.PROTEIN to 16.4),
+            ),
+            isFullRecord = false,
+        )
+        // Нарезка из грудки не получает название «Куриное филе».
+        val id = foods.saveRemote(lunchmeat, "куриного филе")
+        assertEquals(emptyList<String>(), foods.get(id)!!.aliases)
+        // Так её назвала прежняя версия — название убирается при чистке.
+        foods.setAliases(id, listOf("Куринное филе"))
+        val cottage = RemoteFood(
+            FoodData(
+                name = "Cheese, cottage, NFS", source = FoodSource.USDA_SURVEY, externalId = "1002",
+                nutrients = Nutrients.of(Nutrient.ENERGY to 82.0),
+            ),
+            isFullRecord = false,
+        )
+        val cid = foods.saveRemote(cottage, "творог")
+        foods.setAliases(cid, listOf("Творога", "Мой творог с рынка"))
+        assertEquals(2, foods.cleanUsdaAliases())
+        assertEquals(emptyList<String>(), foods.get(id)!!.aliases)
+        assertEquals("Lunchmeat, chicken breast, sliced", foods.get(id)!!.displayName)
+        assertEquals(listOf("Творог", "Мой творог с рынка"), foods.get(cid)!!.aliases)
+        assertEquals(0, foods.cleanUsdaAliases())
+    }
+
+    @Test
     fun weightEntriesAreOnePerDayAndMergeMeasurements() = runBlocking<Unit> {
         body.saveBody(BodyEntry(0, day, 80.0, null, null, null, null, null, null, null))
         body.saveBody(BodyEntry(0, day, null, 85.0, null, null, null, null, null, null))

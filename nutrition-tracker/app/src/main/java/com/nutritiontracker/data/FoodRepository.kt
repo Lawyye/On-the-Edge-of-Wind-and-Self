@@ -182,7 +182,40 @@ class FoodRepository(
     private fun russianAlias(searchQuery: String?, data: FoodData): String? {
         val q = searchQuery?.trim()?.takeIf { it.length >= 2 } ?: return null
         if (!TextNormalizer.isCyrillic(TextNormalizer.normalize(q)) || TextNormalizer.isCyrillic(TextNormalizer.normalize(data.name))) return null
-        return FoodQueryTranslator.translate(q).russianName
+        val t = FoodQueryTranslator.translate(q)
+        // «Куриное филе» — только для куриной грудки, а не для нарезки или наггетсов из неё.
+        val english = t.englishQuery ?: return null
+        return t.russianName?.takeIf { FoodSearch.usdaFits(english, data.name) }
+    }
+
+    /**
+     * Однократная чистка русских названий продуктов USDA, присвоенных прежними
+     * версиями по запросу как есть: «Творога» → «Творог», «Куринное филе» →
+     * «Куриное филе», а название, не подходящее продукту («Куриное филе» у
+     * «Lunchmeat, chicken breast»), убирается. Названия не из словаря не трогаются.
+     * Возвращает число исправленных продуктов.
+     */
+    suspend fun cleanUsdaAliases(): Int {
+        var changed = 0
+        for (e in foodDao.all()) {
+            if (!e.source.startsWith("usda")) continue
+            val old = StorageJson.readStrings(e.aliases)
+            if (old.isEmpty()) continue
+            val fixed = old.mapNotNull { a ->
+                val t = FoodQueryTranslator.translate(a)
+                val english = t.englishQuery
+                when {
+                    english == null || t.untranslatedTokens.isNotEmpty() -> a
+                    FoodSearch.usdaFits(english, e.name) -> t.russianName ?: a
+                    else -> null
+                }
+            }.distinct()
+            if (fixed != old) {
+                setAliases(e.id, fixed)
+                changed++
+            }
+        }
+        return changed
     }
 
     /**
@@ -197,7 +230,7 @@ class FoodRepository(
     }
 
     private fun aliasStem(s: String): String =
-        TextNormalizer.tokens(s).joinToString(" ") { com.nutritiontracker.core.text.RussianStemmer.stem(it) }
+        TextNormalizer.tokens(s).joinToString(" ") { com.nutritiontracker.core.text.RussianStemmer.stem(TextNormalizer.squeeze(it)) }
 
     /** Догружает полную карточку USDA (порции, полный состав), если её ещё нет. */
     suspend fun ensureDetails(foodId: Long): RemoteError? {

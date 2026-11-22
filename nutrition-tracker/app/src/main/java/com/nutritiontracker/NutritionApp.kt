@@ -5,6 +5,8 @@ import com.nutritiontracker.data.work.CacheRefreshWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+private const val ALIASES_FIX = "usda_aliases_v1"
+
 class NutritionApp : Application() {
     lateinit var container: AppContainer
         private set
@@ -19,6 +21,11 @@ class NutritionApp : Application() {
                 CacheRefreshWorker.syncWhenOnline(this@NutritionApp)
             }
             container.profile.maybeUpdateAdaptive(LocalDate.now())
+            // Прежние версии давали продуктам USDA русское название по запросу как есть.
+            if (!container.settings.isDone(ALIASES_FIX)) {
+                container.foods.cleanUsdaAliases()
+                container.settings.markDone(ALIASES_FIX)
+            }
         }
     }
 }

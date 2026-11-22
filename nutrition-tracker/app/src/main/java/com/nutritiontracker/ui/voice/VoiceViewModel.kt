@@ -108,7 +108,12 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
     fun findFood(id: Int, query: String) {
         val translation = com.nutritiontracker.core.text.FoodQueryTranslator.translate(query)
         updateItem(id) {
-            it.copy(searching = true, searchQuery = query, searchError = null, selected = null, clarifications = translation.clarifications)
+            // После нажатия на вариант («Спагетти сухие») кнопки остаются, выбранная отмечена.
+            val keep = translation.clarifications.isEmpty() && query in it.clarifications
+            it.copy(
+                searching = true, searchQuery = query, searchError = null, selected = null,
+                clarifications = if (keep) it.clarifications else translation.clarifications,
+            )
         }
         viewModelScope.launch {
             val englishQuery = translation.englishQuery

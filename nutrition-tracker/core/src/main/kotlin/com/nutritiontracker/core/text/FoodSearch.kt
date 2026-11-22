@@ -147,6 +147,25 @@ object FoodSearch {
         return (base + bonus).coerceAtLeast(0.1)
     }
 
+    /**
+     * Описание USDA — это именно названный продукт, а не блюдо из него или с ним:
+     * главное слово совпадает с запросом, а остальные слова только уточняют
+     * состояние и обработку. «Cheese, cottage, NFS» для «cottage cheese» — да,
+     * «Lunchmeat, chicken breast, sliced» для «chicken breast» — нет.
+     * Только такому продукту присваивается русское название из словаря.
+     */
+    fun usdaFits(englishQuery: String, name: String): Boolean {
+        val stems = queryStems(englishQuery)
+        val required = (stems - stems.filter { it in usdaStateWords }.toSet()).ifEmpty { stems }
+        if (!matches(buildIndex(name), required)) return false
+        val tokens = TextNormalizer.tokens(name).map { keyOf(it) }
+        val head = tokens.firstOrNull { it !in stopWords && it.any(Char::isLetter) } ?: return false
+        if (required.none { s -> head.startsWith(s) || s.startsWith(head) || wordMatches(head, s) }) return false
+        return tokens.filter { t -> t.length >= 3 && t !in stopWords && t.any(Char::isLetter) }
+            .filter { t -> stems.none { s -> t.startsWith(s) || s.startsWith(t) || wordMatches(t, s) } }
+            .all { it in usdaDescriptors || it in usdaStateWords }
+    }
+
     /** Сухой (сырой) и готовый продукт: калорийность на 100 г отличается в 2–3 раза. */
     private val stateGroups: List<Set<String>> = listOf(
         setOf("raw", "dry", "uncooked", "unprepared"),
@@ -170,7 +189,7 @@ object FoodSearch {
             "nfs ns made from water fluid grade grades choice select trimmed separable all commercial includes " +
             "broilers broiler fryers fryer roasting not eaten ripe peeled unpeeled flesh yellow red green golden " +
             "sweet extra virgin light dark cultured vitamin added dairy cow mixed pieces sliced chopped florets " +
-            "uncooked thawed ready serve heated stick sticks whipped"
+            "uncooked thawed ready serve heated stick sticks whipped parboiled precooked converted"
         ).split(' ').filter { it.isNotBlank() }.map { keyOf(it) }.toSet()
 
     /**
@@ -189,10 +208,10 @@ object FoodSearch {
         usdaApproximate: Boolean = false,
     ): Double {
         val base = if (data.source.isUsda) {
-            maxOf(
-                englishQuery?.let { relevanceUsda(it, data.name, data.category) } ?: 0.0,
-                aliases.maxOfOrNull { a -> relevance(query, a) } ?: 0.0,
-            )
+            // Для USDA решает исходное английское название: русское название могло
+            // быть присвоено раньше по ошибке («Куриное филе» для нарезки из грудки).
+            if (englishQuery != null) relevanceUsda(englishQuery, data.name, data.category)
+            else aliases.maxOfOrNull { a -> relevance(query, a) } ?: 0.0
         } else {
             relevance(query, aliases.firstOrNull() ?: data.name, data.name, data.brand, data.category, data.nameEn)
         }
@@ -201,8 +220,8 @@ object FoodSearch {
         val src = data.source
         if (src == com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION || src == com.nutritiontracker.core.model.FoodSource.USDA_SR_LEGACY) bonus += 1.5
         if (src == com.nutritiontracker.core.model.FoodSource.USER || src == com.nutritiontracker.core.model.FoodSource.RECIPE) bonus += 3.0
-        // Русское название, сохранённое пользователем для продукта USDA, — его осознанный выбор.
-        if (src.isUsda && usdaApproximate && aliases.isEmpty()) bonus -= USDA_APPROXIMATE_PENALTY
+        // Продукт USDA, который пользователь уже записывал в дневник, — его осознанный выбор.
+        if (src.isUsda && usdaApproximate && useCount == 0) bonus -= USDA_APPROXIMATE_PENALTY
         bonus += minOf(useCount, 5) * 0.4
         return base + bonus
     }

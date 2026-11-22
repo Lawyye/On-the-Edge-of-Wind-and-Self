@@ -51,6 +51,14 @@ class SettingsRepository(context: Context) {
 
     suspend fun current(): AppSettings = settings.first()
 
+    /** Однократные служебные задачи (исправление данных прежних версий). */
+    suspend fun isDone(task: String): Boolean =
+        try { store.data.first()[booleanPreferencesKey("done_$task")] == true } catch (e: IOException) { false }
+
+    suspend fun markDone(task: String) {
+        store.edit { it[booleanPreferencesKey("done_$task")] = true }
+    }
+
     suspend fun update(transform: (AppSettings) -> AppSettings) {
         store.edit { p ->
             val old = AppSettings(

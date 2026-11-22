@@ -300,7 +300,7 @@ private fun VoiceItemCard(
         if (item.clarifications.isNotEmpty()) {
             Spacer(Modifier.height(6.dp))
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item.clarifications.forEach { option -> ChoiceChip(option, false, onClick = { onSearch(option) }) }
+                item.clarifications.forEach { option -> ChoiceChip(option, option == item.searchQuery, onClick = { onSearch(option) }) }
             }
         }
 

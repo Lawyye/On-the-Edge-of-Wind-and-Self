@@ -19,6 +19,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 data class LocalSearchHit(val food: FoodItem, val score: Double)
 
@@ -32,6 +34,8 @@ data class OnlineSearchResult(
     val usdaSkippedNoTranslation: Boolean,
 )
 
+private const val ONLINE_CACHE_MS = 10 * 60 * 1000L
+
 class FoodRepository(
     private val db: AppDatabase,
     private val usda: UsdaClient,
@@ -41,6 +45,17 @@ class FoodRepository(
     private val foodDao = db.foodDao()
     private val favoriteDao = db.favoriteDao()
     private val historyDao = db.searchHistoryDao()
+
+    /**
+     * Онлайн-запросы идут по одному: бесплатные API отвечают ошибками на
+     * всплески параллельных запросов (голосовой ввод из нескольких позиций,
+     * ввод по буквам). Удачные ответы держатся в памяти 10 минут, чтобы
+     * повторный поиск того же слова не тратил лимит.
+     */
+    private val onlineMutex = Mutex()
+    private val onlineCache = object : LinkedHashMap<String, Pair<Long, OnlineSearchResult>>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<Long, OnlineSearchResult>>?) = size > 40
+    }
 
     fun observeFood(id: Long): Flow<FoodItem?> = foodDao.observe(id).map { it?.toItem() }
     suspend fun get(id: Long): FoodItem? = foodDao.get(id)?.toItem()
@@ -92,7 +107,16 @@ class FoodRepository(
      * Поиск в USDA и Open Food Facts параллельно. Ошибка одного источника не
      * мешает показать результаты другого.
      */
-    suspend fun searchOnline(query: String, settings: AppSettings): OnlineSearchResult = coroutineScope {
+    suspend fun searchOnline(query: String, settings: AppSettings): OnlineSearchResult = onlineMutex.withLock {
+        val key = listOf(settings.usdaEnabled, settings.openFoodFactsEnabled, settings.usdaApiKey.isNotBlank(), TextNormalizer.normalize(query))
+            .joinToString("|")
+        onlineCache[key]?.takeIf { clock() - it.first in 0..ONLINE_CACHE_MS }?.let { return@withLock it.second }
+        val result = searchOnlineNow(query, settings)
+        if (result.errors.isEmpty()) onlineCache[key] = clock() to result
+        result
+    }
+
+    private suspend fun searchOnlineNow(query: String, settings: AppSettings): OnlineSearchResult = coroutineScope {
         val translation = FoodQueryTranslator.translate(query)
         val usdaQuery = if (settings.usdaEnabled) translation.englishQuery else null
         val usdaJob = usdaQuery?.let { q -> async { usda.search(q) } }
@@ -104,7 +128,8 @@ class FoodRepository(
             null -> emptyList()
         }
         val offFoods = when (val r = offJob?.await()) {
-            is RemoteResult.Success -> r.value
+            // Записи без калорийности бесполезны для дневника — в Open Food Facts такие встречаются.
+            is RemoteResult.Success -> r.value.filter { it.food.nutrients.isKnown(com.nutritiontracker.core.model.Nutrient.ENERGY) }
             is RemoteResult.Failure -> { errors += r.error; emptyList() }
             null -> emptyList()
         }
@@ -133,14 +158,12 @@ class FoodRepository(
     suspend fun saveRemote(remote: RemoteFood, searchQuery: String?): Long = db.withTransaction {
         val now = clock()
         val data = remote.food
-        val alias = searchQuery?.trim()?.takeIf { q ->
-            q.length >= 2 && TextNormalizer.isCyrillic(TextNormalizer.normalize(q)) && !TextNormalizer.isCyrillic(TextNormalizer.normalize(data.name))
-        }?.replaceFirstChar { it.uppercase() }
+        val alias = russianAlias(searchQuery, data)
         val existing = data.externalId?.let { foodDao.findExternal(data.source.key, it) }
         if (existing == null) {
             foodDao.insert(newFoodEntity(data, listOfNotNull(alias), remote.isFullRecord, now, now))
         } else {
-            val aliases = StorageJson.readStrings(existing.aliases).let { if (alias != null && alias !in it) it + alias else it }
+            val aliases = mergeAlias(StorageJson.readStrings(existing.aliases), alias)
             val updated = if (!remote.isFullRecord && existing.detailsLoaded) {
                 existing.copy(aliases = StorageJson.strings(aliases), searchIndex = buildSearchIndex(existing.toItem().data, aliases))
             } else {
@@ -150,6 +173,31 @@ class FoodRepository(
             existing.id
         }
     }
+
+    /**
+     * Русское название для продукта с английским названием, найденного по
+     * русскому запросу: начальная форма из словаря («творога» → «Творог»),
+     * а не сам запрос в падеже.
+     */
+    private fun russianAlias(searchQuery: String?, data: FoodData): String? {
+        val q = searchQuery?.trim()?.takeIf { it.length >= 2 } ?: return null
+        if (!TextNormalizer.isCyrillic(TextNormalizer.normalize(q)) || TextNormalizer.isCyrillic(TextNormalizer.normalize(data.name))) return null
+        return FoodQueryTranslator.translate(q).russianName
+    }
+
+    /**
+     * Добавляет название; прежнее автоматическое название в другом падеже
+     * («Творога» при новом «Творог») заменяется, а не копится рядом.
+     */
+    private fun mergeAlias(aliases: List<String>, alias: String?): List<String> {
+        if (alias == null || alias in aliases) return aliases
+        val stem = aliasStem(alias)
+        val i = aliases.indexOfFirst { aliasStem(it) == stem }
+        return if (i >= 0) aliases.toMutableList().also { it[i] = alias } else aliases + alias
+    }
+
+    private fun aliasStem(s: String): String =
+        TextNormalizer.tokens(s).joinToString(" ") { com.nutritiontracker.core.text.RussianStemmer.stem(it) }
 
     /** Догружает полную карточку USDA (порции, полный состав), если её ещё нет. */
     suspend fun ensureDetails(foodId: Long): RemoteError? {

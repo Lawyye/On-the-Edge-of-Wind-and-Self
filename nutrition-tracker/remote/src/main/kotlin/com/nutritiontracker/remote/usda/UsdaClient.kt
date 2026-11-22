@@ -15,16 +15,14 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 internal interface UsdaApi {
-    @GET("foods/search")
-    suspend fun search(
-        @Query("query") query: String,
-        @Query("dataType") dataType: String,
-        @Query("pageSize") pageSize: Int,
-        @Query("pageNumber") pageNumber: Int = 1,
-    ): UsdaSearchResponse
+    /**
+     * Поиск — POST с телом запроса. GET с типами данных через запятую сервер
+     * USDA для части запросов отклоняет ответом 400 (проверено в CI, ноябрь 2026).
+     */
+    @POST("foods/search")
+    suspend fun search(@Body body: UsdaSearchRequest): UsdaSearchResponse
 
     @GET("food/{fdcId}")
     suspend fun food(@Path("fdcId") fdcId: Long): UsdaFoodDetail
@@ -60,14 +58,19 @@ class UsdaClient(
         .build()
         .create(UsdaApi::class.java)
 
-    suspend fun search(query: String, pageSize: Int = 25, includeBranded: Boolean = false): RemoteResult<List<RemoteFood>> =
-        remoteCall(SOURCE) {
-            val types = buildList {
-                add("Foundation"); add("SR Legacy"); add("Survey (FNDDS)")
-                if (includeBranded) add("Branded")
-            }.joinToString(",")
-            api.search(query, types, pageSize).foods.map { RemoteFood(UsdaMapper.fromSearch(it), isFullRecord = false) }
+    suspend fun search(query: String, pageSize: Int = 15, includeBranded: Boolean = false): RemoteResult<List<RemoteFood>> {
+        val types = buildList {
+            add("Foundation"); add("SR Legacy"); add("Survey (FNDDS)")
+            if (includeBranded) add("Branded")
         }
+        val first = remoteCall(SOURCE) { searchOnce(query, types, pageSize) }
+        // Сервер иногда не справляется с большим ответом — вторая попытка с меньшей страницей.
+        val retry = first is RemoteResult.Failure && first.error.kind == RemoteErrorKind.SERVER && pageSize > SMALL_PAGE
+        return if (retry) remoteCall(SOURCE) { searchOnce(query, types, SMALL_PAGE) } else first
+    }
+
+    private suspend fun searchOnce(query: String, types: List<String>, pageSize: Int): List<RemoteFood> =
+        api.search(UsdaSearchRequest(query, types, pageSize)).foods.map { RemoteFood(UsdaMapper.fromSearch(it), isFullRecord = false) }
 
     suspend fun details(fdcId: String): RemoteResult<RemoteFood> = remoteCall(SOURCE) {
         val id = fdcId.toLongOrNull() ?: throw RemoteError(RemoteErrorKind.NOT_FOUND, SOURCE)
@@ -83,5 +86,6 @@ class UsdaClient(
         const val SOURCE = "USDA FoodData Central"
         const val BASE_URL = "https://api.nal.usda.gov/fdc/v1/"
         const val DEMO_KEY = "DEMO_KEY"
+        private const val SMALL_PAGE = 8
     }
 }

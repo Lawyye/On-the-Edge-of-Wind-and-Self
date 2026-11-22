@@ -61,7 +61,11 @@ class RemoteClientsTest {
         val foods = usda("MY_KEY").search("chicken breast").ok()
         val req = server.takeRequest()
         assertEquals("MY_KEY", req.requestUrl!!.queryParameter("api_key"))
-        assertEquals("Foundation,SR Legacy,Survey (FNDDS)", req.requestUrl!!.queryParameter("dataType"))
+        assertEquals("POST", req.method)
+        assertEquals("/fdc/v1/foods/search", req.requestUrl!!.encodedPath)
+        val body = kotlinx.serialization.json.Json.parseToJsonElement(req.body.readUtf8()).toString()
+        assertTrue(body, body.contains("\"query\":\"chicken breast\""))
+        assertTrue(body, body.contains("[\"Foundation\",\"SR Legacy\",\"Survey (FNDDS)\"]"))
         assertEquals(2, foods.size)
         val f = foods[0].food
         assertFalse(foods[0].isFullRecord)
@@ -217,11 +221,15 @@ class RemoteClientsTest {
         assertEquals(RemoteErrorKind.RATE_LIMITED, limited.error.kind)
         assertEquals(3, server.requestCount)
 
-        repeat(3) { server.enqueue(MockResponse().setResponseCode(400).setBody("{\"error\":\"bad\"}")) }
+        // 400 не повторяется тем же запросом, но поиск пробует страницу поменьше.
+        repeat(2) { server.enqueue(MockResponse().setResponseCode(400).setBody("<html>bad</html>")) }
         val bad = client.search("rice") as RemoteResult.Failure
         assertEquals(400, bad.error.httpCode)
         assertTrue(bad.error.userMessage.contains("400"))
-        assertEquals(4, server.requestCount)
+        assertEquals(5, server.requestCount)
+        server.takeRequest(); server.takeRequest(); server.takeRequest()
+        assertTrue(server.takeRequest().body.readUtf8().contains("\"pageSize\":15"))
+        assertTrue(server.takeRequest().body.readUtf8().contains("\"pageSize\":8"))
     }
 
     @Test

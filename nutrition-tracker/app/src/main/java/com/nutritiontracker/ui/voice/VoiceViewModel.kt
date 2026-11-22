@@ -40,6 +40,8 @@ data class VoiceItem(
     val needs: String? = null,
     val included: Boolean = true,
     val searchError: String? = null,
+    /** «Масло» без уточнения: варианты, из которых выбирает пользователь. */
+    val clarifications: List<String> = emptyList(),
 ) {
     val amount: Double? get() = parseDecimal(amountText)?.takeIf { it > 0 && it <= 10_000 }
     val ready: Boolean get() = !included || (selected != null && amount != null)
@@ -112,7 +114,8 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
         } else {
             FoodSearch.relevance(query, aliases.firstOrNull() ?: data.name, data.name, data.brand, data.category, data.nameEn)
         }
-        if (base <= 0.0) return 0.0
+        // Без калорийности продукт не выбирается сам — только вручную.
+        if (base <= 0.0 || !data.nutrients.isKnown(Nutrient.ENERGY)) return 0.0
         var bonus = data.nutrients.known.size / 20.0
         if (data.source == com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION || data.source == com.nutritiontracker.core.model.FoodSource.USDA_SR_LEGACY) bonus += 1.5
         if (data.source == com.nutritiontracker.core.model.FoodSource.USER || data.source == com.nutritiontracker.core.model.FoodSource.RECIPE) bonus += 3.0
@@ -121,9 +124,12 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
     }
 
     fun findFood(id: Int, query: String) {
-        updateItem(id) { it.copy(searching = true, searchQuery = query, searchError = null, selected = null) }
+        val translation = com.nutritiontracker.core.text.FoodQueryTranslator.translate(query)
+        updateItem(id) {
+            it.copy(searching = true, searchQuery = query, searchError = null, selected = null, clarifications = translation.clarifications)
+        }
         viewModelScope.launch {
-            val englishQuery = com.nutritiontracker.core.text.FoodQueryTranslator.translate(query).englishQuery
+            val englishQuery = translation.englishQuery
             val local = c.foods.searchLocal(query, limit = 8).map { it.food }
             val localScored = local.map { f -> f to candidateScore(query, englishQuery, f.data, f.aliases, f.useCount) }
                 .sortedByDescending { it.second }
@@ -144,6 +150,7 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
                     remoteCandidates = remoteScored.take(8).map { p -> p.first },
                     searching = false,
                     searchError = when {
+                        translation.clarifications.isNotEmpty() -> "Уточните, какой именно продукт: «${query}» бывает разным"
                         online == null && local.isEmpty() -> "Нет интернета — поиск только по сохранённым продуктам"
                         online != null && online.errors.isNotEmpty() && bestLocal == null && bestRemote == null ->
                             online.errors.first().userMessage
@@ -153,6 +160,8 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
                 )
             }
             when {
+                // Неоднозначное слово: не выбираем за пользователя.
+                translation.clarifications.isNotEmpty() -> {}
                 bestRemote != null && (bestLocal == null || bestRemote.second > bestLocal.second) -> selectRemote(id, bestRemote.first)
                 bestLocal != null -> select(id, bestLocal.first)
             }

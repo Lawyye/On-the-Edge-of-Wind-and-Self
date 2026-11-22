@@ -268,4 +268,63 @@ class VoiceAndTextTest {
         val r = QuantityResolver.resolve(half, AmountUnit.GRAM, servings) as ResolvedAmount.Resolved
         assertEquals(122.5, r.amount, eps)
     }
+
+    @Test
+    fun `единицы распознаются в любом падеже`() {
+        val r = VoiceInputParser.parse("110 г спагетти, 180 г творога, на двух чайных ложках масла")
+        assertEquals(listOf("спагетти", "творога", "масла"), r.items.map { it.name })
+        assertEquals(ParsedQuantity.Mass(110.0), r.items[0].quantity)
+        assertEquals(ParsedQuantity.Mass(180.0), r.items[1].quantity)
+        assertEquals(ParsedQuantity.Count(2.0, CountKind.HOUSEHOLD, "чайных ложках"), r.items[2].quantity)
+
+        val more = VoiceInputParser.parse("три чашек чая, 2 кусками хлеба, 300 граммами риса, 2 стаканами молока, 1,5 литрами воды")
+        assertEquals(listOf("чая", "хлеба", "риса", "молока", "воды"), more.items.map { it.name })
+        assertEquals(CountKind.HOUSEHOLD, (more.items[0].quantity as ParsedQuantity.Count).kind)
+        assertEquals(CountKind.PIECE, (more.items[1].quantity as ParsedQuantity.Count).kind)
+        assertEquals(ParsedQuantity.Mass(300.0), more.items[2].quantity)
+        assertEquals(CountKind.HOUSEHOLD, (more.items[3].quantity as ParsedQuantity.Count).kind)
+        assertEquals(ParsedQuantity.Volume(1500.0), more.items[4].quantity)
+    }
+
+    @Test
+    fun `слова похожие на единицы не принимаются за них`() {
+        val r = VoiceInputParser.parse("2 банана, 100 г кускуса, 1 банка тунца")
+        assertEquals(listOf("банана", "кускуса", "тунца"), r.items.map { it.name })
+        assertEquals(ParsedQuantity.Count(2.0, CountKind.PIECE), r.items[0].quantity)
+        assertEquals(ParsedQuantity.Mass(100.0), r.items[1].quantity)
+        assertEquals(CountKind.PACKAGE, (r.items[2].quantity as ParsedQuantity.Count).kind)
+    }
+
+    @Test
+    fun `чайная ложка выводится из столовой и мера приводится к одной единице`() {
+        val oil = listOf(ServingSize("1 tbsp", 13.5, ServingKind.HOUSEHOLD, "USDA"))
+        val tsp = QuantityResolver.resolve(ParsedQuantity.Count(2.0, CountKind.HOUSEHOLD, "чайных ложках"), AmountUnit.GRAM, oil) as ResolvedAmount.Resolved
+        assertEquals(9.0, tsp.amount, eps)
+        assertTrue(tsp.explanation!!.contains("÷ 3"))
+        // «0.5 cup» весом 120 г — это 240 г на стакан, а не 120.
+        val milk = listOf(ServingSize("0.5 cup", 122.0, ServingKind.HOUSEHOLD, "USDA"))
+        val glass = QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "стакан"), AmountUnit.GRAM, milk) as ResolvedAmount.Resolved
+        assertEquals(244.0, glass.amount, eps)
+        val cups = QuantityResolver.resolve(ParsedQuantity.Count(2.0, CountKind.HOUSEHOLD, "чашек"), AmountUnit.GRAM, milk) as ResolvedAmount.Resolved
+        assertEquals(488.0, cups.amount, eps)
+        // Продукт в миллилитрах без справочных мер: ложки — метрические.
+        val ml = QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "столовая ложка"), AmountUnit.MILLILITER, emptyList()) as ResolvedAmount.Resolved
+        assertEquals(15.0, ml.amount, eps)
+        // Граммы без мер — спросить, а не выдумывать.
+        assertTrue(QuantityResolver.resolve(ParsedQuantity.Count(1.0, CountKind.HOUSEHOLD, "чайная ложка"), AmountUnit.GRAM, emptyList()) is ResolvedAmount.NeedsInput)
+    }
+
+    @Test
+    fun `русское название в начальной форме и уточнение для масла`() {
+        assertEquals("Творог", FoodQueryTranslator.translate("творога").russianName)
+        assertEquals("Куриное филе", FoodQueryTranslator.translate("куриного филе").russianName)
+        assertEquals("Спагетти", FoodQueryTranslator.translate("спагетти").russianName)
+        assertEquals("spaghetti", FoodQueryTranslator.translate("спагетти").englishQuery)
+        val oil = FoodQueryTranslator.translate("масла")
+        assertNull(oil.englishQuery)
+        assertTrue(oil.clarifications.contains("Сливочное масло"))
+        assertTrue(FoodQueryTranslator.translate("оливкового масла").clarifications.isEmpty())
+        assertEquals("olive oil", FoodQueryTranslator.translate("оливкового масла").englishQuery)
+        assertTrue(FoodQueryTranslator.translate("маслины").clarifications.isEmpty())
+    }
 }

@@ -18,6 +18,7 @@ import com.nutritiontracker.data.BodyEntry
 import com.nutritiontracker.data.BodyRepository
 import com.nutritiontracker.data.DiaryRepository
 import com.nutritiontracker.data.FoodRepository
+import com.nutritiontracker.data.displayName
 import com.nutritiontracker.data.RecipeDraft
 import com.nutritiontracker.data.RecipeIngredient
 import com.nutritiontracker.data.RecipeRepository
@@ -185,6 +186,24 @@ class DataLayerTest {
         assertEquals(id1, hits.first().food.id)
         assertEquals(listOf("Яблоко"), foods.get(id1)!!.aliases)
         assertFalse(foods.get(id1)!!.detailsLoaded)
+    }
+
+    @Test
+    fun russianNameIsNominativeAndReplacesInflectedOne() = runBlocking<Unit> {
+        val remote = RemoteFood(
+            FoodData(
+                name = "Cheese, cottage, lowfat, 2% milkfat", source = FoodSource.USDA_SR_LEGACY, externalId = "173417",
+                nutrients = Nutrients.of(Nutrient.ENERGY to 81.0, Nutrient.PROTEIN to 10.45),
+            ),
+            isFullRecord = false,
+        )
+        val id = foods.saveRemote(remote, "творога")
+        assertEquals(listOf("Творог"), foods.get(id)!!.aliases)
+        // Прежняя версия сохраняла запрос как есть — «Творога»; он заменяется.
+        foods.setAliases(id, listOf("Творога"))
+        foods.saveRemote(remote, "творогом")
+        assertEquals(listOf("Творог"), foods.get(id)!!.aliases)
+        assertEquals("Творог", foods.get(id)!!.displayName)
     }
 
     @Test

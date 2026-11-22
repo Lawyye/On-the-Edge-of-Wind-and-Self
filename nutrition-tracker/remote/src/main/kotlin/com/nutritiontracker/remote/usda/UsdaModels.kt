@@ -90,6 +90,14 @@ data class UsdaMeasureUnit(
 )
 
 @Serializable
+data class UsdaSearchRequest(
+    val query: String,
+    val dataType: List<String>,
+    val pageSize: Int,
+    val pageNumber: Int = 1,
+)
+
+@Serializable
 data class UsdaFoodsRequest(
     val fdcIds: List<Long>,
     val format: String = "full",

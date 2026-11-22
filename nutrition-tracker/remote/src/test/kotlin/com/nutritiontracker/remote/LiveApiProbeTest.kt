@@ -61,20 +61,11 @@ class LiveApiProbeTest {
     @Test
     fun probe() = runBlocking<Unit> {
         assumeTrue("NT_LIVE_API=1 не задан", enabled)
-        val base = "https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY"
-        val all = "Foundation,SR%20Legacy,Survey%20%28FNDDS%29"
-        raw("USDA A app cottage", "$base&query=cottage%20cheese&dataType=$all&pageSize=25&pageNumber=1")
-        raw("USDA B no FNDDS cottage", "$base&query=cottage%20cheese&dataType=Foundation,SR%20Legacy&pageSize=25")
-        raw("USDA C FNDDS only cottage", "$base&query=cottage%20cheese&dataType=Survey%20%28FNDDS%29&pageSize=25")
-        raw("USDA D page10 cottage", "$base&query=cottage%20cheese&dataType=$all&pageSize=10")
-        raw("USDA F repeated cottage", "$base&query=cottage%20cheese&dataType=Foundation&dataType=SR%20Legacy&dataType=Survey%20%28FNDDS%29&pageSize=25")
-        rawPost("USDA E POST cottage", "https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY",
-            """{"query":"cottage cheese","dataType":["Foundation","SR Legacy","Survey (FNDDS)"],"pageSize":25}""")
         raw("OFF search-a-licious app fields", "https://search.openfoodfacts.org/search?q=%D1%82%D0%B2%D0%BE%D1%80%D0%BE%D0%B3&page_size=3&langs=ru,en&fields=" + OpenFoodFactsClient.FIELDS)
 
         val usda = UsdaClient(http, { "" })
         val off = OpenFoodFactsClient(http, UA)
-        for (q in listOf("cottage cheese", "rice")) report("USDA '$q'", usda.search(q, 25))
+        for (q in listOf("cottage cheese", "spaghetti", "rice", "buckwheat groats", "chicken breast")) report("USDA '$q'", usda.search(q))
         for (q in listOf("творог", "спагетти", "оливковое масло")) report("OFF '$q'", off.search(q, 10))
 
         // Несколько запросов OFF одновременно — как голосовой ввод из трёх позиций.

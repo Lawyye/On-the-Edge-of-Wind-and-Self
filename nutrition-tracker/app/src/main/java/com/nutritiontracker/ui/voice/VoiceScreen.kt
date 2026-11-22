@@ -272,6 +272,8 @@ private fun VoiceItemCard(
         val sel = item.selected
         if (sel != null) {
             Text(sel.displayName, style = AppTheme.type.bodyStrong, color = c.textPrimary)
+            // Русское название продукта USDA общее для разных записей — видно и исходное.
+            if (sel.displayName != sel.data.name) Text(sel.data.name, style = AppTheme.type.caption, color = c.textSecondary)
             Text(listOfNotNull(sel.data.brand, sourceShort(sel.source)).joinToString(" · "), style = AppTheme.type.caption, color = c.textSecondary)
             // Ценность на 100 г — чтобы сразу было видно, если подобрался не тот продукт.
             Text(com.nutritiontracker.ui.foods.shortNutrition(sel.data), style = AppTheme.type.caption, color = c.textPrimary)
@@ -290,9 +292,17 @@ private fun VoiceItemCard(
         } else if (item.searching) {
             SkeletonBox(Modifier.fillMaxWidth(0.7f), height = 18.dp)
         } else {
-            InfoBanner("Продукт «${item.parsed.name}» не найден. Уточните название ниже.", kind = BannerKind.WARNING)
+            if (item.clarifications.isEmpty()) {
+                InfoBanner("Продукт «${item.parsed.name}» не найден. Уточните название ниже.", kind = BannerKind.WARNING)
+            }
         }
         item.searchError?.let { Text(it, style = AppTheme.type.caption, color = c.warning, modifier = Modifier.padding(top = 6.dp)) }
+        if (item.clarifications.isNotEmpty()) {
+            Spacer(Modifier.height(6.dp))
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item.clarifications.forEach { option -> ChoiceChip(option, false, onClick = { onSearch(option) }) }
+            }
+        }
 
         val others = item.localCandidates.filter { it.id != sel?.id }
         if (others.isNotEmpty() || item.remoteCandidates.isNotEmpty()) {

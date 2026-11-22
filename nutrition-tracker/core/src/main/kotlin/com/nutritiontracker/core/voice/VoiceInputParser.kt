@@ -283,6 +283,7 @@ object VoiceInputParser {
         }
 
         val isEmpty get() = nameTokens.isEmpty() && !hadQuantityToken
+        val hasName get() = nameTokens.any { it !in edgeWords }
     }
 
     private val edgeWords = setOf("с", "со", "из", "в", "на", "и", "а", "по")
@@ -312,7 +313,7 @@ object VoiceInputParser {
             }
             val match = quantityAt(tokens, i)
             if (match != null) {
-                if (cur.hadQuantityToken && cur.nameTokens.isNotEmpty()) {
+                if (cur.hadQuantityToken && cur.hasName) {
                     items += cur.build()
                     cur = Builder()
                 }
@@ -324,7 +325,8 @@ object VoiceInputParser {
                     existing is ParsedQuantity.Volume && incoming is ParsedQuantity.Volume -> ParsedQuantity.Volume(existing.milliliters + incoming.milliliters)
                     else -> incoming
                 }
-                cur.quantityAfterName = cur.nameTokens.isNotEmpty()
+                // «на двух ложках масла»: предлог перед количеством — ещё не название.
+                cur.quantityAfterName = cur.hasName
                 cur.hadQuantityToken = true
                 match.note?.let { cur.notes += it }
                 cur.sourceTokens += tokens.subList(i, i + match.consumed)

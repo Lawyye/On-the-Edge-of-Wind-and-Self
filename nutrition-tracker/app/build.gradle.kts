@@ -30,7 +30,12 @@ val devUsdaKey: String = localProps.getProperty("usda.apiKey", "")
 
 android {
     namespace = "com.nutritiontracker"
-    compileSdk = 37
+    // Compose 1.13 требует компиляции против Android API 37.1 или новее.
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
 
     defaultConfig {
         applicationId = "com.nutritiontracker.app"

@@ -26,3 +26,11 @@ dependencies {
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.kotlinx.coroutines.test)
 }
+
+tasks.withType<Test>().configureEach {
+    // Живая проверка сервисов печатает результаты в журнал CI.
+    if (System.getenv("NT_LIVE_API") == "1") {
+        testLogging.showStandardStreams = true
+        outputs.upToDateWhen { false }
+    }
+}

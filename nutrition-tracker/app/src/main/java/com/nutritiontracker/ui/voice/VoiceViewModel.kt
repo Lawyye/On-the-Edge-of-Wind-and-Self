@@ -146,7 +146,7 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
                     searchError = when {
                         online == null && local.isEmpty() -> "Нет интернета — поиск только по сохранённым продуктам"
                         online != null && online.errors.isNotEmpty() && bestLocal == null && bestRemote == null ->
-                            online.errors.first().let { e -> "${e.source}: ${e.kind.messageRu}" }
+                            online.errors.first().userMessage
                         bestLocal == null && bestRemote == null -> "Точного совпадения не нашлось — выберите продукт из вариантов или уточните название"
                         else -> null
                     },

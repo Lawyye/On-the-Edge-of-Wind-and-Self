@@ -48,7 +48,7 @@ class RemoteClientsTest {
     }
 
     private fun usda(key: String = "") = UsdaClient(RemoteJson.defaultOkHttp(), { key }, server.url("/fdc/v1/").toString())
-    private fun off() = OpenFoodFactsClient(RemoteJson.defaultOkHttp(), "NutritionTrackerTest/1.0", server.url("/").toString())
+    private fun off() = OpenFoodFactsClient(RemoteJson.defaultOkHttp(), "NutritionTrackerTest/1.0", server.url("/").toString(), server.url("/sal/").toString())
 
     private fun <T> RemoteResult<T>.ok(): T {
         assertTrue("Ожидался успех, получено $this", this is RemoteResult.Success)

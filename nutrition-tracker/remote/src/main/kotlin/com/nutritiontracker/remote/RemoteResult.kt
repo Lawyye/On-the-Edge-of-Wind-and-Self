@@ -20,8 +20,11 @@ enum class RemoteErrorKind(val messageRu: String) {
     BAD_RESPONSE("Сервис вернул данные в неожиданном формате"),
 }
 
-class RemoteError(val kind: RemoteErrorKind, val source: String, cause: Throwable? = null) :
-    Exception("$source: ${kind.messageRu}", cause)
+class RemoteError(val kind: RemoteErrorKind, val source: String, cause: Throwable? = null, val httpCode: Int? = null) :
+    Exception("$source: ${kind.messageRu}" + (httpCode?.let { " (HTTP $it)" } ?: ""), cause) {
+    /** Сообщение для интерфейса: источник, причина и код ответа, если он есть. */
+    val userMessage: String get() = "$source: ${kind.messageRu}" + (httpCode?.let { " (код $it)" } ?: "")
+}
 
 sealed interface RemoteResult<out T> {
     data class Success<T>(val value: T) : RemoteResult<T>
@@ -50,7 +53,7 @@ internal suspend fun <T> remoteCall(source: String, block: suspend () -> T): Rem
             e.code() == 404 -> RemoteErrorKind.NOT_FOUND
             else -> RemoteErrorKind.SERVER
         }
-        RemoteResult.Failure(RemoteError(kind, source, e))
+        RemoteResult.Failure(RemoteError(kind, source, e, e.code()))
     } catch (e: SocketTimeoutException) {
         RemoteResult.Failure(RemoteError(RemoteErrorKind.TIMEOUT, source, e))
     } catch (e: UnknownHostException) {

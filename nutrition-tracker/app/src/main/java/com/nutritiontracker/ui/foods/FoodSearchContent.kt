@@ -177,7 +177,7 @@ fun LazyListScope.searchResults(
                 item {
                     Column(Modifier.padding(bottom = 8.dp)) {
                         InfoBanner(
-                            "${e.source}: ${e.kind.messageRu}.",
+                            "${e.userMessage}.",
                             kind = if (e.kind == RemoteErrorKind.NO_NETWORK) BannerKind.WARNING else BannerKind.ERROR,
                             action = "Повторить", onAction = onRetry,
                         )

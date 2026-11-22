@@ -27,6 +27,25 @@ defaults:
     working-directory: nutrition-tracker
 
 jobs:
+  # Живая проверка USDA и Open Food Facts: коды ответов и результаты клиентов
+  # приложения. Только диагностика — сбой сервисов не останавливает сборку.
+  live-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Запросы к настоящим сервисам
+        env:
+          NT_JVM_ONLY: '1'
+          NT_LIVE_API: '1'
+        run: ./gradlew --no-daemon :remote:test --tests '*LiveApiProbeTest*' 2>&1 | grep -E 'LIVE|FAIL|BUILD' || true
+
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 45

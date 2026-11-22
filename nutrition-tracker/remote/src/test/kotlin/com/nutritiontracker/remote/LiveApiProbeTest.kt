@@ -30,13 +30,14 @@ class LiveApiProbeTest {
         assumeTrue("NT_LIVE_API=1 не задан", enabled)
         val usda = UsdaClient(http, { "" })
         val off = OpenFoodFactsClient(http, UA)
-        for (query in listOf("спагетти сухие", "спагетти варёные", "рис сухой", "рис варёный", "творог", "куриное филе", "гречка варёная", "овсянка сухая")) {
-            val english = FoodQueryTranslator.translate(query).englishQuery
+        for (query in listOf("спагетти сухие", "рис сухой", "рис варёный", "творог", "куриное филе", "гречка сухая")) {
+            val translation = FoodQueryTranslator.translate(query)
+            val english = translation.englishQuery
             val u = english?.let { usda.search(it) }
             val o = off.search(query)
             val all = listOfNotNull((u as? RemoteResult.Success)?.value, (o as? RemoteResult.Success)?.value).flatten()
                 .filter { it.food.nutrients.isKnown(Nutrient.ENERGY) }
-            val ranked = all.map { it to FoodSearch.autoPickScore(query, english, it.food) }.filter { it.second > 0 }.sortedByDescending { it.second }
+            val ranked = all.map { it to FoodSearch.autoPickScore(query, english, it.food, usdaApproximate = translation.usdaApproximate) }.filter { it.second > 0 }.sortedByDescending { it.second }
             println("LIVE pick [$query → $english] USDA ${u?.let(::describe) ?: "—"}, OFF ${describe(o)}")
             ranked.take(4).forEachIndexed { i, (r, score) ->
                 val n = r.food.nutrients

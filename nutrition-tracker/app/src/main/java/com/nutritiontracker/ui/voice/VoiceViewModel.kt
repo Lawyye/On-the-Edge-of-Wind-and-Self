@@ -99,8 +99,10 @@ class VoiceViewModel(private val c: AppContainer, route: VoiceRoute) : ViewModel
         _state.update { s -> s.copy(items = s.items.map { if (it.id == id) t(it) else it }) }
 
     /** Оценка кандидата для автоматического выбора — общая с проверками в CI. */
-    private fun candidateScore(query: String, englishQuery: String?, data: com.nutritiontracker.core.model.FoodData, aliases: List<String>, useCount: Int): Double =
-        FoodSearch.autoPickScore(query, englishQuery, data, aliases, useCount)
+    private fun candidateScore(query: String, englishQuery: String?, data: com.nutritiontracker.core.model.FoodData, aliases: List<String>, useCount: Int): Double {
+        val approx = com.nutritiontracker.core.text.FoodQueryTranslator.translate(query).usdaApproximate
+        return FoodSearch.autoPickScore(query, englishQuery, data, aliases, useCount, approx)
+    }
 
     /** Ищет продукт: сначала в локальной базе, затем, если есть сеть, в интернете. */
     fun findFood(id: Int, query: String) {

@@ -327,7 +327,8 @@ class VoiceAndTextTest {
         assertEquals("pasta cooked", FoodQueryTranslator.translate("Спагетти варёные").englishQuery)
         assertTrue(FoodQueryTranslator.translate("Спагетти варёные").clarifications.isEmpty())
         assertEquals(listOf("Гречка сухая", "Гречка варёная"), FoodQueryTranslator.translate("гречки").clarifications)
-        assertEquals("rice cooked", FoodQueryTranslator.translate("отварной рис").englishQuery)
+        assertEquals("rice white cooked", FoodQueryTranslator.translate("отварной рис").englishQuery)
+        assertEquals("Рис", FoodQueryTranslator.translate("риса").russianName)
         assertTrue(FoodQueryTranslator.translate("творог").clarifications.isEmpty())
         val oil = FoodQueryTranslator.translate("масла")
         assertNull(oil.englishQuery)
@@ -360,6 +361,18 @@ class VoiceAndTextTest {
         assertEquals(
             "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
             best("куриное филе", listOf("Lunchmeat, chicken breast, sliced", "Chicken breast tenders, breaded, uncooked", "Chicken, broilers or fryers, breast, meat only, cooked, roasted")),
+        )
+        // Творог: американский cottage cheese заметно отличается — русский товар предпочтительнее.
+        val tvorogUsda = usda("Cheese, cottage, NFS")
+        val tvorogOff = com.nutritiontracker.core.model.FoodData(
+            name = "Творог 9%", source = com.nutritiontracker.core.model.FoodSource.OPEN_FOOD_FACTS, externalId = "4600000000000",
+            nutrients = com.nutritiontracker.core.model.Nutrients.of(com.nutritiontracker.core.model.Nutrient.ENERGY to 159.0, com.nutritiontracker.core.model.Nutrient.PROTEIN to 16.7),
+        )
+        val t = FoodQueryTranslator.translate("творог")
+        assertTrue(t.usdaApproximate)
+        assertTrue(
+            FoodSearch.autoPickScore("творог", t.englishQuery, tvorogOff, usdaApproximate = true) >
+                FoodSearch.autoPickScore("творог", t.englishQuery, tvorogUsda, usdaApproximate = true),
         )
         // Без калорийности — не выбирается автоматически.
         val noEnergy = com.nutritiontracker.core.model.FoodData(name = "Творог", source = com.nutritiontracker.core.model.FoodSource.OPEN_FOOD_FACTS, externalId = "1", nutrients = com.nutritiontracker.core.model.Nutrients.of(com.nutritiontracker.core.model.Nutrient.PROTEIN to 17.0))

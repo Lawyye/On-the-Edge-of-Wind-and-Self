@@ -157,6 +157,7 @@ object FoodSearch {
         listOf("fried", "baked", "roasted", "grilled", "broiled", "dried", "canned", "smoked", "nonfat", "low", "fat", "whole").map { keyOf(it) }
 
     const val USDA_DISH_WORD_PENALTY = 3.0
+    const val USDA_APPROXIMATE_PENALTY = 5.0
     const val USDA_DESCRIPTOR_PENALTY = 0.1
 
     /** Слова описаний USDA, которые уточняют продукт (состояние, обработку, сорт), но не меняют его. */
@@ -185,6 +186,7 @@ object FoodSearch {
         data: com.nutritiontracker.core.model.FoodData,
         aliases: List<String> = emptyList(),
         useCount: Int = 0,
+        usdaApproximate: Boolean = false,
     ): Double {
         val base = if (data.source.isUsda) {
             maxOf(
@@ -199,6 +201,8 @@ object FoodSearch {
         val src = data.source
         if (src == com.nutritiontracker.core.model.FoodSource.USDA_FOUNDATION || src == com.nutritiontracker.core.model.FoodSource.USDA_SR_LEGACY) bonus += 1.5
         if (src == com.nutritiontracker.core.model.FoodSource.USER || src == com.nutritiontracker.core.model.FoodSource.RECIPE) bonus += 3.0
+        // Русское название, сохранённое пользователем для продукта USDA, — его осознанный выбор.
+        if (src.isUsda && usdaApproximate && aliases.isEmpty()) bonus -= USDA_APPROXIMATE_PENALTY
         bonus += minOf(useCount, 5) * 0.4
         return base + bonus
     }

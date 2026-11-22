@@ -26,13 +26,26 @@ object FoodQueryTranslator {
         val clarifications: List<String> = emptyList(),
         /** Вопрос к вариантам [clarifications]. */
         val clarifyQuestion: String? = null,
+        /**
+         * Ближайший продукт USDA заметно отличается от привычного русского
+         * («творог» и американский cottage cheese: 11 г белка против 16–18 г).
+         * Тогда при автоматическом выборе предпочтительнее русские товары.
+         */
+        val usdaApproximate: Boolean = false,
     ) {
         val englishQuery: String? get() = englishQueries.firstOrNull()
     }
 
-    private class Entry(val english: String, val alternatives: List<List<String>>, val isModifier: Boolean, val ru: String? = null)
+    private class Entry(
+        val english: String,
+        val alternatives: List<List<String>>,
+        val isModifier: Boolean,
+        val ru: String? = null,
+        val usdaApproximate: Boolean = false,
+    )
 
-    private fun food(en: String, vararg alts: String, ru: String? = null) = Entry(en, alts.map { it.split(' ') }, false, ru)
+    private fun food(en: String, vararg alts: String, ru: String? = null, approx: Boolean = false) =
+        Entry(en, alts.map { it.split(' ') }, false, ru, approx)
     private fun mod(en: String, vararg alts: String) = Entry(en, alts.map { it.split(' ') }, true)
 
     private val entries: List<Entry> = listOf(
@@ -83,7 +96,7 @@ object FoodQueryTranslator {
         food("milk", "молок"),
         food("kefir", "кефир"),
         food("yogurt", "йогурт"),
-        food("cottage cheese", "творог", "творож"),
+        food("cottage cheese", "творог", "творож", approx = true),
         food("butter", "сливоч масл", "масл сливоч", "масло сливоч"),
         food("cream", "сливк", "сливок"),
         food("sour cream", "сметан"),
@@ -92,7 +105,8 @@ object FoodQueryTranslator {
         food("feta cheese", "фета", "фетой", "брынз"),
         food("cheese", "сыр", "сырок", "сырн"),
         // Крупы, хлеб, макароны
-        food("rice", "рис", "рисов"),
+        // «Рис» в России — почти всегда белый.
+        food("rice white", "рис", "рисов", ru = "Рис"),
         food("buckwheat groats", "греч"),
         food("oats", "овсян", "овес", "овса", "геркулес"),
         // В USDA спагетти — это «Pasta» (сухие: «Pasta, dry», готовые: «Pasta, cooked»).
@@ -305,7 +319,6 @@ object FoodQueryTranslator {
         "parmesan cheese" to "Пармезан",
         "feta cheese" to "Фета",
         "cheese" to "Сыр",
-        "rice" to "Рис",
         "buckwheat groats" to "Гречка",
         "oats" to "Овсянка",
         "pasta" to "Макароны",
@@ -456,7 +469,7 @@ object FoodQueryTranslator {
      * понятно, какой вес назван. Значение — род для формы прилагательного.
      */
     private val cookable: Map<String, Char> = mapOf(
-        "rice" to 'm', "buckwheat groats" to 'f', "oats" to 'f', "pasta" to 'p', "noodles" to 'f', "bulgur" to 'm',
+        "rice white" to 'm', "buckwheat groats" to 'f', "oats" to 'f', "pasta" to 'p', "noodles" to 'f', "bulgur" to 'm',
         "quinoa" to 'f', "couscous" to 'm', "millet" to 'n', "barley pearled" to 'f', "semolina" to 'f',
         "lentils" to 'f', "chickpeas" to 'm', "beans" to 'f', "peas" to 'm',
     )
@@ -530,6 +543,7 @@ object FoodQueryTranslator {
             translatedTokens = taken.sorted().map { tokens[it] },
             untranslatedTokens = tokens.indices.filter { it !in taken }.map { tokens[it] },
             russianName = mainRu,
+            usdaApproximate = mainEntry.usdaApproximate,
             clarifications = stateChoice,
             clarifyQuestion = if (stateChoice.isEmpty()) null else "Вес сухого продукта или готового? Калорийность отличается в 2–3 раза",
         )

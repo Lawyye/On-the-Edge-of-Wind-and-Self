@@ -1,8 +1,24 @@
 package com.nutritiontracker
 
 import android.app.Application
-import com.nutritiontracker.data.db.AppDatabase
+import com.nutritiontracker.data.work.CacheRefreshWorker
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class NutritionApp : Application() {
-    val database: AppDatabase by lazy { AppDatabase.create(this) }
+    lateinit var container: AppContainer
+        private set
+
+    override fun onCreate() {
+        super.onCreate()
+        container = AppContainer(this)
+        CacheRefreshWorker.schedule(this)
+        container.appScope.launch {
+            // Недостающие карточки продуктов догрузятся, как только появится сеть.
+            if (container.foods.countNeedingRefresh(CacheRefreshWorker.MAX_AGE_MILLIS) > 0) {
+                CacheRefreshWorker.syncWhenOnline(this@NutritionApp)
+            }
+            container.profile.maybeUpdateAdaptive(LocalDate.now())
+        }
+    }
 }

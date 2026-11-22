@@ -141,9 +141,10 @@ private fun CaloriesCard(s: HomeState, onClick: () -> Unit) {
                 s.targets?.calorie?.let { g ->
                     val actualDeficit = g.tdeeKcal - eaten
                     Stat("Расход ≈", "${NutrientFormat.kcal(g.tdeeKcal)} ккал")
+                    Stat("Плановый дефицит", "${NutrientFormat.kcal(g.deficitKcal)} ккал")
                     Stat(
-                        if (actualDeficit >= 0) "Дефицит сейчас" else "Профицит сейчас",
-                        "${NutrientFormat.kcal(kotlin.math.abs(actualDeficit))} из ${NutrientFormat.kcal(g.deficitKcal)}",
+                        if (actualDeficit >= 0) "Расход минус съеденное" else "Съедено сверх расхода",
+                        "${NutrientFormat.kcal(kotlin.math.abs(actualDeficit))} ккал",
                     )
                 }
             }

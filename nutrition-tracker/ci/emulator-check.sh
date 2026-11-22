@@ -18,6 +18,8 @@ FAIL=0
 adb wait-for-device
 adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 1; done'
 adb shell input keyevent 82 || true
+# Системные диалоги эмулятора («Launcher isn't responding») не должны закрывать снимки.
+adb shell settings put global hide_error_dialogs 1 || true
 
 run_test() {
   local out
@@ -31,6 +33,7 @@ run_test() {
 }
 
 shot() {
+  adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
   sleep 2
   adb exec-out screencap -p > "$OUT/$1.png"
 }
@@ -52,6 +55,7 @@ W=${SIZE%x*}; H=${SIZE#*x}
 Y=$((H - H * 55 / 1000))
 for i in 1 2 3 4; do
   X=$((W * (2 * i + 1) / 10))
+  adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
   adb shell input tap "$X" "$Y"
   shot "$((i + 1))-tab"
 done
